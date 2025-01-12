@@ -1,15 +1,18 @@
 import subprocess
 import os
-import time
 import re
 from dotenv import load_dotenv
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
+import sys
+from utils import Logger
 
-TEST_OUTPUT_FILE = f"{USER_PREFIX}/llm/src/output_logs/regression_test_log.txt"
-UNOPTIMIZED_OUTPUT = f"{USER_PREFIX}/llm/src/output_logs/unoptimized_output.txt"
-OPTIMIZED_OUTPUT = f"{USER_PREFIX}/llm/src/output_logs/optimized_output.txt"
-ITERATION_OUTPUT_DIR = f"{USER_PREFIX}/llm/src/output_logs//output_format_compare"
+TEST_OUTPUT_FILE = f"{USER_PREFIX}/src/runtime_logs/regression_test_log.txt"
+UNOPTIMIZED_OUTPUT = f"{USER_PREFIX}/src/runtime_logs/unoptimized_output.txt"
+OPTIMIZED_OUTPUT = f"{USER_PREFIX}/src/runtime_logs/optimized_output.txt"
+ITERATION_OUTPUT_DIR = f"{USER_PREFIX}/src/runtime_logs"
+
+logger = Logger("logs", sys.argv[2]).logger
 
 false_positive_counter = 0
 comparison_count = 0
@@ -31,10 +34,10 @@ def compile_program(output_log, optimized):
                     stdout=output_log, 
                     stderr=output_log  # Redirect stderr to the same file as stdout
             )
-        print("regression_test: Makefile compile successfully.\n")
+        logger.info(f"regression_test: Makefile compile successfully. Optimized: {optimized}.\n")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"regression_test: Makefile compile failed: {e}\n")
+        logger.error(f"regression_test: Makefile compile failed: {e} Optimized: {optimized}.\n")
         return False
 
 def run_program(exec_path, output_file, optimized):
@@ -48,7 +51,7 @@ def run_program(exec_path, output_file, optimized):
     if result.returncode != 0:
         with open(output_file, 'w+') as f:
             f.write(result.stderr)
-        print(f"Runtime error on {exec_path} with error message: {result.stderr}")
+        logger.error(f"Runtime error on {exec_path} with error message: {result.stderr}")
         return False
 
     # Filter out the unwanted lines
@@ -76,30 +79,16 @@ def save_output(cleaned_content1, cleaned_content2, output_string):
     global false_positive_counter
     global output_different_counter
 
-    filename = f"{ITERATION_OUTPUT_DIR}/output_compare.txt"
-    
-    # # Process and save the cleaned output content
-    # cleaned_content1 = process_output_content(file1_content)
-    # cleaned_content2 = process_output_content(file2_content)
-
-    # Compare the output without whitespace
-    # if cleaned_content1 == cleaned_content2:
-    #     compare = "Output correct, but format wrong"
-    #     false_positive_counter += 1
-    # else:
-    #     compare = "Output wrong"
-
-    with open(filename, 'a') as file:
+    with open(f"{ITERATION_OUTPUT_DIR}/output_compare.txt", 'w') as file:
         file.write(f"{output_string}\n")
         file.write(f"Number of comparison: {comparison_count}\n")
         file.write(f"Number of output difference: {output_different_counter}\n")
-        file.write(f"Number of falise-positive: {false_positive_counter}\n")
+        file.write(f"Number of false-positive: {false_positive_counter}\n")
         file.write(f"Original:\n{cleaned_content1}\n")
         file.write(f"Optimized:\n{cleaned_content2}\n\n")
         
-    print(f"Saved output to {filename}")
-    print(f"false positive count: {false_positive_counter}")
-    print(f"comparison count: {comparison_count}")
+    logger.info(f"false positive count: {false_positive_counter}")
+    logger.info(f"comparison count: {comparison_count}")
 
 def compare_outputs(file1, file2, output_log):
     global comparison_count
@@ -107,7 +96,7 @@ def compare_outputs(file1, file2, output_log):
     global false_positive_counter
 
     comparison_count += 1
-    print(f"comparison_count is {comparison_count}")
+    logger.info(f"comparison_count is {comparison_count}")
     with open(file1, 'r') as f1, open(file2, 'r') as f2:
         file1_content = f1.readlines()
         file2_content = f2.readlines()

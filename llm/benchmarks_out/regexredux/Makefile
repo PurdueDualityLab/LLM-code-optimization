@@ -9,12 +9,12 @@ compile_optimized:
 measure:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "./regexredux.gpp-3.gpp_run 0 < regexredux-input5000000.txt" c++ regex-redux
-	sudo chmod -R 777 ${USER_PREFIX}/energy/src/c++.csv
+	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++/c++.csv
 
 measure_optimized:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "./optimized_regexredux.gpp-3.gpp_run 0 < regexredux-input5000000.txt" c++ regex-redux
-	sudo chmod -R 777 ${USER_PREFIX}/energy/src/c++.csv
+	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++/c++.csv
 	
 run:
 	./regexredux.gpp-3.gpp_run 0 < regexredux-input5000000.txt

@@ -13,7 +13,7 @@ def evaluator_llm(client, model_name, benchmark_info):
     original_source_code = benchmark_info["original"]["source_code"]
     original_avg_energy = benchmark_info["original"]["avg_energy"]
     original_avg_runtime = benchmark_info["original"]["avg_runtime"]
-    # print(original_source_code)
+
     lowest_soruce_code = benchmark_info["lowest_avg_energy"]["source_code"]
     lowest_avg_energy = benchmark_info["lowest_avg_energy"]["avg_energy"]
     lowest_avg_runtime = benchmark_info["lowest_avg_energy"]["avg_runtime"]
@@ -29,7 +29,7 @@ def evaluator_llm(client, model_name, benchmark_info):
     - Explain how the current code functions, highlighting its design, algorithm choices, and any assumptions it makes.
     
     2. **Inefficiencies and Bottlenecks**:
-    - Identify potential inefficiencies in terms of time complexity (e.g., algorithm choice), space complexity (e.g., memory usage), and readability (e.g., structure, variable naming, etc.).
+    - Identify potential inefficiencies in terms of time complexity (e.g., algorithm choice) and space complexity (e.g., memory usage).
     - Highlight any specific patterns or functions that are likely to consume excessive energy or computational resources.
     
     3. **Energy-Efficiency Specific Analysis**:
@@ -96,14 +96,13 @@ def evaluator_llm(client, model_name, benchmark_info):
         output = client.chat(model=model_name, messages=messages)
         evaluator_feedback = output["message"]["content"]
 
-
     #write to file
-    current_dir = os.path.dirname(__file__)
+    current_dir = os.path.join(os.path.dirname(__file__), "../runtime_logs")
     file_path = os.path.join(current_dir, "evaluator_feedback.txt")
-    prompt_path = os.path.join(current_dir, "evaluator_promt.txt")
-    with open(prompt_path, "w") as file:
+    prompt_path = os.path.join(current_dir, "evaluator_prompt.txt")
+    with open(prompt_path, "w+") as file:
         file.write(prompt)
-    with open(file_path, "w") as file:
+    with open(file_path, "w+") as file:
         file.write(evaluator_feedback)
     
     return evaluator_feedback

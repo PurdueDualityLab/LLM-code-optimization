@@ -1,5 +1,0 @@
-You have been provided with code and its corresponding energy usage data collected throughout its runtime.
-
-Provide Natural Language Feedback on how to further optimize the code by analyzing the energy data and identifying bottlenecks.
-
-Your output should be feedback in the form of bullet points.

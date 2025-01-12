@@ -11,11 +11,16 @@ full_report = {}
 energy_csv_file = open(f"{USER_PREFIX}/energy/data/C++.csv", 'w')
 energy_csv_file.close()
 
+compiler_optimized = False
+
 #Iterate through all the folders in benchmarks folder
 for benchmark in benchmark_dirs:
     #Compile the benchmark's code
     try:
-        result = subprocess.run("make compile_compiler_optimized", cwd= f"{USER_PREFIX}/benchmarks/{benchmark}", stderr=subprocess.PIPE, check=True, shell=True)
+        if compiler_optimized:
+            result = subprocess.run("make compile_compiler_optimized", cwd= f"{USER_PREFIX}/benchmarks/{benchmark}", stderr=subprocess.PIPE, check=True, shell=True)
+        else:
+            result = subprocess.run("make compile", cwd= f"{USER_PREFIX}/benchmarks/{benchmark}", stderr=subprocess.PIPE, check=True, shell=True)
         print(f"Successfully compiled {benchmark}.")
     except subprocess.CalledProcessError as e:
         print(f"Error while compiling {benchmark} raw code:")
@@ -44,9 +49,6 @@ for line in energy_data_file:
     energy_data = [float(num) for num in energy_data if num]
     benchmark_data.append((benchmark_name, *energy_data))
 
-# print(benchmark_data)
-
-
 #Find average energy usage and average runtime
 averages = []
 for i in range(0, len(benchmark_data), 5):
@@ -65,8 +67,6 @@ for i in range(0, len(benchmark_data), 5):
     avg_runtime = round(total_runtime / count, 3)
 
     full_report[n_runs_data[0][0]] = (avg_energy, avg_runtime)
-
-# print(f"{full_report}")
 
 #Print out results nicely
 for benchmark in full_report.keys():

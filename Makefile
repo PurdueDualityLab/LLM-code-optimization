@@ -8,7 +8,7 @@ setup:
 
 run:
 	@echo "Running main with arguments: $(ARGS)"
-	python3 llm/src/main.py $(ARGS)
+	python3 src/main.py $(ARGS)
 
 all: setup run
 

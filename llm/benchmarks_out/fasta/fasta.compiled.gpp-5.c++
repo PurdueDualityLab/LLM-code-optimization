@@ -1,10 +1,13 @@
+//compiles with gcc fasta.cpp -std=c++11 -O2
+
+
 #include <algorithm>
 #include <array>
 #include <vector>
 #include <thread>
+#include <mutex>
 #include <iostream>
 #include <numeric>
-#include <atomic>
 
 struct IUB
 {
@@ -146,38 +149,33 @@ const size_t CHARS_PER_BLOCK_INCL_NEWLINES = CHARS_PER_LINE_INCL_NEWLINES * LINE
 
 const unsigned THREADS_TO_USE = std::max( 1U, std::min( 4U, std::thread::hardware_concurrency() ));
 
-std::atomic_size_t g_fillThreadIndex = 0;
-size_t g_totalValuesToGenerate = 0;
-
-std::mutex g_fillMutex;
-
-std::vector<char> output_buffer;
-
-// Function to flush output buffer to stdout
-void flush_output() {
-    std::lock_guard<std::mutex> lock(g_fillMutex);
-    std::fwrite(output_buffer.data(), 1, output_buffer.size(), stdout);
-    output_buffer.clear();
-}
-
-// Calling flush every after threads processed their work
-
 #define LOCK( mutex ) std::lock_guard< decltype( mutex ) > guard_{ mutex };
 
-size_t fillBlock(size_t currentThread, std::vector<uint32_t>::iterator begin, random_generator_type<std::array<IUB, 15>::iterator>& generator) {
-   while(true) {
-      if(currentThread == g_fillThreadIndex.load(std::memory_order_relaxed)) {
-         // Select the next thread for this work.
-         g_fillThreadIndex.fetch_add(1, std::memory_order_relaxed);
-         if(g_fillThreadIndex.load(std::memory_order_relaxed) >= THREADS_TO_USE) {
-            g_fillThreadIndex.store(0, std::memory_order_relaxed);
-         }
+std::mutex g_fillMutex;
+size_t g_fillThreadIndex = 0;
+size_t g_totalValuesToGenerate = 0;
 
+template<class iterator_type, class generator_type>
+size_t fillBlock(size_t currentThread, iterator_type begin, generator_type& generator)
+{
+   while( true )
+   {
+      LOCK(g_fillMutex);
+      if(currentThread == g_fillThreadIndex)
+      {
+         // Select the next thread for this work.
+         ++g_fillThreadIndex;
+         if(g_fillThreadIndex >= THREADS_TO_USE)
+         {
+            g_fillThreadIndex = 0;
+         }
+         
          // Do the work.
          const size_t valuesToGenerate = std::min(g_totalValuesToGenerate, VALUES_PER_BLOCK);
          g_totalValuesToGenerate -= valuesToGenerate;
-
-         for(size_t valuesRemaining = 0; valuesRemaining < valuesToGenerate; ++valuesRemaining) {
+         
+         for(size_t valuesRemaining = 0; valuesRemaining < valuesToGenerate; ++valuesRemaining)
+         {
             *begin++ = generator();
          }
          
@@ -186,115 +184,120 @@ size_t fillBlock(size_t currentThread, std::vector<uint32_t>::iterator begin, ra
    }
 }
 
-templateg<class BlockIter, class converter_type, std::vector<char>::iterator CharIter>
-size_t convertBlock(BlockIter begin, BlockIter end, CharIter outCharacter, converter_type& converter) {
+template<class BlockIter, class CharIter, class converter_type>
+size_t convertBlock(BlockIter begin, BlockIter end, CharIter outCharacter, converter_type& converter)
+{
    const auto beginCharacter = outCharacter;
    size_t col = 0;
-   for(; begin != end; ++begin) {
+   for( ; begin != end; ++begin)
+   {
       const uint32_t random = *begin;
-
+      
       *outCharacter++ = converter(random);
-      if(++col >= CHARS_PER_LINE) {
+      if(++col >= CHARS_PER_LINE)
+      {
          col = 0;
          *outCharacter++ = '\n';
       }
    }
-   // Check if we need to end the line
-   if(0 != col) {
-      // Last iteration didn't end the line, so finish the job.
+   //Check if we need to end the line
+   if(0 != col)
+   {
+      //Last iteration didn't end the line, so finish the job.
       *outCharacter++ = '\n';
    }
+   
    return std::distance(beginCharacter, outCharacter);
 }
 
 std::mutex g_outMutex;
-std::atomic_size_t g_outThreadIndex = -1;
+size_t g_outThreadIndex = -1;
 
-void writeCharacters(size_t currentThread, std::vector<char>::iterator begin, size_t count) {
-   while(true) {
-      if(g_outThreadIndex.load(std::memory_order_relaxed) == -1 || currentThread == g_outThreadIndex.load(std::memory_order_relaxed)) {
+template<class iterator_type>
+void writeCharacters(size_t currentThread, iterator_type begin, size_t count)
+{
+   while(true)
+   {
+      LOCK(g_outMutex);
+      if(g_outThreadIndex == -1 || currentThread == g_outThreadIndex)
+      {
          // Select the next thread for this work.
-         g_outThreadIndex.store(currentThread + 1, std::memory_order_relaxed);
-         if(g_outThreadIndex.load(std::memory_order_relaxed) >= THREADS_TO_USE) {
-            g_outThreadIndex.store(0, std::memory_order_relaxed);
-         }
-
-         // Do the work.
+         g_outThreadIndex = currentThread + 1;
+         if(g_outThreadIndex >= THREADS_TO_USE)
          {
-             LOCK(g_outMutex);
-             output_buffer.insert(output_buffer.end(), begin, begin + count);
-             if(output_buffer.size() > 1024 * 1024) {
-                 flush_output();
-             }
+            g_outThreadIndex = 0;
          }
+         
+         // Do the work.
+         std::fwrite( begin, count, 1, stdout );
          return;
       }
    }
 }
 
 
-void work(size_t currentThread, random_generator_type<std::array<IUB, 15>::iterator>& generator, char(*converter)(uint32_t)) {
-   std::vector<uint32_t> block(VALUES_PER_BLOCK);
-   std::vector<char> characters(CHARS_PER_BLOCK_INCL_NEWLINES);
-
-   while(true) {
+template<class generator_type, class converter_type>
+void work(size_t currentThread, generator_type& generator, converter_type& converter)
+{
+   std::array< typename generator_type::result_t, VALUES_PER_BLOCK > block;
+   std::array< char, CHARS_PER_BLOCK_INCL_NEWLINES > characters;
+   
+   while(true)
+   {
       const auto bytesGenerated = fillBlock(currentThread, block.begin(), generator);
-
-      if(bytesGenerated == 0) {
+      
+      if( bytesGenerated == 0 )
+      {
          break;
       }
-
+      
       const auto charactersGenerated = convertBlock(block.begin(), block.begin() + bytesGenerated, characters.begin(), converter);
-
+      
       writeCharacters(currentThread, characters.begin(), charactersGenerated);
    }
-   flush_output();   // Ensure final flush 
 }
 
-template <class generator_type, class converter_type>
+template <class generator_type, class converter_type >
 void make(const char* desc, int n, generator_type generator, converter_type converter) {
    std::cout << '>' << desc << '\n';
-
+   
    g_totalValuesToGenerate = n;
    g_outThreadIndex = -1;
-   g_fillThreadIndex.store(0, std::memory_order_relaxed);
-
-   std::vector<std::thread> threads(THREADS_TO_USE - 1);
-   for(size_t i = 0; i < threads.size(); ++i) {
-      threads[i] = std::thread{
-          [&generator, &converter, i]() {
-              work(i, generator, std::ref(converter));
-          }
-      };
+   g_fillThreadIndex = 0;
+   
+   std::vector< std::thread > threads(THREADS_TO_USE - 1);
+   for(size_t i = 0; i < threads.size(); ++i)
+   {
+      threads[ i ] = std::thread{ std::bind( &work< generator_type, converter_type >, i, std::ref(generator), std::ref(converter)) };
    }
-
+   
    work(threads.size(), generator, converter);
-
-   for(auto& thread : threads) {
+   
+   for(auto& thread : threads)
+   {
       thread.join();
    }
-   flush_output();   // Final flush to ensure all output is handled.
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
    int n = 1000;
-   if(argc < 2 || (n = std::atoi(argv[1])) <= 0) {
+   if (argc < 2 || (n = std::atoi(argv[1])) <= 0) {
       std::cerr << "usage: " << argv[0] << " length\n";
       return 1;
    }
-
+   
    make_cumulative(iub.begin(), iub.end());
    make_cumulative(homosapiens.begin(), homosapiens.end());
-
-   make("ONE Homo sapiens alu", n * 2,
+   
+   make("ONE Homo sapiens alu"      , n * 2,
        make_repeat_generator(alu.begin(), alu.end()),
-       &convert_trivial);
-   make("TWO IUB ambiguity codes", n * 3,
+       &convert_trivial );
+   make("TWO IUB ambiguity codes"   , n * 3,
        make_random_generator(iub.begin(), iub.end()),
-       &convert_IUB);
+       &convert_IUB );
    make("THREE Homo sapiens frequency", n * 5,
        make_random_generator(homosapiens.begin(), homosapiens.end()),
-       &convert_homosapiens);
-   flush_output();
+       &convert_homosapiens );
    return 0;
 }

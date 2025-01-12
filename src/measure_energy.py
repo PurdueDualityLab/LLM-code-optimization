@@ -1,18 +1,18 @@
-try:
-    # Try relative imports
-    from .benchmark import Benchmark
-    from .evaluator import evaluator_llm
-except ImportError:
-    # If relative imports fail, use absolute imports
-    from benchmark import Benchmark
-    from evaluator import evaluator_llm
+
+from benchmark import Benchmark
+from llm.evaluator_llm import evaluator_llm
 import pickle
 import os
 from dotenv import load_dotenv
 import os
+import sys
+from utils import Logger
+
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
 benchmark_data = {}
+
+logger = Logger("logs", sys.argv[2]).logger
 
 def load_benchmark_data(filepath):
     with open(filepath, "rb") as file:
@@ -74,21 +74,18 @@ def print_benchmark_info(benchmark_info):
     """Prints the benchmark information in a structured format."""
     print("Original:")
     # Uncomment to print source code
-    # print("Source Code:", benchmark_info["original"]["source_code"])
     print("Average Energy:", benchmark_info["original"]["avg_energy"])
     print("Average Runtime:", benchmark_info["original"]["avg_runtime"])
     print("\n")
 
     print("Lowest Average Energy:")
     # Uncomment to print source code
-    # print("Source Code:", benchmark_info["lowest_avg_energy"]["source_code"])
     print("Average Energy:", benchmark_info["lowest_avg_energy"]["avg_energy"])
     print("Average Runtime:", benchmark_info["lowest_avg_energy"]["avg_runtime"])
     print("\n")
 
     print("Current:")
     # Uncomment to print source code
-    # print("Source Code:", benchmark_info["current"]["source_code"])
     print("Average Energy:", benchmark_info["current"]["avg_energy"])
     print("Average Runtime:", benchmark_info["current"]["avg_runtime"])
     print("\n")
@@ -96,34 +93,30 @@ def print_benchmark_info(benchmark_info):
 def get_evaluator_feedback(client, model_name, filename, optim_iter):
 
     language = filename.split(".")[-1]
-    # print(f"language: {language}")
 
     name = filename.split(".")[0]
-    # print(f"name: {name}")
 
     original_code_path = f"{USER_PREFIX}/llm/llm_input_files/input_code/{filename}"
-    # print(f"original_code_path: {original_code_path}")
 
     optimized_code_path = f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0]}/optimized_{filename}"
-    # print(f"optimized_code_path: {optimized_code_path}")
 
-    pkl_path = os.path.join(os.path.dirname(__file__), f"../../energy/{language}/benchmark_data.pkl")
-    # print(f"This is the pkl file path: {pkl_path}")
+    pkl_path = f"{USER_PREFIX}/src/runtime_logs/c++/benchmark_data.pkl"
     
     #create a benchmark object
-    bmark = Benchmark(language, name, filename, benchmark_data)
+    bmark = Benchmark(language, name, benchmark_data)
     
     #run benchmark
     #load the original code and data into pkl file 
     if optim_iter == 0:
-        results_file = bmark.run(optim_iter)
-        bmark.process_results(results_file, optim_iter, original_code_path)
+        logger.info("Iteration 0, run benchmark on the original code")
+        bmark.run(optim_iter)
+        bmark.process_results(optim_iter, original_code_path)
         
-
     #load the optimized code and data
     optim_iter = optim_iter + 1 # offset
-    results_file = bmark.run(optim_iter)
-    bmark.process_results(results_file, optim_iter, original_code_path if optim_iter == 0 else optimized_code_path)
+    logger.info(f"Iteration {optim_iter}, run benchmark on the optimized code")
+    bmark.run(optim_iter)
+    bmark.process_results(optim_iter, original_code_path if optim_iter == 0 else optimized_code_path)
 
     # Load benchmark data
     contents = load_benchmark_data(pkl_path)
@@ -135,13 +128,4 @@ def get_evaluator_feedback(client, model_name, filename, optim_iter):
     print_benchmark_info(benchmark_info)
 
     #run evaluator
-    print("get_evaluator_feedback: Getting evaluator feedback ....")
-    evaluator_feedback = evaluator_llm(client, model_name, benchmark_info)
-    # print(evaluator_feedback)
-    
-    return benchmark_info
-
-if __name__ == "__main__":
-    for i in range(0,4):
-        print(f"Iteration {i}")
-        get_evaluator_feedback(None, None, "binarytrees.gpp-9.c++", i)
+    evaluator_llm(client, model_name, benchmark_info)

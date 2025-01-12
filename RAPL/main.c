@@ -11,7 +11,7 @@
 
 int main (int argc, char **argv) 
 { char command[500]="",language[500]="", test[500]="", path[500]="";
-  int  ntimes = 2;
+  int  ntimes = 5;
   int  core = 0;
   int  i=0;
 
@@ -28,8 +28,7 @@ int main (int argc, char **argv)
   //Language name
   strcpy(language,argv[2]);
   //Path to language .csv file
-  // strcpy(path, "ABSOLUTE_PATH/E2COOL/energy/src/");
-  strcpy(path, "/home/jimmy/VIP_PTM/E2COOL/energy/src/");
+  strcpy(path, "/home/hpeng/E2COOL/src/runtime_logs/c++/");
   strcat(language,".csv");
   strcat(path,language);
   //Test name

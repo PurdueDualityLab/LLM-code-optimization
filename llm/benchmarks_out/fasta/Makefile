@@ -9,11 +9,12 @@ compile_optimized:
 measure:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "./fasta.gpp-5.gpp_run 25000000" c++ fasta
-	sudo chmod -R 777 ${USER_PREFIX}/energy/src/c++.csv
+	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++/c++.csv
 	
 measure_optimized:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "./optimized_fasta.gpp-5.gpp_run 25000000" C++ fasta
+	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++/c++.csv
 
 run:
 	./fasta.gpp-5.gpp_run 25000000
