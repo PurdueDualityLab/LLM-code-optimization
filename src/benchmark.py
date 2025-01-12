@@ -31,7 +31,7 @@ class Benchmark():
 
         #run make measure using make file
         #change current directory to benchmarks/folder to run make file
-        os.chdir(f"{USER_PREFIX}/llm/benchmarks_out/{self.benchmark_name}")
+        os.chdir(f"{USER_PREFIX}/benchmark_c++/{self.benchmark_name}")
         current_dir = os.getcwd()
         logger.info(f"Current directory: {current_dir}")
 

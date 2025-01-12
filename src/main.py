@@ -41,8 +41,8 @@ def master_script(filename, client, model_name):
     global total_compilation_errors, compilation_errors_fixed
 
     # Keep a copy of a compiling file for re-optimization
-    # copy original code to benchmarks_out/ as filename.compiled.gpp-x.c++
-    shutil.copyfile(f"{USER_PREFIX}/llm/llm_input_files/input_code/{filename}", f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0]}/{filename.split('.')[0]}.compiled.{'.'.join(filename.split('.')[1:])}")
+    # copy original code as filename.compiled.gpp-x.c++
+    shutil.copyfile(f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/{filename}", f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/{filename.split('.')[0]}.compiled.{'.'.join(filename.split('.')[1:])}")
     
     # keep track of errors
     regression_test_result = -3
@@ -97,17 +97,17 @@ def master_script(filename, client, model_name):
             reoptimize_lastly_flag = 1
             continue
         
-        # num_success_iteration
+        # success
         if regression_test_result == 1:
-            logger.info("Regression test num_success_iterationful, getting evaluator feedback")
+            logger.info("Regression test success, getting evaluator feedback")
             get_evaluator_feedback(client, model_name, filename, num_success_iteration)
             logger.info("Got evaluator feedback")
             num_success_iteration += 1
 
             # Copy lastest optimized code for logic error re-optimization
             logger.info("Saving lastest working optimized file")
-            os.makedirs(os.path.dirname(f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0]}/{filename.split('.')[0]}.compiled.{'.'.join(filename.split('.')[1:])}"), exist_ok=True)
-            shutil.copyfile(f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0]}/optimized_{filename}", f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0]}/{filename.split('.')[0]}.compiled.{'.'.join(filename.split('.')[1:])}")
+            os.makedirs(os.path.dirname(f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/{filename.split('.')[0]}.compiled.{'.'.join(filename.split('.')[1:])}"), exist_ok=True)
+            shutil.copyfile(f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/optimized_{filename}", f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/{filename.split('.')[0]}.compiled.{'.'.join(filename.split('.')[1:])}")
             
             # Hard code to run 5 times
             if num_success_iteration == 5:
@@ -152,16 +152,26 @@ if __name__ == "__main__":
         contents = pickle.load(file)
     
     dict_str = json.dumps(contents, indent=4)
-    with open(f"{USER_PREFIX}/src/runtime_logs/result_file.txt", "w+") as file:
+    with open(f"{USER_PREFIX}/src/runtime_logs/results/result_file.txt", "w+") as file:
         file.write(str(dict_str))
 
-    # # Remove txt log file under runtime_logs
-    # directory = f"{USER_PREFIX}/src/runtime_logs"
-    # try:
-    #     for filename in os.listdir(directory):
-    #         if filename.endswith(".txt"):
-    #             file_path = os.path.join(directory, filename)
-    #             os.remove(file_path)
-    #             logger.info(f"{file_path} has been removed successfully.")
-    # except Exception as e:
-    #     logger.error(f"An error occurred while trying to remove the files: {e}")
+    # Remove txt log file under runtime_logs
+    directory = f"{USER_PREFIX}/src/runtime_logs"
+    try:
+        for filename in os.listdir(directory):
+            if filename.endswith(".txt"):
+                file_path = os.path.join(directory, filename)
+                os.remove(file_path)
+                logger.info(f"{file_path} has been removed successfully.")
+    except Exception as e:
+        logger.error(f"An error occurred while trying to remove the files: {e}")
+
+    directory = f"{USER_PREFIX}/benchmark_c++/{benchmark.split('.')[0]}"
+    try:
+        for filename in os.listdir(directory):
+            if filename != "Makefile" and filename != benchmark:
+                file_path = os.path.join(directory, filename)
+                os.remove(file_path)
+                logger.info(f"{file_path} has been removed successfully.")
+    except Exception as e:
+        logger.error(f"An error occurred while trying to remove the files: {e}")

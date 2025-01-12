@@ -73,19 +73,16 @@ def extract_content(contents):
 def print_benchmark_info(benchmark_info):
     """Prints the benchmark information in a structured format."""
     print("Original:")
-    # Uncomment to print source code
     print("Average Energy:", benchmark_info["original"]["avg_energy"])
     print("Average Runtime:", benchmark_info["original"]["avg_runtime"])
     print("\n")
 
     print("Lowest Average Energy:")
-    # Uncomment to print source code
     print("Average Energy:", benchmark_info["lowest_avg_energy"]["avg_energy"])
     print("Average Runtime:", benchmark_info["lowest_avg_energy"]["avg_runtime"])
     print("\n")
 
     print("Current:")
-    # Uncomment to print source code
     print("Average Energy:", benchmark_info["current"]["avg_energy"])
     print("Average Runtime:", benchmark_info["current"]["avg_runtime"])
     print("\n")
@@ -96,9 +93,9 @@ def get_evaluator_feedback(client, model_name, filename, optim_iter):
 
     name = filename.split(".")[0]
 
-    original_code_path = f"{USER_PREFIX}/llm/llm_input_files/input_code/{filename}"
+    original_code_path = f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/{filename}"
 
-    optimized_code_path = f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0]}/optimized_{filename}"
+    optimized_code_path = f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/optimized_{filename}"
 
     pkl_path = f"{USER_PREFIX}/src/runtime_logs/c++/benchmark_data.pkl"
     

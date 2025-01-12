@@ -124,11 +124,11 @@ def compare_outputs(file1, file2, output_log):
             return False
 
 def regression_test(filename): 
-    unoptimized_file_exec = f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0]}/{filename.split('.')[0]}"
-    optimized_file_exec = f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0]}/optimized_{filename}"
+    unoptimized_file_exec = f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/{filename.split('.')[0]}"
+    optimized_file_exec = f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/optimized_{filename}"
 
     # Needed for makefiles
-    os.chdir(f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0].split('_')[-1]}")   
+    os.chdir(f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0].split('_')[-1]}")   
     with open(TEST_OUTPUT_FILE, 'w+') as output_log:
         if not compile_program(output_log, False):
             # Return code when unoptimized file does not compile

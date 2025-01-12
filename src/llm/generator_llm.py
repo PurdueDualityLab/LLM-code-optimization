@@ -18,15 +18,15 @@ with open(f"{USER_PREFIX}/src/llm/llm_prompts/generator_prompt.txt", "r") as fil
 def llm_optimize(client, model_name, filename, optim_iter):
 
     # get original code
-    source_path = f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0]}/{filename}"
+    source_path = f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/{filename}"
 
     # get optimized file if is not first iteration
     if optim_iter != 0:
-        source_path = f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0]}/optimized_{filename}"
+        source_path = f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/optimized_{filename}"
 
     # get lastly compiled code
     if filename.split('.')[1] == "compiled":
-        source_path = f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0]}/{filename}"
+        source_path = f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/{filename}"
         filename = filename.split('.')[0] + "." + ('.'.join(filename.split('.')[2:]))
     
     with open(source_path, "r") as file:
@@ -93,8 +93,8 @@ def llm_optimize(client, model_name, filename, optim_iter):
     final_code = final_code.replace("```cpp", "")
     final_code = final_code.replace("```", "")
     
-    logger.info(f"llm_optimize: : writing optimized code to llm/benchmarks_out/{filename.split('.')[0]}/optimized_{filename}")
-    destination_path = f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0]}/optimized_{filename}"
+    logger.info(f"llm_optimize: : writing optimized code to benchmark_c++/{filename.split('.')[0]}/optimized_{filename}")
+    destination_path = f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/optimized_{filename}"
     with open(destination_path, "w") as file:
         file.write(final_code)
 
@@ -102,7 +102,7 @@ def llm_optimize(client, model_name, filename, optim_iter):
     return 0
 
 def handle_compilation_error(client, model_name, filename):
-    with open(f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0]}/optimized_{filename}", "r") as file:
+    with open(f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/optimized_{filename}", "r") as file:
         optimized_code = file.read()
 
     with open(f"{USER_PREFIX}/src/runtime_logs/regression_test_log.txt", "r") as file:
@@ -142,12 +142,12 @@ def handle_compilation_error(client, model_name, filename):
         final_code = final_code.replace("```", "")
 
         logger.info(f"handle_compilation_error: writing re-optimized code to optimized_{filename}")
-        destination_path = f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0]}"
+        destination_path = f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}"
         with open(destination_path+"/optimized_"+filename, "w") as file:
             file.write(final_code)
 
 def handle_logic_error(client, model_name, filename):
-    with open(f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0]}/optimized_{filename}", "r") as file:
+    with open(f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/optimized_{filename}", "r") as file:
         optimized_code = file.read()
 
     with open(f"{USER_PREFIX}/src/runtime_logs/regression_test_log.txt", "r") as file:
@@ -185,7 +185,7 @@ def handle_logic_error(client, model_name, filename):
         final_code = final_code.replace("```cpp", "")
         final_code = final_code.replace("```", "")
 
-    destination_path = f"{USER_PREFIX}/llm/benchmarks_out/{filename.split('.')[0]}"
+    destination_path = f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}"
     with open(destination_path+"/optimized_"+filename, "w") as file:
         file.write(final_code)
 
