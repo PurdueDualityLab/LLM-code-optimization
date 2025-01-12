@@ -1,13 +1,3 @@
-// The Computer Language Benchmarks Game
-// http://benchmarksgame.alioth.debian.org/
-//
-// Contributed by Dave Compton
-// Based on "fannkuch-redux C gcc #5", contributed by Jeremy Zerfas
-// which in turn was based on the Ada program by Jonathan Parker and 
-// Georg Bauhaus which in turn was based on code by Dave Fladebo, 
-// Eckehard Berns, Heiner Marxen, Hongwei Xi, and The Anh Tran and 
-// also the Java program by Oleg Mazurov.
-
 #include <iostream>
 #include <vector>
 #include <algorithm>

@@ -1,17 +1,3 @@
-/* The Computer Language Benchmarks Game
- http://benchmarksgame.alioth.debian.org/
- 
- converted to C++ from D by Rafal Rusin
- modified by Vaclav Haisman
- modified by The Anh to compile with g++ 4.3.2
- modified by Branimir Maksimovic
- modified by Kim Walisch
- modified by Tavis Bohne
- made multithreaded by Jeff Wofford on the model of fasta C gcc #7 and fasta Rust #2
- 
- compiles with gcc fasta.cpp -std=c++11 -O2
- */
-
 #include <algorithm>
 #include <array>
 #include <vector>

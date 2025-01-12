@@ -1,9 +1,3 @@
-/* The Computer Language Benchmarks Game
-http://benchmarksgame.alioth.debian.org/
-
-Contributed by Andrew Moon
-*/
-
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>

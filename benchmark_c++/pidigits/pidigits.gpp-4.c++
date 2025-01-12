@@ -1,9 +1,3 @@
-/* The Computer Language Benchmarks Game
- * http://benchmarksgame.alioth.debian.org/
- *
- * contributed by Alessandro Power
- */
-
 #include <gmpxx.h>
 #include <cstdlib>
 #include <iostream>

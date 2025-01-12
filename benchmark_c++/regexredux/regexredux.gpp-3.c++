@@ -1,11 +1,3 @@
-/* The Computer Language Benchmarks Game
-   http://benchmarksgame.alioth.debian.org/
-
-   regex-dna program contributed by Alexey Zolotov
-   modified by Vaclav Zeman
-   converted from regex-dna program
-*/
-
 #include <boost/regex.hpp>
 #include <cassert>
 #include <iostream>

@@ -1,14 +1,3 @@
-/* The Computer Language Benchmarks Game
-   http://benchmarksgame.alioth.debian.org/
-
-   contributed by Mark C. Lewis
-   modified slightly by Chad Whipkey
-   converted from java to c++,added sse support, by Branimir Maksimovic
-   converted from c++ to c, by Alexey Medvedchikov 
-   converted from c to c++11, by Walter Landry
-   modified by Dmitri Naumov
-*/
-
 #include <algorithm>
 #include <stdio.h>
 #include <cmath>

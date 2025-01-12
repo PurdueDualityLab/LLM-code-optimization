@@ -1,17 +1,3 @@
-/* The Computer Language Benchmarks Game
-http://benchmarksgame.alioth.debian.org/
-
-Based on C contribution by Alex Burlyga
-Based on Java contribution by Michael Barker
-Based on the original C++ contribution by The Anh Tran 
-Based on the #5 C contribution by Dmitry Vyukov 
-Contributed & Modified by Andrew Moon
-
-Each chameneous creature is a standard OS thread.
-Data exchange mechanism is gcc built-in atomic ops.
-*/
-
-
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>

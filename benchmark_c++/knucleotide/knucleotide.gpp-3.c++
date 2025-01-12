@@ -1,11 +1,3 @@
-/* The Computer Language Benchmarks Game
-   http://benchmarksgame.alioth.debian.org/
-
-   Contributed by Branimir Maksimovic
-*/
-
-// g++ 4.8.x bug, compile with: -Wl,--no-as-needed option 
-
 #include <iostream>
 #include <iomanip>
 #include <cstdint>
