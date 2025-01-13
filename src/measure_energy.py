@@ -17,7 +17,6 @@ logger = Logger("logs", sys.argv[2]).logger
 def load_benchmark_data(filepath):
     with open(filepath, "rb") as file:
         contents = pickle.load(file)
-    # print(contents)
     return contents
 
 def extract_content(contents):
@@ -26,10 +25,7 @@ def extract_content(contents):
 
     # print all values
     for key, (source_code, avg_energy, avg_runtime) in contents.items():
-        print("key:", key)
-        print("avg_energy:", avg_energy)
-        print("avg_runtime:", avg_runtime)
-    print("\n")
+        logger.info(f"key: {key}, avg_energy: {avg_energy}, avg_runtime: {avg_runtime}")
 
     # Extract the first(original) and last(current) elements
     first_key = keys[0]
@@ -72,22 +68,11 @@ def extract_content(contents):
 
 def print_benchmark_info(benchmark_info):
     """Prints the benchmark information in a structured format."""
-    print("Original:")
-    print("Average Energy:", benchmark_info["original"]["avg_energy"])
-    print("Average Runtime:", benchmark_info["original"]["avg_runtime"])
-    print("\n")
+    logger.info("Original: Average Energy: {}, Average Runtime: {}".format(benchmark_info["original"]["avg_energy"], benchmark_info["original"]["avg_runtime"]))
+    logger.info("Lowest Average Energy: Average Energy: {}, Average Runtime: {}".format(benchmark_info["lowest_avg_energy"]["avg_energy"], benchmark_info["lowest_avg_energy"]["avg_runtime"]))
+    logger.info("Current: Average Energy: {}, Average Runtime: {}".format(benchmark_info["current"]["avg_energy"], benchmark_info["current"]["avg_runtime"]))
 
-    print("Lowest Average Energy:")
-    print("Average Energy:", benchmark_info["lowest_avg_energy"]["avg_energy"])
-    print("Average Runtime:", benchmark_info["lowest_avg_energy"]["avg_runtime"])
-    print("\n")
-
-    print("Current:")
-    print("Average Energy:", benchmark_info["current"]["avg_energy"])
-    print("Average Runtime:", benchmark_info["current"]["avg_runtime"])
-    print("\n")
-
-def get_evaluator_feedback(client, model_name, filename, optim_iter):
+def get_evaluator_feedback(llm, model_name, filename, optim_iter, client, assistant_id, thread_id):
 
     language = filename.split(".")[-1]
 
@@ -125,4 +110,4 @@ def get_evaluator_feedback(client, model_name, filename, optim_iter):
     print_benchmark_info(benchmark_info)
 
     #run evaluator
-    evaluator_llm(client, model_name, benchmark_info)
+    evaluator_llm(llm, model_name, benchmark_info, client, assistant_id, thread_id)

@@ -2,12 +2,31 @@ from dotenv import load_dotenv
 import json
 from openai import OpenAI
 import os
-from pydantic import BaseModel
+import time
+from utils import Logger
+import sys
 
 load_dotenv()
 openai_key = os.getenv('API_KEY')
 
-def evaluator_llm(client, model_name, benchmark_info):
+logger = Logger("logs", sys.argv[2]).logger
+
+def create_evaluator_assistant():
+    client = OpenAI(api_key=openai_key)
+    assistant = client.beta.assistants.create(
+            name="Evaluator",
+            instructions="You are a code expert. Think through the code optimizations strategies possible step by step",
+            model="gpt-4o",
+        )
+        
+    # create a thread
+    thread = client.beta.threads.create()
+
+    assistant_id = assistant.id
+    thread_id = thread.id
+    return client, assistant_id, thread_id
+
+def evaluator_llm(llm, model_name, benchmark_info, client, assistant_id, thread_id):
 
     #extract original
     original_source_code = benchmark_info["original"]["source_code"]
@@ -23,7 +42,7 @@ def evaluator_llm(client, model_name, benchmark_info):
     current_avg_runtime = benchmark_info["current"]["avg_runtime"]
 
     prompt = f"""
-    You are a code optimization and energy efficiency expert. Evaluate the following current code snippet in terms of time complexity, space complexity, readability, energy usage, and performance, considering both the original and optimized code. Please provide a comprehensive analysis of the code's efficiency, energy consumption, and suggest further optimizations. Your feedback should include:
+    You are a code optimization and energy efficiency expert. Evaluate the following current code snippet in terms of time complexity, space complexity, energy usage, and performance, considering both the original and optimized code. Please provide a comprehensive analysis of the code's efficiency, energy consumption, and suggest further optimizations. Your feedback should include:
 
     1. **Current Code Behavior**:
     - Explain how the current code functions, highlighting its design, algorithm choices, and any assumptions it makes.
@@ -74,26 +93,27 @@ def evaluator_llm(client, model_name, benchmark_info):
     Please respond in natural language (English) with actionable suggestions for improving the code's performance in terms of energy usage. Provide only the best code with the lowest energy usage.
     """
 
-    messages = [
-                {
-                    "role": "system",
-                    "content": "You are a helpful assistant. Think through the code optimizations strategies possible step by step"
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-                ]
-    if client == "openai":
-        client = OpenAI(api_key=openai_key)
-        
-        response = client.beta.chat.completions.parse(
-            model="gpt-4o-2024-08-06",
-            messages=messages
+    if llm == "openai":
+        # create a run
+        run = client.beta.threads.runs.create_and_poll(
+            thread_id=thread_id,
+            assistant_id=assistant_id,
+            instructions=prompt,
         )
-        evaluator_feedback = response.choices[0].message.content
+
+        # check run status
+        while run.status != 'completed':
+            time.sleep(2)  # Wait for 2 seconds before checking again
+            run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+        
+        # get message history
+        messages = client.beta.threads.messages.list(
+            thread_id=thread_id
+        )
+        evaluator_feedback = messages.data[0].content[0].text.value
+        logger.info(f"evaluator_feedback: {evaluator_feedback}")
     else:
-        output = client.chat(model=model_name, messages=messages)
+        output = llm.chat(model=model_name, messages=messages)
         evaluator_feedback = output["message"]["content"]
 
     #write to file

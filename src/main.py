@@ -14,9 +14,10 @@ load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
 
 from regression_test import regression_test
-from llm.generator_llm import llm_optimize, handle_compilation_error
+from llm.generator_llm import llm_optimize, handle_compilation_error, create_generator_assistant
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from measure_energy import get_evaluator_feedback
+from llm.evaluator_llm import create_evaluator_assistant
 
 valid_benchmarks = [
     "binarytrees.gpp-9.c++",
@@ -44,6 +45,9 @@ def master_script(filename, client, model_name):
     # copy original code as filename.compiled.gpp-x.c++
     shutil.copyfile(f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/{filename}", f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/{filename.split('.')[0]}.compiled.{'.'.join(filename.split('.')[1:])}")
     
+    #create LLM agent
+    generator_client, generator_assistant_id, generator_thread_id = create_generator_assistant()
+    evaluator_client, evaluator_assistant_id, evaluator_thread_id = create_evaluator_assistant()
     # keep track of errors
     regression_test_result = -3
     compilation_errors, num_success_iteration = 0, 0
@@ -55,10 +59,10 @@ def master_script(filename, client, model_name):
         # reoptimize latest working opimized file if logic/compile error
         if reoptimize_lastly_flag == 0:
             logger.info(f"Optimizing {filename}, iteration {num_success_iteration}")
-            llm_optimize(client, model_name, filename, num_success_iteration)
+            llm_optimize(client, model_name, filename, num_success_iteration, generator_client, generator_assistant_id, generator_thread_id)
         else:
             logger.info("re-optimizing from latest working optimization")
-            llm_optimize(client, model_name, f"{filename.split('.')[0]}.compiled.{'.'.join(filename.split('.')[1:])}", num_success_iteration)
+            llm_optimize(client, model_name, f"{filename.split('.')[0]}.compiled.{'.'.join(filename.split('.')[1:])}", num_success_iteration, generator_client, generator_assistant_id, generator_thread_id)
             reoptimize_lastly_flag = 0
         
         # regression test step
@@ -87,7 +91,7 @@ def master_script(filename, client, model_name):
                 continue
 
             logger.error("Error in optimized file, re-optimizing")
-            handle_compilation_error(client, model_name, filename)
+            handle_compilation_error(client, model_name, filename, generator_client, generator_assistant_id, generator_thread_id)
             compilation_errors += 1
 
         # Output difference in optimized file, re-prompt
@@ -100,7 +104,7 @@ def master_script(filename, client, model_name):
         # success
         if regression_test_result == 1:
             logger.info("Regression test success, getting evaluator feedback")
-            get_evaluator_feedback(client, model_name, filename, num_success_iteration)
+            get_evaluator_feedback(client, model_name, filename, num_success_iteration, evaluator_client, evaluator_assistant_id, evaluator_thread_id)
             logger.info("Got evaluator feedback")
             num_success_iteration += 1
 

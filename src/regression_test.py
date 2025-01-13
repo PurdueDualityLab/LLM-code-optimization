@@ -45,7 +45,7 @@ def run_program(exec_path, output_file, optimized):
     if not optimized:
         result = subprocess.run(["make", "run"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     else:
-        result = subprocess.run(["make", "run_optimized"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        result = subprocess.run(["make", "run_optimized"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
     
     # Check for errors
     if result.returncode != 0:

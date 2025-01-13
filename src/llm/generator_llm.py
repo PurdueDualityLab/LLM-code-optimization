@@ -4,6 +4,8 @@ import os
 from pydantic import BaseModel
 import sys
 from utils import Logger
+import time
+import json
 
 load_dotenv()
 
@@ -15,7 +17,22 @@ logger = Logger("logs", sys.argv[2]).logger
 with open(f"{USER_PREFIX}/src/llm/llm_prompts/generator_prompt.txt", "r") as file:
     prompt = file.read()
 
-def llm_optimize(client, model_name, filename, optim_iter):
+def create_generator_assistant():
+    client = OpenAI(api_key=openai_key)
+    assistant = client.beta.assistants.create(
+            name="Genrator",
+            instructions="You are a code expert. Think through the code optimizations strategies possible step by step and generate the optimized code",
+            model="gpt-4o",
+        )
+        
+    # create a thread
+    thread = client.beta.threads.create()
+
+    assistant_id = assistant.id
+    thread_id = thread.id
+    return client, assistant_id, thread_id
+
+def llm_optimize(llm, model_name, filename, optim_iter, client, assistant_id, thread_id):
 
     # get original code
     source_path = f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/{filename}"
@@ -63,7 +80,35 @@ def llm_optimize(client, model_name, filename, optim_iter):
         f.write(optimize_prompt)
     
     logger.info(f"llm_optimize: Generator LLM Optimizing ....")
-    messages = [
+    if llm == "openai":
+        # create a run
+        run = client.beta.threads.runs.create_and_poll(
+            thread_id=thread_id,
+            assistant_id=assistant_id,
+            instructions=optimize_prompt,
+            response_format={
+                'type': 'json_schema',
+                'json_schema': 
+                    {
+                        "name":"whocares", 
+                        "schema": OptimizationReasoning.model_json_schema()
+                    }
+            }
+        )
+
+        # check run status
+        while run.status != 'completed':
+            time.sleep(2)  # Wait for 2 seconds before checking again
+            run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+        
+        # get message history
+        messages = client.beta.threads.messages.list(
+            thread_id=thread_id
+        )
+        final_code_obj = messages.data[0].content[0].text.value
+        final_code = json.loads(final_code_obj)['final_code']
+    else:
+        messages = [
                 {
                     "role": "system", 
                     "content": "You are a helpful assistant. Think through the code optimizations strategies possible step by step"
@@ -72,17 +117,8 @@ def llm_optimize(client, model_name, filename, optim_iter):
                     "role": "user",
                     "content": optimize_prompt
                 }
-                ]
-    if client == "openai":
-        client = OpenAI(api_key=openai_key)
-        completion = client.beta.chat.completions.parse(
-            model="gpt-4o-2024-08-06",
-            messages=messages,
-            response_format=OptimizationReasoning
-        )
-        final_code = completion.choices[0].message.parsed.final_code
-    else:
-        output = client.chat(model=model_name, messages=messages)
+        ]
+        output = llm.chat(model=model_name, messages=messages)
         final_code = output["message"]["content"]
 
     if final_code == "":
@@ -97,44 +133,63 @@ def llm_optimize(client, model_name, filename, optim_iter):
     destination_path = f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/optimized_{filename}"
     with open(destination_path, "w") as file:
         file.write(final_code)
-
     # Success code
-    return 0
+    return 0    
 
-def handle_compilation_error(client, model_name, filename):
+def handle_compilation_error(llm, model_name, filename, client, assistant_id, thread_id):
     with open(f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/optimized_{filename}", "r") as file:
         optimized_code = file.read()
 
     with open(f"{USER_PREFIX}/src/runtime_logs/regression_test_log.txt", "r") as file:
         error_message = file.read()
     
-
         class ErrorReasoning(BaseModel):
             analysis: str
             final_code: str
         
-        compilation_error_prompt = f"""You were tasked with the task outlined in the following prompt: {prompt}. You returned the following optimized code: {optimized_code}. However, the code failed to compile with the following error message: {error_message}. Analyze the error message and explicitly identify the issue in the code that caused the compilation error. Then, consider if there's a need to use a different optimization strategy to compile successfully or if there are code changes which can fix this implementation strategy. Finally, update the code accordingly and ensure it compiles successfully. Ensure that the optimized code is both efficient and error-free and return it. """   
+        compilation_error_prompt = f"""You returned the following optimized code: {optimized_code}. However, the code failed to compile with the following error message: {error_message}. Analyze the error message and explicitly identify the issue in the code that caused the compilation error. Then, consider if there's a need to use a different optimization strategy to compile successfully or if there are code changes which can fix this implementation strategy. Finally, update the code accordingly and ensure it compiles successfully. Ensure that the optimized code is both efficient and error-free and return it. """   
         
-        logger.info("handle_compilation_error: promting for re-optimization")
-        messages = [
-                    {
-                        "role": "system",
-                        "content": "You are a code expert. Think through the code debugging strategies step by step."},
-                    {
-                        "role": "user",
-                        "content": compilation_error_prompt
-                    }
-                    ]
-        if client == "openai":
-            client = OpenAI(api_key=openai_key)
-            completion = client.beta.chat.completions.parse(
-                model="gpt-4o-2024-08-06",
-                messages=messages,
-                response_format=ErrorReasoning
+        if llm == "openai":
+            # create a run with the generator assistant
+            run = client.beta.threads.runs.create_and_poll(
+                thread_id=thread_id,
+                assistant_id=assistant_id,
+                instructions=compilation_error_prompt,
+                response_format={
+                    'type': 'json_schema',
+                    'json_schema': 
+                        {
+                            "name":"whocares", 
+                            "schema": ErrorReasoning.model_json_schema()
+                        }
+                }
             )
-            final_code = completion.choices[0].message.parsed.final_code
+
+             # check run status
+            while run.status != 'completed':
+                time.sleep(2)  # Wait for 2 seconds before checking again
+                run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+            
+            # get message history
+            messages = client.beta.threads.messages.list(
+                thread_id=thread_id
+            )
+            final_code_obj = messages.data[0].content[0].text.value
+            final_code = json.loads(final_code_obj)['final_code']
         else:
-            output = client.chat(model=model_name, messages=messages)
+            compilation_error_prompt = f"""You were tasked with the task outlined in the following prompt: {prompt}. You returned the following optimized code: {optimized_code}. However, the code failed to compile with the following error message: {error_message}. Analyze the error message and explicitly identify the issue in the code that caused the compilation error. Then, consider if there's a need to use a different optimization strategy to compile successfully or if there are code changes which can fix this implementation strategy. Finally, update the code accordingly and ensure it compiles successfully. Ensure that the optimized code is both efficient and error-free and return it. """   
+        
+            logger.info("handle_compilation_error: promting for re-optimization")
+            messages = [
+                        {
+                            "role": "system",
+                            "content": "You are a code expert. Think through the code debugging strategies step by step."},
+                        {
+                            "role": "user",
+                            "content": compilation_error_prompt
+                        }
+                        ]
+            output = llm.chat(model=model_name, messages=messages)
             final_code = output["message"]["content"]
 
         # Remove code block delimiters
@@ -145,47 +200,4 @@ def handle_compilation_error(client, model_name, filename):
         destination_path = f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}"
         with open(destination_path+"/optimized_"+filename, "w") as file:
             file.write(final_code)
-
-def handle_logic_error(client, model_name, filename):
-    with open(f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/optimized_{filename}", "r") as file:
-        optimized_code = file.read()
-
-    with open(f"{USER_PREFIX}/src/runtime_logs/regression_test_log.txt", "r") as file:
-        output_differences = file.read()
-    
-    class ErrorReasoning(BaseModel):
-        analysis: str
-        final_code: str
-        
-    #just prompting it to give output difference everytime
-    logic_error_prompt = f"""You were tasked with the task outlined in the following prompt: {prompt}. You returned the following optimized code: {optimized_code}. However, the code failed to produce the same outputs as the original source code. Here are the output differences : {output_differences}. Analyze the source code and the optimized code and explicitly identify the potential reasons that caused the logic error. Then, consider if there's a need to use a different optimization strategy to match the outputs or if there are code changes which can fix this implementation strategy. Finally, update the code accordingly and ensure it will match the source code's outputs for any input. Ensure that the optimized code is both efficient and error-free and return it. """
-    
-    messages = [
-                {
-                    "role": "system",
-                    "content": "You are a code expert. Think through the code debugging strategies step by step."},
-                {
-                    "role": "user",
-                    "content": logic_error_prompt
-                }
-                ]
-    if client == "openai":
-        client = OpenAI(api_key=openai_key)
-        completion = client.beta.chat.completions.parse(
-            model="gpt-4o-2024-08-06",
-            messages=messages,
-            response_format=ErrorReasoning
-        )
-        final_code = completion.choices[0].message.parsed.final_code
-    else:
-        output = client.chat(model=model_name, messages=messages)
-        final_code = output["message"]["content"]
-
-    # Remove code block delimiters
-        final_code = final_code.replace("```cpp", "")
-        final_code = final_code.replace("```", "")
-
-    destination_path = f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}"
-    with open(destination_path+"/optimized_"+filename, "w") as file:
-        file.write(final_code)
 
