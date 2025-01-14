@@ -64,15 +64,17 @@ class Benchmark():
             
             #Remove empty strings for CPU, GPU, DRAM and convert remaining numbers to floats
             energy_data = [float(num) for num in energy_data if num]
-            logger.info(energy_data)
             benchmark_data.append((benchmark_name, *energy_data))
 
         #Find average energy usage and average runtime
         avg_energy = 0
         avg_runtime = 0
         for data in benchmark_data:
-            avg_energy += data[1]
-            avg_runtime += data[2]
+            if data[1] < 0 or data[2] < 0:
+                benchmark_data.remove(data)
+            else:
+                avg_energy += data[1]
+                avg_runtime += data[2]
 
         avg_energy /= len(benchmark_data)
         avg_runtime /= len(benchmark_data)

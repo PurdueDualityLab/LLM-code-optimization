@@ -72,7 +72,7 @@ def print_benchmark_info(benchmark_info):
     logger.info("Lowest Average Energy: Average Energy: {}, Average Runtime: {}".format(benchmark_info["lowest_avg_energy"]["avg_energy"], benchmark_info["lowest_avg_energy"]["avg_runtime"]))
     logger.info("Current: Average Energy: {}, Average Runtime: {}".format(benchmark_info["current"]["avg_energy"], benchmark_info["current"]["avg_runtime"]))
 
-def get_evaluator_feedback(llm, model_name, filename, optim_iter, client, assistant_id, thread_id):
+def get_evaluator_feedback(llm, model_name, filename, optim_iter, client, assistant_id):
 
     language = filename.split(".")[-1]
 
@@ -110,4 +110,4 @@ def get_evaluator_feedback(llm, model_name, filename, optim_iter, client, assist
     print_benchmark_info(benchmark_info)
 
     #run evaluator
-    evaluator_llm(llm, model_name, benchmark_info, client, assistant_id, thread_id)
+    evaluator_llm(llm, model_name, benchmark_info, client, assistant_id)

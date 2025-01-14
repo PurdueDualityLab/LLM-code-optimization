@@ -46,8 +46,8 @@ def master_script(filename, client, model_name):
     shutil.copyfile(f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/{filename}", f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/{filename.split('.')[0]}.compiled.{'.'.join(filename.split('.')[1:])}")
     
     #create LLM agent
-    generator_client, generator_assistant_id, generator_thread_id = create_generator_assistant()
-    evaluator_client, evaluator_assistant_id, evaluator_thread_id = create_evaluator_assistant()
+    generator_client, generator_assistant_id = create_generator_assistant()
+    evaluator_client, evaluator_assistant_id = create_evaluator_assistant()
     # keep track of errors
     regression_test_result = -3
     compilation_errors, num_success_iteration = 0, 0
@@ -59,10 +59,10 @@ def master_script(filename, client, model_name):
         # reoptimize latest working opimized file if logic/compile error
         if reoptimize_lastly_flag == 0:
             logger.info(f"Optimizing {filename}, iteration {num_success_iteration}")
-            llm_optimize(client, model_name, filename, num_success_iteration, generator_client, generator_assistant_id, generator_thread_id)
+            generator_thread_id = llm_optimize(client, model_name, filename, num_success_iteration, generator_client, generator_assistant_id)
         else:
             logger.info("re-optimizing from latest working optimization")
-            llm_optimize(client, model_name, f"{filename.split('.')[0]}.compiled.{'.'.join(filename.split('.')[1:])}", num_success_iteration, generator_client, generator_assistant_id, generator_thread_id)
+            generator_thread_id = llm_optimize(client, model_name, f"{filename.split('.')[0]}.compiled.{'.'.join(filename.split('.')[1:])}", num_success_iteration, generator_client, generator_assistant_id)
             reoptimize_lastly_flag = 0
         
         # regression test step
@@ -85,7 +85,6 @@ def master_script(filename, client, model_name):
             occurence_of_compilation_error = i
             if compilation_errors == 3:
                 logger.error("Could not compile optimized file after 3 attempts, will re-optimize from lastest working optimized file")
-                logger.info(f"{filename.split('.')[0]}.compiled.{'.'.join(filename.split('.')[1:])}")
                 reoptimize_lastly_flag = 1
                 compilation_errors = 0
                 continue
@@ -104,7 +103,7 @@ def master_script(filename, client, model_name):
         # success
         if regression_test_result == 1:
             logger.info("Regression test success, getting evaluator feedback")
-            get_evaluator_feedback(client, model_name, filename, num_success_iteration, evaluator_client, evaluator_assistant_id, evaluator_thread_id)
+            get_evaluator_feedback(client, model_name, filename, num_success_iteration, evaluator_client, evaluator_assistant_id)
             logger.info("Got evaluator feedback")
             num_success_iteration += 1
 
@@ -118,6 +117,28 @@ def master_script(filename, client, model_name):
                 logger.info("Optimized 5 times successfully, exiting script")
                 break
         
+def cleanup(benchmark):
+    # Remove txt log file under runtime_logs
+    directory = f"{USER_PREFIX}/src/runtime_logs"
+    try:
+        for filename in os.listdir(directory):
+            if filename.endswith(".txt"):
+                file_path = os.path.join(directory, filename)
+                os.remove(file_path)
+                logger.info(f"{file_path} has been removed successfully.")
+    except Exception as e:
+        logger.error(f"An error occurred while trying to remove the files: {e}")
+
+    directory = f"{USER_PREFIX}/benchmark_c++/{benchmark.split('.')[0]}"
+    try:
+        for filename in os.listdir(directory):
+            if filename != "Makefile" and filename != benchmark:
+                file_path = os.path.join(directory, filename)
+                os.remove(file_path)
+                logger.info(f"{file_path} has been removed successfully.")
+    except Exception as e:
+        logger.error(f"An error occurred while trying to remove the files: {e}")
+
 if __name__ == "__main__":
     
     #Check if requested benchmark is valid
@@ -145,7 +166,9 @@ if __name__ == "__main__":
             sys.exit(1)
         else:
             client = Client(host="http://localhost:11434")
-            
+    
+    cleanup(benchmark)         
+   
     #run benchmark
     master_script(benchmark, client, model_name)
 
@@ -159,23 +182,4 @@ if __name__ == "__main__":
     with open(f"{USER_PREFIX}/src/runtime_logs/results/result_file.txt", "w+") as file:
         file.write(str(dict_str))
 
-    # Remove txt log file under runtime_logs
-    directory = f"{USER_PREFIX}/src/runtime_logs"
-    try:
-        for filename in os.listdir(directory):
-            if filename.endswith(".txt"):
-                file_path = os.path.join(directory, filename)
-                os.remove(file_path)
-                logger.info(f"{file_path} has been removed successfully.")
-    except Exception as e:
-        logger.error(f"An error occurred while trying to remove the files: {e}")
-
-    directory = f"{USER_PREFIX}/benchmark_c++/{benchmark.split('.')[0]}"
-    try:
-        for filename in os.listdir(directory):
-            if filename != "Makefile" and filename != benchmark:
-                file_path = os.path.join(directory, filename)
-                os.remove(file_path)
-                logger.info(f"{file_path} has been removed successfully.")
-    except Exception as e:
-        logger.error(f"An error occurred while trying to remove the files: {e}")
+    cleanup(benchmark)

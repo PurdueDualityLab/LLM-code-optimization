@@ -18,15 +18,11 @@ def create_evaluator_assistant():
             instructions="You are a code expert. Think through the code optimizations strategies possible step by step",
             model="gpt-4o",
         )
-        
-    # create a thread
-    thread = client.beta.threads.create()
 
     assistant_id = assistant.id
-    thread_id = thread.id
-    return client, assistant_id, thread_id
+    return client, assistant_id
 
-def evaluator_llm(llm, model_name, benchmark_info, client, assistant_id, thread_id):
+def evaluator_llm(llm, model_name, benchmark_info, client, assistant_id):
 
     #extract original
     original_source_code = benchmark_info["original"]["source_code"]
@@ -94,9 +90,12 @@ def evaluator_llm(llm, model_name, benchmark_info, client, assistant_id, thread_
     """
 
     if llm == "openai":
+        # create a thread
+        thread = client.beta.threads.create()
+
         # create a run
         run = client.beta.threads.runs.create_and_poll(
-            thread_id=thread_id,
+            thread_id=thread.id,
             assistant_id=assistant_id,
             instructions=prompt,
         )
@@ -104,14 +103,14 @@ def evaluator_llm(llm, model_name, benchmark_info, client, assistant_id, thread_
         # check run status
         while run.status != 'completed':
             time.sleep(2)  # Wait for 2 seconds before checking again
-            run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+            run = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
         
         # get message history
         messages = client.beta.threads.messages.list(
-            thread_id=thread_id
+            thread_id=thread.id
         )
         evaluator_feedback = messages.data[0].content[0].text.value
-        logger.info(f"evaluator_feedback: {evaluator_feedback}")
+        logger.info(f"Evaluator messages: {messages}")
     else:
         output = llm.chat(model=model_name, messages=messages)
         evaluator_feedback = output["message"]["content"]

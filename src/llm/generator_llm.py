@@ -24,15 +24,11 @@ def create_generator_assistant():
             instructions="You are a code expert. Think through the code optimizations strategies possible step by step and generate the optimized code",
             model="gpt-4o",
         )
-        
-    # create a thread
-    thread = client.beta.threads.create()
 
     assistant_id = assistant.id
-    thread_id = thread.id
-    return client, assistant_id, thread_id
+    return client, assistant_id
 
-def llm_optimize(llm, model_name, filename, optim_iter, client, assistant_id, thread_id):
+def llm_optimize(llm, model_name, filename, optim_iter, client, assistant_id):
 
     # get original code
     source_path = f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/{filename}"
@@ -59,7 +55,7 @@ def llm_optimize(llm, model_name, filename, optim_iter, client, assistant_id, th
         selected_strategy: str
         final_code: str
 
-    #checking for evaluator feedback
+    # checking for evaluator feedback
     # Construct the absolute path to evaluator_feedback.txt
     feedback_file_path = os.path.abspath(f"{USER_PREFIX}/src/runtime_logs/evaluator_feedback.txt")
 
@@ -67,23 +63,25 @@ def llm_optimize(llm, model_name, filename, optim_iter, client, assistant_id, th
         with open(feedback_file_path, 'r') as file:
             evaluator_feedback = file.read()
             evaluator_feedback = "Here's some suggestion on how you should optimize the code from the evaluator, keep these in mind when optimizing code\n" + evaluator_feedback
-            logger.info("llm_optimize: got evaluator feedback")
+            logger.info("llm_optimize: evaluator feedback added to the generator prompt")
 
     else:
         evaluator_feedback = ""
         logger.info("llm_optimize: First optimization, no evaluator feedback yet")
 
     # add code content to prompt
-    optimize_prompt = prompt + f" {code_content}" + f" {evaluator_feedback}"
+    optimize_prompt = prompt + f"\n Code to optimize: {code_content}" + f"\n {evaluator_feedback}"
 
     with open(f"{USER_PREFIX}/src/runtime_logs/generator_prompt_log.txt", "w") as f:
         f.write(optimize_prompt)
     
     logger.info(f"llm_optimize: Generator LLM Optimizing ....")
     if llm == "openai":
+        # create a thread
+        thread = client.beta.threads.create()
         # create a run
         run = client.beta.threads.runs.create_and_poll(
-            thread_id=thread_id,
+            thread_id=thread.id,
             assistant_id=assistant_id,
             instructions=optimize_prompt,
             response_format={
@@ -99,12 +97,13 @@ def llm_optimize(llm, model_name, filename, optim_iter, client, assistant_id, th
         # check run status
         while run.status != 'completed':
             time.sleep(2)  # Wait for 2 seconds before checking again
-            run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+            run = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
         
         # get message history
         messages = client.beta.threads.messages.list(
-            thread_id=thread_id
+            thread_id=thread.id
         )
+        logger.info(f"Generator messages: {messages}")
         final_code_obj = messages.data[0].content[0].text.value
         final_code = json.loads(final_code_obj)['final_code']
     else:
@@ -134,7 +133,7 @@ def llm_optimize(llm, model_name, filename, optim_iter, client, assistant_id, th
     with open(destination_path, "w") as file:
         file.write(final_code)
     # Success code
-    return 0    
+    return thread.id  
 
 def handle_compilation_error(llm, model_name, filename, client, assistant_id, thread_id):
     with open(f"{USER_PREFIX}/benchmark_c++/{filename.split('.')[0]}/optimized_{filename}", "r") as file:
@@ -176,6 +175,7 @@ def handle_compilation_error(llm, model_name, filename, client, assistant_id, th
             )
             final_code_obj = messages.data[0].content[0].text.value
             final_code = json.loads(final_code_obj)['final_code']
+            logger.info(f"Generator error fixing messages: {messages}")
         else:
             compilation_error_prompt = f"""You were tasked with the task outlined in the following prompt: {prompt}. You returned the following optimized code: {optimized_code}. However, the code failed to compile with the following error message: {error_message}. Analyze the error message and explicitly identify the issue in the code that caused the compilation error. Then, consider if there's a need to use a different optimization strategy to compile successfully or if there are code changes which can fix this implementation strategy. Finally, update the code accordingly and ensure it compiles successfully. Ensure that the optimized code is both efficient and error-free and return it. """   
         
