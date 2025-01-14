@@ -68,6 +68,7 @@ def master_script(filename, client, model_name):
         # regression test step
         logger.info(f"Running regression test on optimized_{filename}")
         regression_test_result = regression_test(f"optimized_{filename}")
+        logger.info(f"Regression test on optimized_{filename} done.")
         i += 1
         
         # Log compilation fixed errors
@@ -179,7 +180,7 @@ if __name__ == "__main__":
         contents = pickle.load(file)
     
     dict_str = json.dumps(contents, indent=4)
-    with open(f"{USER_PREFIX}/src/runtime_logs/results/result_file.txt", "w+") as file:
+    with open(f"{USER_PREFIX}/src/runtime_logs/results/result_file_{benchmark}.txt", "w+") as file:
         file.write(str(dict_str))
 
     cleanup(benchmark)

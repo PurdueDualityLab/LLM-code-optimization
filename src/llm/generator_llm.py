@@ -21,7 +21,7 @@ def create_generator_assistant():
     client = OpenAI(api_key=openai_key)
     assistant = client.beta.assistants.create(
             name="Genrator",
-            instructions="You are a code expert. Think through the code optimizations strategies possible step by step and generate the optimized code",
+            instructions=prompt,
             model="gpt-4o",
         )
 
@@ -70,7 +70,7 @@ def llm_optimize(llm, model_name, filename, optim_iter, client, assistant_id):
         logger.info("llm_optimize: First optimization, no evaluator feedback yet")
 
     # add code content to prompt
-    optimize_prompt = prompt + f"\n Code to optimize: {code_content}" + f"\n {evaluator_feedback}"
+    optimize_prompt = f"Here is the code to optimize, follow the instruction to provide the optimized code WHILE MAINTAINING IT'S FUNCTIONAL CORRECTNESS:\n{code_content}" + f"\n {evaluator_feedback}"
 
     with open(f"{USER_PREFIX}/src/runtime_logs/generator_prompt_log.txt", "w") as f:
         f.write(optimize_prompt)
@@ -114,7 +114,7 @@ def llm_optimize(llm, model_name, filename, optim_iter, client, assistant_id):
                 },
                 {
                     "role": "user",
-                    "content": optimize_prompt
+                    "content": prompt + optimize_prompt
                 }
         ]
         output = llm.chat(model=model_name, messages=messages)

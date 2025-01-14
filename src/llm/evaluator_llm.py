@@ -11,33 +11,7 @@ openai_key = os.getenv('API_KEY')
 
 logger = Logger("logs", sys.argv[2]).logger
 
-def create_evaluator_assistant():
-    client = OpenAI(api_key=openai_key)
-    assistant = client.beta.assistants.create(
-            name="Evaluator",
-            instructions="You are a code expert. Think through the code optimizations strategies possible step by step",
-            model="gpt-4o",
-        )
-
-    assistant_id = assistant.id
-    return client, assistant_id
-
-def evaluator_llm(llm, model_name, benchmark_info, client, assistant_id):
-
-    #extract original
-    original_source_code = benchmark_info["original"]["source_code"]
-    original_avg_energy = benchmark_info["original"]["avg_energy"]
-    original_avg_runtime = benchmark_info["original"]["avg_runtime"]
-
-    lowest_soruce_code = benchmark_info["lowest_avg_energy"]["source_code"]
-    lowest_avg_energy = benchmark_info["lowest_avg_energy"]["avg_energy"]
-    lowest_avg_runtime = benchmark_info["lowest_avg_energy"]["avg_runtime"]
-
-    current_source_code = benchmark_info["current"]["source_code"]  
-    current_avg_energy = benchmark_info["current"]["avg_energy"]
-    current_avg_runtime = benchmark_info["current"]["avg_runtime"]
-
-    prompt = f"""
+assistant_prompt = f"""
     You are a code optimization and energy efficiency expert. Evaluate the following current code snippet in terms of time complexity, space complexity, energy usage, and performance, considering both the original and optimized code. Please provide a comprehensive analysis of the code's efficiency, energy consumption, and suggest further optimizations. Your feedback should include:
 
     1. **Current Code Behavior**:
@@ -64,6 +38,36 @@ def evaluator_llm(llm, model_name, benchmark_info, client, assistant_id):
     6. **Energy-Specific Metrics and Best Practices**:
     - Suggest best practices and coding patterns for energy-efficient code, particularly focusing on areas where the current code deviates from these principles.
     - Point out potential areas where energy could be saved, such as reducing CPU-bound tasks, optimizing memory usage, or minimizing I/O operations.
+    """
+
+def create_evaluator_assistant():
+    client = OpenAI(api_key=openai_key)
+    assistant = client.beta.assistants.create(
+            name="Evaluator",
+            instructions=assistant_prompt,
+            model="gpt-4o",
+        )
+
+    assistant_id = assistant.id
+    return client, assistant_id
+
+def evaluator_llm(llm, model_name, benchmark_info, client, assistant_id):
+
+    #extract original
+    original_source_code = benchmark_info["original"]["source_code"]
+    original_avg_energy = benchmark_info["original"]["avg_energy"]
+    original_avg_runtime = benchmark_info["original"]["avg_runtime"]
+
+    lowest_soruce_code = benchmark_info["lowest_avg_energy"]["source_code"]
+    lowest_avg_energy = benchmark_info["lowest_avg_energy"]["avg_energy"]
+    lowest_avg_runtime = benchmark_info["lowest_avg_energy"]["avg_runtime"]
+
+    current_source_code = benchmark_info["current"]["source_code"]  
+    current_avg_energy = benchmark_info["current"]["avg_energy"]
+    current_avg_runtime = benchmark_info["current"]["avg_runtime"]
+
+    prompt = f"""
+    Based on the provided instruction, evaluate the following current code snippet in terms of time complexity, space complexity, energy usage, and performance, considering both the original and optimized code. Please provide a comprehensive analysis of the code's efficiency, energy consumption, and suggest further optimizations.
 
     Here is the original code snippet:
     ```
@@ -86,7 +90,7 @@ def evaluator_llm(llm, model_name, benchmark_info, client, assistant_id):
     Average energy usage: {current_avg_energy}
     Average run time: {current_avg_runtime}
 
-    Please respond in natural language (English) with actionable suggestions for improving the code's performance in terms of energy usage. Provide only the best code with the lowest energy usage.
+    Please respond in natural language (English) with actionable suggestions for improving the current code's performance in terms of energy usage. Provide only the best code with the lowest energy usage.
     """
 
     if llm == "openai":

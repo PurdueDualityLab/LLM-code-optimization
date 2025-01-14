@@ -43,7 +43,7 @@ def compile_program(output_log, optimized):
 def run_program(exec_path, output_file, optimized):
     # Run the make command and capture the output in a variable
     if not optimized:
-        result = subprocess.run(["make", "run"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        result = subprocess.run(["make", "run"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
     else:
         result = subprocess.run(["make", "run_optimized"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
     

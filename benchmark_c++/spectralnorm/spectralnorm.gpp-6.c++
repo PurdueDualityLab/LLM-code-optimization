@@ -81,13 +81,10 @@ double spectral_game(int N) {
 
     #pragma omp parallel default(shared) num_threads(GetThreadCount())
     {
-        // this block will be executed by NUM_THREADS
-        // variable declared in this block is private for each thread
         int threadid = omp_get_thread_num();
         int threadcount = omp_get_num_threads();
         int chunk = N / threadcount;
 
-        // calculate each thread's working range [r1 .. r2) => static schedule
         int begin = threadid * chunk;
         int end = (threadid < (threadcount -1)) ? (begin + chunk) : N;
 
