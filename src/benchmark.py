@@ -1,94 +1,81 @@
-import subprocess
-import os
-import pickle
-from dotenv import load_dotenv
-from utils import Logger
-import sys
+from abc import ABC, abstractmethod
+from status import Status
 
-load_dotenv()
-USER_PREFIX = os.getenv('USER_PREFIX')
+class Benchmark:
+    def __init__(self, program):
+        self.program = program
+        self.compilation_error = None
+        self.energy_data = None
+        self.original_code = self.set_original_code()
+        self.optimization_iteration = 0
+        self.set_original_energy()
 
-logger = Logger("logs", sys.argv[2]).logger
+    @abstractmethod
+    def set_original_code(self):
+        pass
 
+    @abstractmethod
+    def get_original_code(self):
+        return self.original_code
+    
+    @abstractmethod
+    def set_optimization_iteration(self, num):
+        self.optimization_iteration = num + 1
+    
+    @abstractmethod
+    def get_optimization_iteration(self):
+        return self.optimization_iteration
+    
+    @abstractmethod
+    def set_original_energy(self):
+        pass
+    
+    @abstractmethod
+    def pre_process(self):
+        """
+        Pre-process the data or setup required before benchmarking.
+        """
+        pass
 
-#define raletive path to RAPL
-rapl_main_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../RAPL/main'))
-root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+    @abstractmethod
+    def post_process(self, code):
+        """
+        Post-process the results or clean-up tasks after benchmarking.
+        """
+        pass
 
-class Benchmark():
-    def __init__(self, benchmark_language, benchmark_name, benchmark_data):
-        self.benchmark_language = benchmark_language
-        self.benchmark_name = benchmark_name
-        self.benchmark_data = benchmark_data
+    @abstractmethod
+    def compile(self):
+        """
+        Compile code or perform setup operations required for the benchmark.
+        """
+        pass
 
-    def run(self, optim_iter):
-        # First clear the contents of the energy data log file
-        logger.info(f"Benchmark.run: clearing content in {self.benchmark_language}.csv")
-        log_file_path = f"{USER_PREFIX}/src/runtime_logs/{self.benchmark_language}/{self.benchmark_language}.csv"
-        if os.path.exists(log_file_path):
-            file = open(log_file_path, "w+")
-            file.close()
+    def get_compilation_error(self):
+        return self.compilation_error
 
-        #run make measure using make file
-        #change current directory to benchmarks/folder to run make file
-        os.chdir(f"{USER_PREFIX}/benchmark_c++/{self.benchmark_name}")
-        current_dir = os.getcwd()
-        logger.info(f"Current directory: {current_dir}")
+    @abstractmethod
+    def run_tests(self):
+        """
+        Execute the main tests for benchmarking.
+        """
+        pass
 
-        #collect original data
-        if optim_iter == 0: 
-            try: 
-                result = subprocess.run(["make", "measure"], check=True, capture_output=True, text=True)
-                logger.info("Benchmark.run: make measure successfully\n")
-                return True
-            except subprocess.CalledProcessError as e:
-                logger.error(f"Benchmark.run: make measure failed: {e}\n")
-            return False
-        else:
-            # Measure the optimized code energy 
-            try: 
-                result = subprocess.run(["make", "measure_optimized"], check=True, capture_output=True, text=True)
-                logger.info("Benchmark.run: make measure successfully\n")
-                return True
-            except subprocess.CalledProcessError as e:
-                logger.error(f"Benchmark.run: make measure failed: {e}\n")
-                return False
+    @abstractmethod
+    def measure_energy(self, optimized_code):
+        """
+        Measure energy usage during benchmarking.
+        """
+        pass
 
-    def process_results(self, optim_iter, source_code_path) -> float:
-        energy_data_file = open(f"{USER_PREFIX}/src/runtime_logs/{self.benchmark_language}/{self.benchmark_language}.csv", "r")
-        benchmark_data = []
-        for line in energy_data_file:
-            parts = line.split(';')
-            benchmark_name = parts[0].strip()
-            energy_data = [vals.strip() for vals in parts[1].split(',')]
-            
-            #Remove empty strings for CPU, GPU, DRAM and convert remaining numbers to floats
-            energy_data = [float(num) for num in energy_data if num]
-            benchmark_data.append((benchmark_name, *energy_data))
+    def get_energy_data(self):
+        return self.energy_data
 
-        #Find average energy usage and average runtime
-        avg_energy = 0
-        avg_runtime = 0
-        for data in benchmark_data:
-            if data[1] < 0 or data[2] < 0:
-                benchmark_data.remove(data)
-            else:
-                avg_energy += data[1]
-                avg_runtime += data[2]
-
-        avg_energy /= len(benchmark_data)
-        avg_runtime /= len(benchmark_data)
-
-        #Append results to benchmark data dict
-        source_code_file = open(source_code_path, "r")
-        source_code = source_code_file.read()
-        self.benchmark_data[optim_iter] = (source_code, round(avg_energy, 3), round(avg_runtime, 3))
-
-        #Update PKL file with latest version of benchmark data dict
-        with open(f"{USER_PREFIX}/src/runtime_logs/{self.benchmark_language}/benchmark_data.pkl", "wb") as benchmark_data_pkl_file:
-            pickle.dump(self.benchmark_data, benchmark_data_pkl_file)
-
-        #Close all files
-        energy_data_file.close()
-        source_code_file.close()
-        benchmark_data_pkl_file.close()
+    def static_analysis(self, optimized_code):
+        if not self.compile():
+            return Status.COMPILATION_ERROR
+        if not self.run_tests():
+            return Status.RUNTIME_ERROR_OR_TEST_FAILED
+        if not self.measure_energy(optimized_code):
+            return Status.ALL_TEST_PASSED
+        return Status.PERFORMANCE_IMPROVED     
