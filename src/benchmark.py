@@ -4,8 +4,9 @@ from status import Status
 class Benchmark:
     def __init__(self, program):
         self.program = program
-        self.compilation_error = None
-        self.energy_data = None
+        self.compilation_error = ""
+        self.energy_data = {}
+        self.evaluator_feedback_data = {}
         self.original_code = self.set_original_code()
         self.optimization_iteration = 0
         self.set_original_energy()
@@ -20,7 +21,7 @@ class Benchmark:
     
     @abstractmethod
     def set_optimization_iteration(self, num):
-        self.optimization_iteration = num + 1
+        self.optimization_iteration = num
     
     @abstractmethod
     def get_optimization_iteration(self):
@@ -70,9 +71,12 @@ class Benchmark:
 
     def get_energy_data(self):
         return self.energy_data
+    
+    def get_evaluator_feedback_data(self):
+        return self.evaluator_feedback_data
 
     def static_analysis(self, optimized_code):
-        if not self.compile():
+        if not self.compile(optimized_code):
             return Status.COMPILATION_ERROR
         if not self.run_tests():
             return Status.RUNTIME_ERROR_OR_TEST_FAILED

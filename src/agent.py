@@ -47,7 +47,7 @@ class OpenAIAssistant:
 
         # Poll until the run is completed
         while run.status != 'completed':
-            time.sleep(3)  # Wait for 2 seconds before polling again
+            time.sleep(2)  # Wait for 2 seconds before retrieving again
             run = self.client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
 
         # Retrieve the message history

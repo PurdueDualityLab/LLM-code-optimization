@@ -1,11 +1,15 @@
 from dotenv import load_dotenv
-import os
 from pydantic import BaseModel
 import sys
 from utils import Logger
 import json
+import os
 
 logger = Logger("logs", sys.argv[2]).logger
+load_dotenv()
+USER_PREFIX = os.getenv('USER_PREFIX')
+with open(f"{USER_PREFIX}/src/llm/llm_prompts/generator_prompt.txt", "r") as file:
+    generator_prompt = file.read()
 
 def llm_optimize(code, llm_assistant, evaluator_feedback):
     class Strategy(BaseModel):
@@ -18,7 +22,7 @@ def llm_optimize(code, llm_assistant, evaluator_feedback):
         selected_strategy: str
         final_code: str
 
-    prompt = f"Here is the code to optimize, follow the instruction to provide the optimized code WHILE MAINTAINING IT'S FUNCTIONAL CORRECTNESS:\n{code}" + f"\n {evaluator_feedback}"
+    prompt = generator_prompt + f"Here is the code to optimize, follow the instruction to provide the optimized code WHILE MAINTAINING IT'S FUNCTIONAL CORRECTNESS:\n{code}" + f"\n {evaluator_feedback}"
     
     logger.info(f"llm_optimize: Generator LLM Optimizing ....")
     

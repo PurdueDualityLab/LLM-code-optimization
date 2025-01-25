@@ -14,10 +14,12 @@ class EnergyLanguageBenchmark(Benchmark):
     def __init__(self, program):
         self.program = program
         self.compilation_error = None
-        self.energy_data = None
+        self.energy_data = {}
+        self.evaluator_feedback_data = {}
         self.expect_test_output = None
-        self.original_code = self.set_original_code()
+        self.original_code = None
         self.optimization_iteration = 0
+        self.set_original_code()
         self.set_original_energy()
     
     def set_original_code(self):
@@ -26,7 +28,7 @@ class EnergyLanguageBenchmark(Benchmark):
             self.original_code = file.read()
 
     def get_original_code(self):
-        return super().get_original_code()
+        return self.original_code
     
     def set_optimization_iteration(self, num):
         return super().set_optimization_iteration(num)
@@ -36,6 +38,21 @@ class EnergyLanguageBenchmark(Benchmark):
     
     def set_original_energy(self):
         logger.info("Run benchmark on the original code")
+
+        # compile
+        # Needed for makefiles
+        os.chdir(f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0].split('_')[-1]}")  
+        try: 
+            result = subprocess.run(
+                ["make", "compile"], 
+                check=True,
+                capture_output=True,
+                text=True
+            )
+            self.compilation_error = result.stdout + result.stderr
+            logger.info(f"Original code compile successfully.\n")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Original code compile failed: {e}\n")
 
         self._run_rapl()
 
@@ -53,7 +70,12 @@ class EnergyLanguageBenchmark(Benchmark):
         code = code.replace("```", "")
         return code
 
-    def compile(self):
+    def compile(self, optimized_code):
+        logger.info(f"llm_optimize: : writing optimized code to benchmark_c++/{self.program.split('.')[0]}/optimized_{self.program}")
+        destination_path = f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0]}/optimized_{self.program}"
+        with open(destination_path, "w") as file:
+            file.write(optimized_code)
+
         # Needed for makefiles
         os.chdir(f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0].split('_')[-1]}")  
         try: 
@@ -63,11 +85,11 @@ class EnergyLanguageBenchmark(Benchmark):
                 capture_output=True,
                 text=True
             )
-            self.compilation_error = result.stdout + result.stderr
             logger.info(f"Compile successfully.\n")
             return True
         except subprocess.CalledProcessError as e:
-            logger.error(f"Compile failed: {e}\n")
+            self.compilation_error = e.stderr
+            logger.error(f"Compile failed: {self.compilation_error}\n")
             return False
 
     def get_compilation_error(self):
@@ -99,19 +121,22 @@ class EnergyLanguageBenchmark(Benchmark):
         self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(avg_energy, 3), round(avg_runtime, 3))
         
         # Find the required benchmark elements
-        energy_data = self._extract_content(self.energy_data)
-        self.energy_data = energy_data
+        self.evaluator_feedback_data = self._extract_content(self.energy_data)
         
         # Print the benchmark information
-        self._print_benchmark_info(energy_data)
+        self._print_benchmark_info(self.evaluator_feedback_data)
+
  
     def get_energy_data(self):
         return super().get_energy_data()
     
+    def get_evaluator_feedback_data(self):
+        return super().get_evaluator_feedback_data()
+    
     def static_analysis(self, optimized_code):
         return super().static_analysis(optimized_code)
 
-    def _run_program(optimized):
+    def _run_program(self, optimized):
         # Run the make command and capture the output in a variable
         if not optimized:
             result = subprocess.run(["make", "run"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
@@ -138,7 +163,6 @@ class EnergyLanguageBenchmark(Benchmark):
             logger.info("Outputs are the same.\n")
             return True
         else:
-            logger.error("Outputs are different.\n")
             logger.error(f"Original program output:\n{self.expect_test_output}\n")
             logger.error(f"Optimized program output:\n{optimized_output}\n\n")
             return False
@@ -161,7 +185,7 @@ class EnergyLanguageBenchmark(Benchmark):
 
         #run make measure using make file
         #change current directory to benchmarks/folder to run make file
-        os.chdir(f"{USER_PREFIX}/benchmark_c++/{self.program}")
+        os.chdir(f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0]}")
         current_dir = os.getcwd()
         logger.info(f"Current directory: {current_dir}")
 
@@ -258,15 +282,15 @@ class EnergyLanguageBenchmark(Benchmark):
 def get_valid_energy_language_programs():
     valid_programs = [
         "binarytrees.gpp-9.c++",
-        "chameneosredux.gpp-5.c++",
-        "fannkuchredux.gpp-5.c++",
-        "fasta.gpp-5.c++",
-        "knucleotide.gpp-3.c++",
-        "mandelbrot.gpp-6.c++",
-        "nbody.gpp-8.c++",
-        "pidigits.gpp-4.c++",
-        "regexredux.gpp-3.c++",
-        "revcomp.gpp-4.c++",
-        "spectralnorm.gpp-6.c++"
+        # "chameneosredux.gpp-5.c++",
+        # "fannkuchredux.gpp-5.c++",
+        # "fasta.gpp-5.c++",
+        # "knucleotide.gpp-3.c++",
+        # "mandelbrot.gpp-6.c++",
+        # "nbody.gpp-8.c++",
+        # "pidigits.gpp-4.c++",
+        # "regexredux.gpp-3.c++",
+        # "revcomp.gpp-4.c++",
+        # "spectralnorm.gpp-6.c++"
     ]
     return valid_programs

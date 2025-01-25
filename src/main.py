@@ -16,10 +16,12 @@ openai_key = os.getenv('API_KEY')
 logger = Logger("logs", sys.argv[2]).logger
 
 def parse_arguments():
-    parser = argparse.ArgumentParse(description="LLM-Energy-Optimization")
+    parser = argparse.ArgumentParser(description="LLM-Energy-Optimization")
     parser.add_argument("--benchmark", type=str, default="EnergyLanguage", choices=["EnergyLanguage", "PIE", "Datacenter", "Android"], help="dataset used for experiment")
-    parser.add_argument("--llm", type=str, default="gpt-4o", choices=["llama-3.1", "code llama"], help="llm used for inference")
+    parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "llama-3.1", "code llama"], help="llm used for inference")
     parser.add_argument("--self_optimization_step", type=int, default=5, help="number of LLM self-optimization step")
+    args = parser.parse_args()
+    return args
 
 def get_valid_programs(benchmark):
     if (benchmark == "EnergyLanguage"):
@@ -28,21 +30,12 @@ def get_valid_programs(benchmark):
 
 def master_script(benchmark, model, self_optimization_step):
     #create LLM agent
-    with open(f"{USER_PREFIX}/src/llm/llm_prompts/generator_prompt.txt", "r") as file:
-        generator_prompt = file.read()
 
-    with open(f"{USER_PREFIX}/src/llm/llm_prompts/evaluator_prompt.txt", "r") as file:
-        evaluator_prompt = file.read()
-
-    generator = OpenAIAssistant(api_key=openai_key, name="Generator", instructions=generator_prompt, model=model)
-    evaluator = OpenAIAssistant(api_key=openai_key, name="Evaluator", instructions=evaluator_prompt, model=model)
+    generator = OpenAIAssistant(api_key=openai_key, name="Generator", instructions="You are a code expert. Think through the code optimizations strategies possible step by step.", model=model)
+    evaluator = OpenAIAssistant(api_key=openai_key, name="Evaluator", instructions="You are a code expert. Think through the code optimizations strategies possible step by step.", model=model)
         
     for program in get_valid_programs(benchmark):     
-        if (benchmark == "EnergyLanguage"):
-            benchmark_obj = EnergyLanguageBenchmark(program)
-        else:
-            logger.error("Invalid benchmark.")
-            return
+        benchmark_obj = EnergyLanguageBenchmark(program) if benchmark == "EnergyLanguage" else None
         
         compilation_errors = 0
         reoptimize_lastly_flag = 0
@@ -67,7 +60,7 @@ def master_script(benchmark, model, self_optimization_step):
             
             # code post_process
             last_optimized_code = benchmark_obj.post_process(last_optimized_code)
-            
+
             # static analysis
             status = benchmark_obj.static_analysis(last_optimized_code)
             
@@ -90,8 +83,8 @@ def master_script(benchmark, model, self_optimization_step):
             else:
                 # getting feedback from the evaluator
                 logger.info("Regression test success, getting evaluator feedback")
-                energy_data = benchmark_obj.get_energy_data(program)
-                evaluator_feedback = evaluator_llm(energy_data=energy_data, llm_assistant=evaluator)
+                evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
+                evaluator_feedback = evaluator_llm(evaluator_feedback_data=evaluator_feedback_data, llm_assistant=evaluator)
                 logger.info("Got evaluator feedback")
                 num_success_iteration += 1
                 benchmark_obj.set_optimization_iteration(num_success_iteration)
