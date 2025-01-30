@@ -5,6 +5,7 @@ import subprocess
 import sys
 from utils import Logger
 import re
+from abstract_syntax_trees.cpp_ast import CPPAST
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
@@ -62,7 +63,9 @@ class EnergyLanguageBenchmark(Benchmark):
         self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_runtime, 3))
     
     def pre_process(self):
-        pass
+        ast = CPPAST("cpp")
+        source_code_path = f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0]}/{self.program}"
+        return ast.create_ast(source_code_path)
 
     def post_process(self, code):
         # Remove code block delimiters
@@ -169,6 +172,8 @@ class EnergyLanguageBenchmark(Benchmark):
             
     def _process_output_content(self, content):
         """Remove all spaces, newline characters, and tabs for cleaner comparison."""
+        if content is None or not isinstance(content, str):
+           return content
         # If content is a list of lines, join it into a single string
         if isinstance(content, list):
             content = ''.join(content)

@@ -2,3 +2,4 @@
 logs/
 src/__pycache__/
 src/llm/__pycache__/
+src/abstract_syntax_trees/__pycache__/

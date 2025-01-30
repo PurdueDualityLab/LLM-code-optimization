@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <apr_pools.h>
 
-
 const size_t    LINE_SIZE = 64;
 
 class Apr
@@ -76,12 +75,11 @@ Node *make(int d, NodePool &store)
 int main(int argc, char *argv[]) 
 {
     Apr apr;
-    int min_depth = 4;
+    int min_depth = 6;
     int max_depth = std::max(min_depth+2,
                              (argc == 2 ? atoi(argv[1]) : 10));
     int stretch_depth = max_depth+1;
 
-    // Alloc then dealloc stretchdepth tree
     {
         NodePool store;
         Node *c = make(stretch_depth, store);
@@ -92,7 +90,6 @@ int main(int argc, char *argv[])
     NodePool long_lived_store;
     Node *long_lived_tree = make(max_depth, long_lived_store);
 
-    // buffer to store output of each thread
     char *outputstr = (char*)malloc(LINE_SIZE * (max_depth +1) * sizeof(char));
 
     #pragma omp parallel for 
@@ -101,7 +98,6 @@ int main(int argc, char *argv[])
         int iterations = 1 << (max_depth - d + min_depth);
         int c = 0;
 
-        // Create a memory pool for this thread to use.
         NodePool store;
 
         for (int i = 1; i <= iterations; ++i) 
@@ -111,12 +107,10 @@ int main(int argc, char *argv[])
             store.clear();
         }
 
-        // each thread write to separate location
         sprintf(outputstr + LINE_SIZE * d, "%d\t trees of depth %d\t check: %d\n",
            iterations, d, c);
     }
 
-    // print all results
     for (int d = min_depth; d <= max_depth; d += 2) 
         printf("%s", outputstr + (d * LINE_SIZE) );
     free(outputstr);

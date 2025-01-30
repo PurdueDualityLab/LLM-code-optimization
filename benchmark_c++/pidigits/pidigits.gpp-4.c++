@@ -53,10 +53,8 @@ int main(int, char** argv) {
                 ++n_digits;
             }
         }
-
-        // Pad digits with extra spaces if TOTAL_DIGITS was not a
-        // multiple of 10.
+        
         for (; i < 10; ++i) std::cout << ' ';
-        std::cout << "\t:" << n_digits << '\n';
+        std::cout << "\t" << n_digits << '\n';
     }
 }
