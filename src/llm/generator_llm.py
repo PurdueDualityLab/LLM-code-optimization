@@ -13,11 +13,13 @@ with open(f"{USER_PREFIX}/src/llm/llm_prompts/generator_prompt.txt", "r") as fil
 
 def llm_optimize(code, llm_assistant, evaluator_feedback):
     class Strategy(BaseModel):
+        Strategy: str
         Pros: str
         Cons: str
 
     class OptimizationReasoning(BaseModel):
         analysis: str
+        optimization_opportunities: str
         strategies: list[Strategy] 
         selected_strategy: str
         final_code: str
@@ -26,11 +28,18 @@ def llm_optimize(code, llm_assistant, evaluator_feedback):
     
     logger.info(f"llm_optimize: Generator LLM Optimizing ....")
     
-    thread_id = llm_assistant.create_thread()
-    llm_output = llm_assistant.create_run(user_input=prompt, thread_id = thread_id, output_format=OptimizationReasoning)
+    llm_assistant.add_to_memory("user", prompt)
+    llm_assistant.generate_response(OptimizationReasoning)
 
+    response = llm_assistant.get_last_msg()
+    logger.info(response)
+    
     try:
-        final_code = json.loads(llm_output)['final_code']
+        if (llm_assistant.is_openai_model()):
+            content_dict = json.loads(response["content"])
+            final_code = content_dict["final_code"]
+        else:
+            final_code = OptimizationReasoning.model_validate_json(response["content"]).final_code
     except json.JSONDecodeError as e:
         logger.error(f"Failed to decode JSON: {e}")
         return
@@ -51,11 +60,16 @@ def handle_compilation_error(error_message, llm_assistant):
         Then, consider if there's a need to use a different optimization strategy to compile successfully or if there are code changes which can fix this implementation strategy.
         Finally, update the code accordingly and ensure it compiles successfully. Ensure that the optimized code is both efficient and error-free and return it. """   
         
-    thread_id = llm_assistant.get_current_thread_id()
-    llm_output = llm_assistant.create_run(user_input=compilation_error_prompt, thread_id = thread_id, output_format=ErrorReasoning)
+    llm_assistant.add_to_memory("user", compilation_error_prompt)
+    llm_assistant.generate_response(ErrorReasoning)
+    response = llm_assistant.get_last_msg()
 
     try:
-        final_code = json.loads(llm_output)['final_code']
+        if (llm_assistant.is_openai_model()):
+            content_dict = json.loads(response["content"])
+            final_code = content_dict["final_code"]
+        else:
+            final_code = ErrorReasoning.model_validate_json(response["content"])["final_code"]
     except json.JSONDecodeError as e:
         logger.error(f"Failed to decode JSON: {e}")
         return

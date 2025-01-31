@@ -1,106 +1,99 @@
 You are tasked with optimizing the following C++ code to improve its energy efficiency. This involves reducing CPU cycles, minimizing memory access, and optimizing I/O operations. Please follow these steps and guidelines:
 
 Task Instructions:
-
-                - Analyze the code: Examine the provided C++ code in detail.
-                - Identify optimization opportunities, determine where you can:
-                    - Reduce or eliminate nested loops to lower computational overhead.
-                    - Select more efficient data structures to minimize memory access and improve performance.
-                    - Apply dynamic programming or memoization to avoid redundant calculations and reduce CPU usage where applicable.
-                    - Implement specialized algorithms if they can significantly improve performance and reduce energy consumption.
-                    - Optimize I/O operations to reduce their impact on overall performance.
-                - Suggest optimization strategies: Propose multiple methods to improve energy efficiency. For each method:
-                    - Provide a detailed explanation of how the optimization reduces energy usage.
-                    - Discuss the trade-offs in terms of complexity, maintainability, and performance gains.
-                - Choose the most effective optimization: After evaluating each proposed strategy, select the approach that yields the best balance of energy efficiency, performance, readability, and maintainability.
-                - Implement the chosen optimization: Rewrite the code with the chosen optimization strategies, ensuring:
-                    - The optimized code produces the same output as the original code for all valid inputs.
-                    - Code remains clear and understandable.
-                - Provide a detailed explanation: For each change you make, explain:
-                    - Why this change optimizes energy efficiency.
-                    - The improvement in performance and energy usage expected.
-                    - How this change preserves the correctness and format of the output.
-                - Output Requirements:
-                    - Begin with a step-by-step analysis of the original code and identify inefficiencies.
-                    - Outline each proposed optimization strategy in detail, including the reasoning behind it and its potential impact on energy usage.
-                    - Implement the best optimization strategies directly into the code.
-                    - Ensure the final code is energy-efficient, correct in terms of functionality, and maintains same output formatting.
+- Analyze the code: Examine the provided C++ code in detail.
+- Identify optimization opportunities, determine where you can:
+    - Reduce or eliminate nested loops to lower computational overhead.
+    - Select more efficient data structures to minimize memory access and improve performance.
+    - Apply dynamic programming or memoization to avoid redundant calculations and reduce CPU usage where applicable.
+    - Implement specialized algorithms if they can significantly improve performance and reduce energy consumption.
+    - Optimize I/O operations to reduce their impact on overall performance.
+- Suggest optimization strategies: Propose multiple methods to improve energy efficiency. For each method:
+    - Provide a detailed explanation of how the optimization reduces energy usage.
+    - Discuss the trade-offs in terms of complexity, maintainability, and performance gains.
+- Choose the most effective optimization: After evaluating each proposed strategy, select the approach that yields the best balance of energy efficiency, performance, readability, and maintainability.
+- Implement the chosen optimization: Rewrite the code with the chosen optimization strategies, ensuring:
+    - The optimized code produces the same output as the original code for all valid inputs.
+- Output Requirements:
+    - Begin with a step-by-step analysis of the original code and identify inefficiencies.
+    - Outline each proposed optimization strategy in detail, including the reasoning behind it and its potential impact on energy usage.
+    - Implement the best optimization strategies directly into the code.
+    - Ensure the final code is energy-efficient, correct in terms of functionality, and maintains same output formatting.
                                 
-                Here is an example of desirable response:
-                Example of cpp code to be optimized:
-                ```
-                #include <iostream>
-                #include <vector>
+Here is an example of desirable response:
+Example of cpp code to be optimized:
+```
+#include <iostream>
+#include <vector>
 
-                using namespace std;
+using namespace std;
 
-                // Inefficient code for finding duplicates in a vector of user IDs
-                vector<int> findDuplicates(const vector<int>& userIds) {
-                    vector<int> duplicates;
-                    for (size_t i = 0; i < userIds.size(); ++i) {
-                        for (size_t j = i + 1; j < userIds.size(); ++j) {
-                            if (userIds[i] == userIds[j]) {
-                                duplicates.push_back(userIds[i]);
-                            }
-                        }
-                    }
-                    return duplicates;
-                }
+// Inefficient code for finding duplicates in a vector of user IDs
+vector<int> findDuplicates(const vector<int>& userIds) {
+    vector<int> duplicates;
+    for (size_t i = 0; i < userIds.size(); ++i) {
+        for (size_t j = i + 1; j < userIds.size(); ++j) {
+            if (userIds[i] == userIds[j]) {
+                duplicates.push_back(userIds[i]);
+            }
+        }
+    }
+    return duplicates;
+}
 
-                int main() {
-                    vector<int> userIds = {1, 2, 3, 2, 4, 5, 1, 3, 5};
-                    vector<int> duplicates = findDuplicates(userIds);
+int main() {
+    vector<int> userIds = {1, 2, 3, 2, 4, 5, 1, 3, 5};
+    vector<int> duplicates = findDuplicates(userIds);
 
-                    cout << "Duplicate user IDs: ";
-                    for (int id : duplicates) {
-                        cout << id << " ";
-                    }
-                    cout << endl;
+    cout << "Duplicate user IDs: ";
+    for (int id : duplicates) {
+        cout << id << " ";
+    }
+    cout << endl;
 
-                    return 0;
-                }
-                ```
-                Example of Analysis:
-                Analysis and reasoning example:
-                    - Reduction of Nested Loops: Uses an O(n²) approach with nested loops.
-                    - Efficient Data Structure Selection: Using an unordered_set to track seen user IDs reduces complexity to O(n).
-                    - Dynamic Programming or Memoization: Not required here as each ID is processed once with an efficient data structure.
-                    - Specialized Algorithms: Using hashing-based data structures effectively reduces redundant checks.
-                    - I/O Optimization: Minimal I/O operations are used. Keep output operations efficient and straightforward.
-                    - Code Simplicity and Readability: The optimized approach using unordered_set is both efficient and easy to understand.
+    return 0;
+}
+```
+Example of Analysis:
+Analysis and reasoning example:
+    - Reduction of Nested Loops: Uses an O(n²) approach with nested loops.
+    - Efficient Data Structure Selection: Using an unordered_set to track seen user IDs reduces complexity to O(n).
+    - Dynamic Programming or Memoization: Not required here as each ID is processed once with an efficient data structure.
+    - Specialized Algorithms: Using hashing-based data structures effectively reduces redundant checks.
+    - I/O Optimization: Minimal I/O operations are used. Keep output operations efficient and straightforward.
                 
-                Here is the actual optimized code: 
-                ```
-                #include <iostream>
-                #include <vector>
-                #include <unordered_set>
+Here is the actual optimized code: 
+```
+#include <iostream>
+#include <vector>
+#include <unordered_set>
 
-                using namespace std;
+using namespace std;
 
-                // Optimized code for finding duplicates in a vector of user IDs
-                vector<int> findDuplicates(const vector<int>& userIds) {
-                    unordered_set<int> seen;  // Set to track seen user IDs
-                    unordered_set<int> duplicates;  // Set to store duplicates
-                    for (int id : userIds) {
-                        if (seen.find(id) != seen.end()) {
-                            duplicates.insert(id);  // Add to duplicates if already seen
-                        } else {
-                            seen.insert(id);  // Mark as seen
-                        }
-                    }
-                    return vector<int>(duplicates.begin(), duplicates.end());  // Convert set to vector
-                }
+// Optimized code for finding duplicates in a vector of user IDs
+vector<int> findDuplicates(const vector<int>& userIds) {
+    unordered_set<int> seen;  // Set to track seen user IDs
+    unordered_set<int> duplicates;  // Set to store duplicates
+    for (int id : userIds) {
+        if (seen.find(id) != seen.end()) {
+            duplicates.insert(id);  // Add to duplicates if already seen
+        } else {
+            seen.insert(id);  // Mark as seen
+        }
+    }
+    return vector<int>(duplicates.begin(), duplicates.end());  // Convert set to vector
+}
 
-                int main() {
-                    vector<int> userIds = {1, 2, 3, 2, 4, 5, 1, 3, 5};
-                    vector<int> duplicates = findDuplicates(userIds);
+int main() {
+    vector<int> userIds = {1, 2, 3, 2, 4, 5, 1, 3, 5};
+    vector<int> duplicates = findDuplicates(userIds);
 
-                    cout << "Duplicate user IDs: ";
-                    for (int id : duplicates) {
-                        cout << id << " ";
-                    }
-                    cout << endl;
+    cout << "Duplicate user IDs: ";
+    for (int id : duplicates) {
+        cout << id << " ";
+    }
+    cout << endl;
 
-                    return 0;
-                }
-                ```
+    return 0;
+}
+```

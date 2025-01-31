@@ -60,8 +60,9 @@ class EnergyLanguageBenchmark(Benchmark):
         avg_energy, avg_runtime = self._compute_avg()
 
         #Append results to benchmark data dict
-        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_runtime, 3))
-    
+        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_runtime, 3), len(self.original_code.splitlines()))
+        logger.info(f"original_energy_data: {self.energy_data[0]}")
+
     def pre_process(self):
         ast = CPPAST("cpp")
         source_code_path = f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0]}/{self.program}"
@@ -119,9 +120,9 @@ class EnergyLanguageBenchmark(Benchmark):
         self._run_rapl()
     
         avg_energy, avg_runtime = self._compute_avg()
-
+        
         #Append results to benchmark data dict
-        self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(avg_energy, 3), round(avg_runtime, 3))
+        self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(avg_energy, 3), round(avg_runtime, 3), len(optimized_code.splitlines()))
         
         # Find the required benchmark elements
         self.evaluator_feedback_data = self._extract_content(self.energy_data)
@@ -237,8 +238,8 @@ class EnergyLanguageBenchmark(Benchmark):
         keys = list(contents.keys())
 
         # print all values
-        for key, (source_code, avg_energy, avg_runtime) in contents.items():
-            logger.info(f"key: {key}, avg_energy: {avg_energy}, avg_runtime: {avg_runtime}")
+        for key, (source_code, avg_energy, avg_runtime, num_of_lines) in contents.items():
+            logger.info(f"key: {key}, avg_energy: {avg_energy}, avg_runtime: {avg_runtime}, num_of_lines: {num_of_lines}")
 
         # Extract the first(original) and last(current) elements
         first_key = keys[0]
@@ -251,7 +252,7 @@ class EnergyLanguageBenchmark(Benchmark):
         # Loop through the contents to find the key with the lowest avg_energy
         min_avg_energy = float('inf')
         min_energy_key = None
-        for key, (source_code, avg_energy, avg_runtime) in contents.items():
+        for key, (source_code, avg_energy, avg_runtime, num_of_lines) in contents.items():
             if avg_energy < min_avg_energy:
                 min_avg_energy = avg_energy
                 min_energy_key = key
@@ -263,17 +264,20 @@ class EnergyLanguageBenchmark(Benchmark):
             "original": {
                 "source_code": first_value[0],
                 "avg_energy": first_value[1],
-                "avg_runtime": first_value[2]
+                "avg_runtime": first_value[2],
+                "num_of_lines": first_value[3]
             },
             "lowest_avg_energy": {
                 "source_code": min_value[0],
                 "avg_energy": min_value[1],
-                "avg_runtime": min_value[2]
+                "avg_runtime": min_value[2],
+                "num_of_lines": min_value[3]
             },
             "current": {
                 "source_code": last_value[0],
                 "avg_energy": last_value[1],
-                "avg_runtime": last_value[2]
+                "avg_runtime": last_value[2],
+                "num_of_lines": last_value[3]
             }
         }
         

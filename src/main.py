@@ -4,7 +4,7 @@ import os
 import sys
 from utils import Logger
 import argparse
-from agent import OpenAIAssistant
+from agent import LLMAgent
 from status import Status
 from llm.generator_llm import llm_optimize, handle_compilation_error
 from llm.evaluator_llm import evaluator_llm
@@ -18,7 +18,7 @@ logger = Logger("logs", sys.argv[2]).logger
 def parse_arguments():
     parser = argparse.ArgumentParser(description="LLM-Energy-Optimization")
     parser.add_argument("--benchmark", type=str, default="EnergyLanguage", choices=["EnergyLanguage", "PIE", "Datacenter", "Android"], help="dataset used for experiment")
-    parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "llama-3.1", "code llama"], help="llm used for inference")
+    parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "deepseek-r1:671b", "qwen2.5-coder:32b", "llama3.3", "codellama:70b"], help="llm used for inference")
     parser.add_argument("--self_optimization_step", type=int, default=5, help="number of LLM self-optimization step")
     args = parser.parse_args()
     return args
@@ -30,10 +30,9 @@ def get_valid_programs(benchmark):
 
 def master_script(benchmark, model, self_optimization_step):
     #create LLM agent
+    generator = LLMAgent(api_key=openai_key, model=model, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
+    evaluator = LLMAgent(api_key=openai_key, model=model, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
 
-    generator = OpenAIAssistant(api_key=openai_key, name="Generator", instructions="You are a code expert. Think through the code optimizations strategies possible step by step.", model=model)
-    evaluator = OpenAIAssistant(api_key=openai_key, name="Evaluator", instructions="You are a code expert. Think through the code optimizations strategies possible step by step.", model=model)
-        
     for program in get_valid_programs(benchmark):     
         benchmark_obj = EnergyLanguageBenchmark(program) if benchmark == "EnergyLanguage" else None
         
@@ -55,6 +54,7 @@ def master_script(benchmark, model, self_optimization_step):
                     last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback)
             else:
                 logger.info("re-optimizing from latest working optimization")
+                generator.clear_memory()
                 last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback)
                 reoptimize_lastly_flag = 0
             
@@ -81,15 +81,9 @@ def master_script(benchmark, model, self_optimization_step):
                 compilation_errors = 0
                 continue
             else:
-                # getting feedback from the evaluator
-                logger.info("Regression test success, getting evaluator feedback")
-                evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
-                evaluator_feedback = evaluator_llm(evaluator_feedback_data=evaluator_feedback_data, llm_assistant=evaluator)
-                logger.info("Got evaluator feedback")
                 num_success_iteration += 1
                 benchmark_obj.set_optimization_iteration(num_success_iteration)
                 compilation_errors = 0
-
                 # Copy lastest optimized code for logic error re-optimization
                 last_working_optimized_code = last_optimized_code
                 
@@ -102,7 +96,13 @@ def master_script(benchmark, model, self_optimization_step):
                         os.makedirs(results_dir)
                     with open(f"{results_dir}/{program}.txt", "w+") as file:
                         file.write(str(dict_str))
-                    break   
+                    break
+
+                # getting feedback from the evaluator
+                logger.info("Regression test success, getting evaluator feedback")
+                evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
+                evaluator_feedback = evaluator_llm(evaluator_feedback_data=evaluator_feedback_data, llm_assistant=evaluator)
+                logger.info("Got evaluator feedback")
 
 def main():
     args=parse_arguments()

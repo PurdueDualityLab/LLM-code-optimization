@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
         printf("%s", outputstr + (d * LINE_SIZE) );
     free(outputstr);
 
-    std::cout << "long lived tree of depth " << max_depth << "\t "
+    std::cout << "long-lived tree of depth " << max_depth << "\t "
               << "check: " << (long_lived_tree->check()) << "\n";
 
     return 0;

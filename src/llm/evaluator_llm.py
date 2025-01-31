@@ -51,7 +51,8 @@ def evaluator_llm(evaluator_feedback_data, llm_assistant):
     Please respond in natural language (English) with actionable suggestions for improving the current code's performance in terms of energy usage. Provide only the best code with the lowest energy usage.
     """
 
-    thread_id = llm_assistant.create_thread()
-    evaluator_feedback = llm_assistant.create_run(user_input=prompt, thread_id = thread_id)
+    llm_assistant.add_to_memory("user", prompt)
+    llm_assistant.generate_response()
+    evaluator_feedback = llm_assistant.get_last_msg()
 
-    return evaluator_feedback
+    return evaluator_feedback["content"]
