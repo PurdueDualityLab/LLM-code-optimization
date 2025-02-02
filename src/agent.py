@@ -22,7 +22,7 @@ class LLMAgent:
             try:
                 subprocess.run(["ollama", "pull", model], check=True)
             except Exception as e:
-                logger.error(f"Error: Invalid LLM requested: {model}. Please provide the name of an LLM suppported by Ollama.")
+                logger.error(f"Error pulling model from ollama: {e}")
                 sys.exit(1)
             else:
                 self.client = Client(host="http://localhost:11434")
