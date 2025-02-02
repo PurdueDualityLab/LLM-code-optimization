@@ -55,6 +55,7 @@ def master_script(benchmark, model, self_optimization_step):
             else:
                 logger.info("re-optimizing from latest working optimization")
                 generator.clear_memory()
+                evaluator_feedback = ""
                 last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback)
                 reoptimize_lastly_flag = 0
             
