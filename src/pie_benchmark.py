@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 from utils import Logger
@@ -297,17 +298,42 @@ class PIEBenchmark(Benchmark):
 def get_valid_pie_programs(num_programs):
     slow_fast_pairs = []
     selected_problem_ids = set()
+    source_code = []
 
     #Extract the first 5 unique problems from the validation set
-    with open(f"{USER_PREFIX}/benchmark_pie/val.jsonl", "r") as f:
-        for line in f:
-            json_line = json.loads(line)
-            if json_line["problem_id"] not in selected_problem_ids and len(selected_problem_ids) != num_programs:
-                selected_problem_ids.add(json_line["problem_id"])
-                slow_fast_pairs.append(json_line)
-            if len(selected_problem_ids) == num_programs:
-                break
+    file = open(f"{USER_PREFIX}/benchmark_pie/val.jsonl", "r")
+    for line in file:
+        json_line = json.loads(line)
+        if json_line["problem_id"] not in selected_problem_ids and len(selected_problem_ids) != num_programs:
+            selected_problem_ids.add(json_line["problem_id"])
+            slow_fast_pairs.append(json_line)
+            source_code.append(json_line["src_code"])
+        if len(selected_problem_ids) == num_programs:
+            break
+    file.close()
 
     #Return only the program names
     valid_programs = [f"{pair['problem_id']}_{pair['src_id']}_t{pair['tgt_id'][1:]}.cpp" for pair in slow_fast_pairs]
+    setup_benchmarks(valid_programs, source_code)
+
     return valid_programs
+
+def setup_benchmarks(valid_programs, source_code):
+    for i, program in enumerate(valid_programs):
+        #Create the folder if it does not exist
+        folder_path = f"{USER_PREFIX}/benchmark_pie/{program.split('_')[0]}"
+        file_name = program.split('_')[1]
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+
+        #Create a new cpp file in the folder with the source code
+        file = open(f"{folder_path}/{file_name}.cpp", "w")
+        file.write(f"{source_code[i]}")
+        file.close()
+        
+        #Copy the test case folder from all_test_cases/ into the program's folder
+        problem_id = program.split('_')[0]
+        test_case_folder_src = f"{USER_PREFIX}/benchmark_pie/all_test_cases/{problem_id}"
+        test_case_folder_dest = f"{folder_path}/test_cases"
+        if not os.path.exists(test_case_folder_dest):
+            shutil.copytree(test_case_folder_src, test_case_folder_dest)
