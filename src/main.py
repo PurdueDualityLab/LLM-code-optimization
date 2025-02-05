@@ -9,6 +9,7 @@ from status import Status
 from llm.generator_llm import llm_optimize, handle_compilation_error
 from llm.evaluator_llm import evaluator_llm
 from energy_language_benchmark import get_valid_energy_language_programs, EnergyLanguageBenchmark
+from pie_benchmark import get_valid_pie_programs, PIEBenchmark
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
@@ -20,20 +21,24 @@ def parse_arguments():
     parser.add_argument("--benchmark", type=str, default="EnergyLanguage", choices=["EnergyLanguage", "PIE", "Datacenter", "Android"], help="dataset used for experiment")
     parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "deepseek-r1:671b","deepseek-r1:70b", "qwen2.5-coder:32b", "llama3.3", "codellama:70b"], help="llm used for inference")
     parser.add_argument("--self_optimization_step", type=int, default=5, help="number of LLM self-optimization step")
+    parser.add_argument("--num_programs", type=int, default=5, help="number of programs from the benchmark to test")
+
     args = parser.parse_args()
     return args
 
-def get_valid_programs(benchmark):
+def get_valid_programs(benchmark, num_programs):
     if (benchmark == "EnergyLanguage"):
         return get_valid_energy_language_programs()
+    elif (benchmark == "PIE"):
+        return get_valid_pie_programs(num_programs)
     return []
 
-def master_script(benchmark, model, self_optimization_step):
+def master_script(benchmark, num_programs, model, self_optimization_step):
     #create LLM agent
     generator = LLMAgent(api_key=openai_key, model=model, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
     evaluator = LLMAgent(api_key=openai_key, model=model, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
 
-    for program in get_valid_programs(benchmark):     
+    for program in get_valid_programs(benchmark, num_programs):     
         benchmark_obj = EnergyLanguageBenchmark(program) if benchmark == "EnergyLanguage" else None
         
         compilation_errors = 0
@@ -109,11 +114,12 @@ def main():
     args=parse_arguments()
     
     benchmark = args.benchmark
+    num_programs = args.num_programs
     model = args.llm
     self_optimization_step = args.self_optimization_step
        
     #run benchmark
-    master_script(benchmark, model, self_optimization_step)
+    master_script(benchmark, num_programs, model, self_optimization_step)
 
 if __name__ == "__main__":
     main()
