@@ -1,5 +1,7 @@
+from abstract_syntax_trees.cpp_ast import CPPAST
 from benchmark import Benchmark
 from dotenv import load_dotenv
+import glob
 import json
 import os
 import re
@@ -15,7 +17,7 @@ logger = Logger("logs", sys.argv[2]).logger
 
 class PIEBenchmark(Benchmark):
     def __init__(self, program):
-        self.program = program
+        self.program = program #This is the CPP file name including the .cpp extension
         self.compilation_error = None
         self.energy_data = {}
         self.evaluator_feedback_data = {}
@@ -30,8 +32,8 @@ class PIEBenchmark(Benchmark):
         self.set_original_code()
         self.set_original_energy()
     
-    def set_original_code(self): #TODO
-        source_path = f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0]}/{self.program}"
+    def set_original_code(self):
+        source_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}/{self.program}"
         with open(source_path, 'r') as file:
             self.original_code = file.read()
 
@@ -44,12 +46,12 @@ class PIEBenchmark(Benchmark):
     def get_optimization_iteration(self):
         return super().get_optimization_iteration()
     
-    def set_original_energy(self): #TODO
+    def set_original_energy(self):
         logger.info("Run benchmark on the original code")
 
         # compile
         # Needed for makefiles
-        os.chdir(f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0].split('_')[-1]}")  
+        os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}")  
         try: 
             result = subprocess.run(
                 ["make", "compile"], 
@@ -62,7 +64,7 @@ class PIEBenchmark(Benchmark):
         except subprocess.CalledProcessError as e:
             logger.error(f"Original code compile failed: {e}\n")
 
-        self._run_rapl()
+        self._run_rapl() #FIXME: what params to pass into this function
 
         avg_energy, avg_runtime = self._compute_avg()
 
@@ -70,9 +72,9 @@ class PIEBenchmark(Benchmark):
         self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_runtime, 3), len(self.original_code.splitlines()))
         logger.info(f"original_energy_data: {self.energy_data[0]}")
 
-    def pre_process(self): #TODO
+    def pre_process(self):
         ast = CPPAST("cpp")
-        source_code_path = f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0]}/{self.program}"
+        source_code_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}/{self.program}"
         return ast.create_ast(source_code_path)
 
     def post_process(self, code):
@@ -81,14 +83,14 @@ class PIEBenchmark(Benchmark):
         code = code.replace("```", "")
         return code
 
-    def compile(self, optimized_code): #TODO
-        logger.info(f"llm_optimize: : writing optimized code to benchmark_c++/{self.program.split('.')[0]}/optimized_{self.program}")
-        destination_path = f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0]}/optimized_{self.program}"
+    def compile(self, optimized_code):
+        logger.info(f"llm_optimize: : writing optimized code to benchmark_pie/{self.program.split('_')[0]}/optimized_{self.program}")
+        destination_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}/optimized_{self.program}"
         with open(destination_path, "w") as file:
             file.write(optimized_code)
 
         # Needed for makefiles
-        os.chdir(f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0].split('_')[-1]}")  
+        os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}")  
         try: 
             result = subprocess.run(
                 ["make", "compile_optimized"], 
@@ -106,12 +108,38 @@ class PIEBenchmark(Benchmark):
     def get_compilation_error(self):
         return super().get_compilation_error()
 
-    def run_tests(self): #TODO
+    def run_tests(self):
         # Needed for makefiles
-        os.chdir(f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0].split('_')[-1]}")
+        os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}")
+
+        # No need to run original code once to get the expectec output as baseline since we have test cases
+        # Run all test cases on the optimized code
+        #Go into the problems dir and test case dir and count number of input files and output files and assert they are equal
+        #in for loop, iterate through 
+            #set self.expect test output to be output from output file
+            #then call run program with param = input from input test case file
+                #need to modify run program function to accept input as param and also modify makefile
+            #check if outputs are same by calling compare outputs
+                #if not same at any one then return false immediately
+        
+        problem_id = self.program.split('_')[0]
+        test_case_folder = f"{USER_PREFIX}/benchmark_pie/{problem_id}/test_cases"
+        input_files = glob.glob(f"{test_case_folder}/input.*.txt")
+        output_files = glob.glob(f"{test_case_folder}/output.*.txt")
+        assert (len(input_files) == len(output_files)), "Number of input files and output files do not match"
+
+        for i, input_file in input_files:
+            with open(output_files[i], 'r') as file:
+                self.expect_test_output = self._process_output_content(file.read())
+            
+            optimized_output = self._run_program(True, input_file)
+            if not self._compare_outputs(optimized_output):
+                return False
+        
+        return True
 
         if (self.expect_test_output == None):   
-            self.expect_test_output = self._process_output_content(self._run_program(False))
+            self.expect_test_output = self._process_output_content(self._run_program(False)) #Runs the original code to get the expected output as a baseline
         
         optimized_output = self._run_program(True)
 
@@ -124,7 +152,7 @@ class PIEBenchmark(Benchmark):
         #load the optimized code and data
         logger.info(f"Iteration {self.optimization_iteration + 1}, run benchmark on the optimized code")
         
-        self._run_rapl()
+        self._run_rapl() #FIXME: what params to pass into this function
     
         avg_energy, avg_runtime = self._compute_avg()
         
@@ -147,12 +175,15 @@ class PIEBenchmark(Benchmark):
     def static_analysis(self, optimized_code):
         return super().static_analysis(optimized_code)
 
-    def _run_program(self, optimized): #TODO: Integrate test cases
+    def _run_program(self, optimized, input_file):
+        run_unoptimized = ["make", "run", f"input={input_file}"]
+        run_optimized = ["make", "run_optimized", f"input={input_file}"]
+
         # Run the make command and capture the output in a variable
         if not optimized:
-            result = subprocess.run(["make", "run"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
+            result = subprocess.run(run_unoptimized, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
         else:
-            result = subprocess.run(["make", "run_optimized"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
+            result = subprocess.run(run_optimized, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
         
         # Check for runtime errors
         if result.returncode != 0:
@@ -188,7 +219,7 @@ class PIEBenchmark(Benchmark):
         # Remove all whitespace characters
         return re.sub(r'\s+', '', content)
 
-    def _run_rapl(self):
+    def _run_rapl(self, input_file, problem_id): #TODO
         # First clear the contents of the energy data log file
         logger.info(f"Benchmark.run: clearing content in c++.csv")
         log_file_path = f"{USER_PREFIX}/src/runtime_logs/c++/c++.csv"
@@ -203,10 +234,12 @@ class PIEBenchmark(Benchmark):
         logger.info(f"Current directory: {current_dir}")
 
         try:
+            measure_unoptimized = ["make", "measure", f"input={input_file}", f"problem_id={problem_id}"]
+            measure_optimized = ["make", "measure_optimized", f"input={input_file}", f"problem_id={problem_id}"]
             if (self.optimization_iteration == 0):
-                subprocess.run(["make", "measure"], check=True, capture_output=True, text=True)
+                subprocess.run(measure_unoptimized, check=True, capture_output=True, text=True)
             else:
-                subprocess.run(["make", "measure_optimized"], check=True, capture_output=True, text=True)
+                subprocess.run(measure_optimized, check=True, capture_output=True, text=True)
             logger.info("Benchmark.run: make measure successfully\n")
         except subprocess.CalledProcessError as e:
             logger.error(f"Benchmark.run: make measure failed: {e}\n")
@@ -322,12 +355,11 @@ def setup_benchmarks(valid_programs, source_code):
     for i, program in enumerate(valid_programs):
         #Create the folder if it does not exist
         folder_path = f"{USER_PREFIX}/benchmark_pie/{program.split('_')[0]}"
-        file_name = program.split('_')[1]
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
         #Create a new cpp file in the folder with the source code
-        file = open(f"{folder_path}/{file_name}.cpp", "w")
+        file = open(f"{folder_path}/{program}", "w")
         file.write(f"{source_code[i]}")
         file.close()
         
@@ -337,3 +369,16 @@ def setup_benchmarks(valid_programs, source_code):
         test_case_folder_dest = f"{folder_path}/test_cases"
         if not os.path.exists(test_case_folder_dest):
             shutil.copytree(test_case_folder_src, test_case_folder_dest)
+
+        #Create parameterized Makefile for each problem id folder
+        #Open template file
+            #replace ${FILE_NAME} with program name and ${PROBLEM_ID} with problem id
+        #Write to new file
+        makefile_template = open(f"{USER_PREFIX}/benchmark_pie/makefile_template.mak", "r")
+        makefile_content = makefile_template.read()
+        makefile_content = makefile_content.replace("${FILE_NAME}", program.split('.')[0])
+        makefile_content = makefile_content.replace("${PROBLEM_ID}", problem_id)
+        makefile_template.close()
+        makefile_template = open(f"{folder_path}/Makefile", "w")
+        makefile_template.write(makefile_content)
+        makefile_template.close()
