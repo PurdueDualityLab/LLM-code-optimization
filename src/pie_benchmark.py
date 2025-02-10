@@ -120,9 +120,6 @@ class PIEBenchmark(Benchmark):
         output_files = sorted(glob.glob(f"{test_case_folder}/output.*.txt"))
 
         assert (len(input_files) == len(output_files)), "Number of input files and output files do not match"
-
-        #hard-code to run 10 tests for now
-        input_files = input_files[:10]
         
         for i, input_file in enumerate(input_files):
             with open(output_files[i], 'r') as file:
@@ -356,7 +353,7 @@ def setup_benchmarks(valid_programs, source_code):
         
         #Copy the test case folder from all_test_cases/ into the program's folder
         problem_id = program.split('_')[0]
-        test_case_folder_src = f"{USER_PREFIX}/benchmark_pie/all_test_cases/{problem_id}"
+        test_case_folder_src = f"{USER_PREFIX}/benchmark_pie/merged_test_cases/{problem_id}"
         test_case_folder_dest = f"{folder_path}/test_cases"
         if not os.path.exists(test_case_folder_dest):
             shutil.copytree(test_case_folder_src, test_case_folder_dest)
