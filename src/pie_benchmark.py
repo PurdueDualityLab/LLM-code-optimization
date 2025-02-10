@@ -51,7 +51,8 @@ class PIEBenchmark(Benchmark):
 
         # compile
         # Needed for makefiles
-        os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}")  
+        problem_id = self.program.split('_')[0]
+        os.chdir(f"{USER_PREFIX}/benchmark_pie/{problem_id}")  
         try: 
             result = subprocess.run(
                 ["make", "compile"], 
@@ -64,7 +65,7 @@ class PIEBenchmark(Benchmark):
         except subprocess.CalledProcessError as e:
             logger.error(f"Original code compile failed: {e}\n")
 
-        self._run_rapl() #FIXME: what params to pass into this function
+        self._run_rapl(problem_id)
 
         avg_energy, avg_runtime = self._compute_avg()
 
@@ -112,47 +113,31 @@ class PIEBenchmark(Benchmark):
         # Needed for makefiles
         os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}")
 
-        # No need to run original code once to get the expectec output as baseline since we have test cases
-        # Run all test cases on the optimized code
-        #Go into the problems dir and test case dir and count number of input files and output files and assert they are equal
-        #in for loop, iterate through 
-            #set self.expect test output to be output from output file
-            #then call run program with param = input from input test case file
-                #need to modify run program function to accept input as param and also modify makefile
-            #check if outputs are same by calling compare outputs
-                #if not same at any one then return false immediately
-        
+        # Iterate through all test cases and perform correctnes check
         problem_id = self.program.split('_')[0]
         test_case_folder = f"{USER_PREFIX}/benchmark_pie/{problem_id}/test_cases"
         input_files = glob.glob(f"{test_case_folder}/input.*.txt")
         output_files = glob.glob(f"{test_case_folder}/output.*.txt")
         assert (len(input_files) == len(output_files)), "Number of input files and output files do not match"
 
-        for i, input_file in input_files:
+        for i, input_file in enumerate(input_files):
             with open(output_files[i], 'r') as file:
                 self.expect_test_output = self._process_output_content(file.read())
-            
+
             optimized_output = self._run_program(True, input_file)
+
             if not self._compare_outputs(optimized_output):
                 return False
         
         return True
 
-        if (self.expect_test_output == None):   
-            self.expect_test_output = self._process_output_content(self._run_program(False)) #Runs the original code to get the expected output as a baseline
-        
-        optimized_output = self._run_program(True)
-
-        if not self._compare_outputs(optimized_output):
-            return False
-        else:
-            return True
     
     def measure_energy(self, optimized_code):            
         #load the optimized code and data
         logger.info(f"Iteration {self.optimization_iteration + 1}, run benchmark on the optimized code")
         
-        self._run_rapl() #FIXME: what params to pass into this function
+        problem_id = self.program.split('_')[0]
+        self._run_rapl(problem_id)
     
         avg_energy, avg_runtime = self._compute_avg()
         
@@ -176,15 +161,14 @@ class PIEBenchmark(Benchmark):
         return super().static_analysis(optimized_code)
 
     def _run_program(self, optimized, input_file):
-        run_unoptimized = ["make", "run", f"input={input_file}"]
-        run_optimized = ["make", "run_optimized", f"input={input_file}"]
-
         # Run the make command and capture the output in a variable
         if not optimized:
-            result = subprocess.run(run_unoptimized, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
+            result = subprocess.Popen(["make", "run"], stdin=open(input_file, 'r'), text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='latin-1')
         else:
-            result = subprocess.run(run_optimized, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
+            result = subprocess.Popen(["make", "run_optimized"], stdin=open(input_file, 'r'), text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='latin-1')
         
+        stdout, stderr = result.communicate(timeout=10)
+
         # Check for runtime errors
         if result.returncode != 0:
             return
@@ -219,7 +203,7 @@ class PIEBenchmark(Benchmark):
         # Remove all whitespace characters
         return re.sub(r'\s+', '', content)
 
-    def _run_rapl(self, input_file, problem_id): #TODO
+    def _run_rapl(self, problem_id):
         # First clear the contents of the energy data log file
         logger.info(f"Benchmark.run: clearing content in c++.csv")
         log_file_path = f"{USER_PREFIX}/src/runtime_logs/c++/c++.csv"
@@ -229,11 +213,12 @@ class PIEBenchmark(Benchmark):
 
         #run make measure using make file
         #change current directory to benchmarks/folder to run make file
-        os.chdir(f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0]}")
+        os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}")
         current_dir = os.getcwd()
         logger.info(f"Current directory: {current_dir}")
 
         try:
+            input_file = "input.0.txt"
             measure_unoptimized = ["make", "measure", f"input={input_file}", f"problem_id={problem_id}"]
             measure_optimized = ["make", "measure_optimized", f"input={input_file}", f"problem_id={problem_id}"]
             if (self.optimization_iteration == 0):
@@ -371,9 +356,6 @@ def setup_benchmarks(valid_programs, source_code):
             shutil.copytree(test_case_folder_src, test_case_folder_dest)
 
         #Create parameterized Makefile for each problem id folder
-        #Open template file
-            #replace ${FILE_NAME} with program name and ${PROBLEM_ID} with problem id
-        #Write to new file
         makefile_template = open(f"{USER_PREFIX}/benchmark_pie/makefile_template.mak", "r")
         makefile_content = makefile_template.read()
         makefile_content = makefile_content.replace("${FILE_NAME}", program.split('.')[0])

@@ -39,7 +39,7 @@ def master_script(benchmark, num_programs, model, self_optimization_step):
     evaluator = LLMAgent(api_key=openai_key, model=model, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
 
     for program in get_valid_programs(benchmark, num_programs):     
-        benchmark_obj = EnergyLanguageBenchmark(program) if benchmark == "EnergyLanguage" else None
+        benchmark_obj = EnergyLanguageBenchmark(program) if benchmark == "EnergyLanguage" else PIEBenchmark(program)
         
         compilation_errors = 0
         reoptimize_lastly_flag = 0

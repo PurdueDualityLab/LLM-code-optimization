@@ -8,22 +8,22 @@ compile_optimized:
 
 measure:
 	sudo modprobe msr
-	sudo ${USER_PREFIX}/RAPL/main "${USER_PREFIX}/benchmark_pie/$(problem_id)/p02639_s662076996_t004750872.gpp_run $(input)" c++ $(problem_id)
+	sudo ${USER_PREFIX}/RAPL/main "${USER_PREFIX}/benchmark_pie/$(problem_id)/p02639_s662076996_t004750872.gpp_run < $(input)" c++ $(problem_id)
 	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++/c++.csv
 
 measure_optimized:
 	sudo modprobe msr
-	sudo ${USER_PREFIX}/RAPL/main "${USER_PREFIX}/benchmark_pie/$(problem_id)/optimized_p02639_s662076996_t004750872.gpp_run $(input)" c++ $(problem_id)
+	sudo ${USER_PREFIX}/RAPL/main "${USER_PREFIX}/benchmark_pie/$(problem_id)/optimized_p02639_s662076996_t004750872.gpp_run < $(input)" c++ $(problem_id)
 	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++/c++.csv
 
 run:
-	./p02639_s662076996_t004750872.gpp_run $(input)
+	./p02639_s662076996_t004750872.gpp_run
 
 run_optimized:
-	./optimized_p02639_s662076996_t004750872.gpp_run $(input)
+	./optimized_p02639_s662076996_t004750872.gpp_run
 
 mem:
-	 /usr/bin/time -v  ./p02639_s662076996_t004750872.gpp_run $(input)
+	 /usr/bin/time -v  ./p02639_s662076996_t004750872.gpp_run
 valgrind:
-	valgrind --tool=massif --stacks=yes  ./p02639_s662076996_t004750872.gpp_run $(input)
+	valgrind --tool=massif --stacks=yes  ./p02639_s662076996_t004750872.gpp_run
 

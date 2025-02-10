@@ -28,7 +28,7 @@ int main (int argc, char **argv)
   //Language name
   strcpy(language,argv[2]);
   //Path to language .csv file
-  strcpy(path, "/home/hpeng/E2COOL/src/runtime_logs/c++/");
+  strcpy(path, "/home/arjun/VIP_PTM/E2COOL/src/runtime_logs/c++/");
   strcat(language,".csv");
   strcat(path,language);
   //Test name
