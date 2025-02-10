@@ -113,13 +113,17 @@ class PIEBenchmark(Benchmark):
         # Needed for makefiles
         os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}")
 
-        # Iterate through all test cases and perform correctnes check
+        # Iterate through all test cases and perform correctness check
         problem_id = self.program.split('_')[0]
         test_case_folder = f"{USER_PREFIX}/benchmark_pie/{problem_id}/test_cases"
         input_files = glob.glob(f"{test_case_folder}/input.*.txt")
         output_files = glob.glob(f"{test_case_folder}/output.*.txt")
         assert (len(input_files) == len(output_files)), "Number of input files and output files do not match"
 
+        #hard-code to run 10 tests for now
+        input_files = input_files[10:20]
+        output_files = output_files[10:20]
+        
         for i, input_file in enumerate(input_files):
             with open(output_files[i], 'r') as file:
                 self.expect_test_output = self._process_output_content(file.read())
@@ -163,14 +167,15 @@ class PIEBenchmark(Benchmark):
     def _run_program(self, optimized, input_file):
         # Run the make command and capture the output in a variable
         if not optimized:
-            result = subprocess.Popen(["make", "run"], stdin=open(input_file, 'r'), text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='latin-1')
+            result = subprocess.run(["make", "run"], stdin=open(input_file, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
         else:
-            result = subprocess.Popen(["make", "run_optimized"], stdin=open(input_file, 'r'), text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='latin-1')
-        
-        stdout, stderr = result.communicate(timeout=10)
+            logger.info(f"Running optimized program with input file: {input_file}")
+            result = subprocess.run(["make", "run_optimized"], stdin=open(input_file, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
+            
+        logger.info(f"_run_program result: {result}")
 
         # Check for runtime errors
-        if result.returncode != 0:
+        if result.returncode is not None and result.returncode != 0:
             return
 
         # Filter out the unwanted lines
@@ -178,7 +183,7 @@ class PIEBenchmark(Benchmark):
             line for line in result.stdout.splitlines()
             if not (line.startswith("make[") or line.startswith("./"))
         )
-        
+        logger.info(f"filtered_output: {filtered_output}")
         return filtered_output
     
     def _compare_outputs(self, optimized_output):

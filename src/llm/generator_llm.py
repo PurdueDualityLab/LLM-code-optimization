@@ -25,7 +25,7 @@ def llm_optimize(code, llm_assistant, evaluator_feedback):
         final_code: str
 
     if evaluator_feedback == "":
-        prompt = generator_prompt + f"Here is the code to optimize, follow the instruction to provide the optimized code WHILE MAINTAINING IT'S FUNCTIONAL CORRECTNESS:\n{code}"
+        prompt = generator_prompt + f"Here is the code to optimize, follow the instruction to provide the optimized code WHILE STRICTLY MAINTAINING IT'S FUNCTIONAL EQUIVALENCE:\n{code}"
     else:
         prompt = f"The code you generated does not improve energy efficiency, please reoptimize WHILE MAINTAINING IT'S FUNCTIONAL CORRECTNESS. Here are some feedbacks: {evaluator_feedback}.\n Original code to optimize:\n {code}"
     
