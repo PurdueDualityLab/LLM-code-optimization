@@ -1,0 +1,28 @@
+Task Instructions:
+- Analyze the provided source code and identify the most suitable energy optimization patterns that can enhance its efficiency. Justify your selection based on the code's structure, operations, and potential areas for improvement.
+    - From the identified energy optimization patterns, select the (one) most suitable and include in output.
+- Output Requirements:
+    - Pattern Name: The name of the energy optimization pattern.
+    - Pattern Description: A brief explanation of the pattern.
+    - Selection Rationale: The reasoning behind choosing this pattern based on the analysis of the source code.
+
+Energy Optimization Patterns:
+- Patterns are in the form: <pattern_name>:<pattern_description>
+- Patterns:
+    1. Eliminate Loop Initialization: The comparison operation and index processing can cause overhead when the initialization of an array is performed by loop structure.
+    2. Inline Math Function: Simplify user-defined function to macro function. This removes the function call overhead and reduces instruction count.
+    3. Pass by Reference: Instead of copying complex structures, pass reference.
+    4. Transform Recursion: Replace recursion function with iterative to eliminate stack overhead and improve performance.
+    5. Encapsulate field: Makes a public field private; Creates getter and setter methods.
+    6. Inline temp: Replaces variable references with itself.
+    7. Introduce explaining variable: Adds variables in the code where there is a complex expression to make the expression simpler.
+    8. Simplify nested loop: Converts the nested loop structure into a single loop.
+    9. Loop fusion: Merge multiple loops that iterate over the same range, especially when accessing the same arrays. This reduces redundant memory accesses and lowers data movement through the memory hierarchy, leading to improved energy efficiency.
+    10. Data layout transformations: Convert a struct of arrays into an array of structs. This transformation improves data locality and reduces the amount of data moved through the memory hierarchy, leading to lower energy consumption.
+    11. Global allocation: Move malloc and free statements outside the loop to allocate temporary variables once and reuse them throughout the program. This reduces memory allocation overhead and minimizes energy consumption.
+    12. Efficient Read-Write: Minimize the memory footprint while performing read/write operations
+    13. Design: Inheritance is more energy efficient than delegation
+    14. Encapsulate field: Makes a public field private; Creates getter and setter methods
+
+Source Code:
+{source_code}

@@ -11,7 +11,9 @@ Task Instructions:
 - Suggest optimization strategies: Propose multiple methods to improve energy efficiency. For each method:
     - Provide a detailed explanation of how the optimization reduces energy usage.
     - Discuss the trade-offs in terms of complexity, maintainability, and performance gains.
-- Choose the most effective optimization: After evaluating each proposed strategy, select the approach that yields the best balance of energy efficiency, performance, readability, and maintainability.
+- Choose the most effective optimization:
+    - After evaluating each proposed strategy, select the approach that yields the best balance of energy efficiency, performance, readability, and maintainability.
+    - If there is an energy optimization pattern provided, then ensure integration of the pattern into the selected strategy.
 - Implement the chosen optimization: Rewrite the code with the chosen optimization strategies, ensuring:
     - The optimized code produces the same output as the original code for all valid inputs.
 - Output Requirements:
