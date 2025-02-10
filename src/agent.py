@@ -60,7 +60,7 @@ class LLMAgent:
         self.memory = [{"role": "system", "content": self.system_message}]
     
     def is_openai_model(self):
-        return self.model in ["gpt-4o", "o1"]
+        return self.model in ["gpt-4o", "o1", "o3-mini"]
 
 class OpenAIAssistant:
     def __init__(self, api_key: str, name: str, instructions: str, model: str = "gpt-4o"):

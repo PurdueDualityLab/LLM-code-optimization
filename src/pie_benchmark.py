@@ -25,9 +25,9 @@ class PIEBenchmark(Benchmark):
         self.original_code = None
         self.optimization_iteration = 0
 
-        #PIE specific config parameters
-        self.num_benchmarks = 5
-        self.SUBMISSIONS_PER_BENCHMARK= 1
+        # #PIE specific config parameters
+        # self.num_benchmarks = 5
+        # self.SUBMISSIONS_PER_BENCHMARK= 1
 
         self.set_original_code()
         self.set_original_energy()
@@ -325,7 +325,8 @@ def get_valid_pie_programs(num_programs):
         if json_line["problem_id"] not in selected_problem_ids and len(selected_problem_ids) != num_programs:
             selected_problem_ids.add(json_line["problem_id"])
             slow_fast_pairs.append(json_line)
-            source_code.append(json_line["src_code"])
+            src_code = json_line["src_code"].replace("\n\n", "\n")
+            source_code.append(src_code)
         if len(selected_problem_ids) == num_programs:
             break
     file.close()
