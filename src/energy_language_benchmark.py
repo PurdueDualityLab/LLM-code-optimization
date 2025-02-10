@@ -21,7 +21,6 @@ class EnergyLanguageBenchmark(Benchmark):
         self.original_code = None
         self.optimization_iteration = 0
         self.set_original_code()
-        self.set_original_energy()
     
     def set_original_code(self):
         source_path = f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0]}/{self.program}"
@@ -54,6 +53,7 @@ class EnergyLanguageBenchmark(Benchmark):
             logger.info(f"Original code compile successfully.\n")
         except subprocess.CalledProcessError as e:
             logger.error(f"Original code compile failed: {e}\n")
+            return False
 
         self._run_rapl()
 
@@ -62,6 +62,7 @@ class EnergyLanguageBenchmark(Benchmark):
         #Append results to benchmark data dict
         self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_runtime, 3), len(self.original_code.splitlines()))
         logger.info(f"original_energy_data: {self.energy_data[0]}")
+        return True
 
     def pre_process(self):
         ast = CPPAST("cpp")

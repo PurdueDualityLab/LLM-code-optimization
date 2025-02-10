@@ -25,12 +25,7 @@ class PIEBenchmark(Benchmark):
         self.original_code = None
         self.optimization_iteration = 0
 
-        # #PIE specific config parameters
-        # self.num_benchmarks = 5
-        # self.SUBMISSIONS_PER_BENCHMARK= 1
-
         self.set_original_code()
-        self.set_original_energy()
     
     def set_original_code(self):
         source_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}/{self.program}"
@@ -64,6 +59,7 @@ class PIEBenchmark(Benchmark):
             logger.info(f"Original code compile successfully.\n")
         except subprocess.CalledProcessError as e:
             logger.error(f"Original code compile failed: {e}\n")
+            return False
 
         self._run_rapl(problem_id)
 
@@ -72,6 +68,7 @@ class PIEBenchmark(Benchmark):
         #Append results to benchmark data dict
         self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_runtime, 3), len(self.original_code.splitlines()))
         logger.info(f"original_energy_data: {self.energy_data[0]}")
+        return True
 
     def pre_process(self):
         ast = CPPAST("cpp")
@@ -82,6 +79,8 @@ class PIEBenchmark(Benchmark):
         # Remove code block delimiters
         code = code.replace("```cpp", "")
         code = code.replace("```", "")
+        # Remove all comments
+        code = re.sub(r'//.*?$|/\*.*?\*/', '', code, flags=re.DOTALL | re.MULTILINE)
         return code
 
     def compile(self, optimized_code):

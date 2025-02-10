@@ -40,6 +40,10 @@ def master_script(benchmark, num_programs, model, self_optimization_step):
 
     for program in get_valid_programs(benchmark, num_programs):     
         benchmark_obj = EnergyLanguageBenchmark(program) if benchmark == "EnergyLanguage" else PIEBenchmark(program)
+        original_code_compiles = benchmark_obj.set_original_energy()
+        if not original_code_compiles:
+            logger.error(f"Unable to compile original code for {program}")
+            continue
         
         compilation_errors = 0
         reoptimize_lastly_flag = 0
