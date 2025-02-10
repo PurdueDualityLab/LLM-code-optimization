@@ -116,13 +116,13 @@ class PIEBenchmark(Benchmark):
         # Iterate through all test cases and perform correctness check
         problem_id = self.program.split('_')[0]
         test_case_folder = f"{USER_PREFIX}/benchmark_pie/{problem_id}/test_cases"
-        input_files = glob.glob(f"{test_case_folder}/input.*.txt")
-        output_files = glob.glob(f"{test_case_folder}/output.*.txt")
+        input_files = sorted(glob.glob(f"{test_case_folder}/input.*.txt"))
+        output_files = sorted(glob.glob(f"{test_case_folder}/output.*.txt"))
+
         assert (len(input_files) == len(output_files)), "Number of input files and output files do not match"
 
         #hard-code to run 10 tests for now
-        input_files = input_files[10:20]
-        output_files = output_files[10:20]
+        input_files = input_files[:10]
         
         for i, input_file in enumerate(input_files):
             with open(output_files[i], 'r') as file:

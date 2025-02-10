@@ -48,7 +48,11 @@ def master_script(benchmark, num_programs, model, self_optimization_step):
         last_working_optimized_code = original_code
         last_optimized_code = original_code
         num_success_iteration = 0
+        total_output_difference = 0
         while True:
+            if total_output_difference == 3:
+                logger.error("Unable to produce functional equivalent programs.")
+                break
             # optimize code
             if reoptimize_lastly_flag == 0:
                 logger.info(f"Optimizing {program}, iteration {num_success_iteration}")
@@ -85,6 +89,7 @@ def master_script(benchmark, num_programs, model, self_optimization_step):
                 reoptimize_lastly_flag = 1
                 evaluator_feedback = ""
                 compilation_errors = 0
+                total_output_difference += 1
                 continue
             else:
                 num_success_iteration += 1
@@ -92,6 +97,7 @@ def master_script(benchmark, num_programs, model, self_optimization_step):
                 compilation_errors = 0
                 # Copy lastest optimized code for logic error re-optimization
                 last_working_optimized_code = last_optimized_code
+                total_output_difference = 0
                 
                 if num_success_iteration == self_optimization_step:
                     logger.info("Optimization Complete, writing results to file.....")
