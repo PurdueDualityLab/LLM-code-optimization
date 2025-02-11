@@ -43,6 +43,10 @@ def master_script(benchmark, num_programs, model, self_optimization_step, use_en
 
     for program in get_valid_programs(benchmark, num_programs):     
         benchmark_obj = EnergyLanguageBenchmark(program) if benchmark == "EnergyLanguage" else PIEBenchmark(program)
+        original_code_compiles = benchmark_obj.set_original_energy()
+        if not original_code_compiles:
+            logger.error(f"Unable to compile original code for {program}")
+            continue
         
         compilation_errors = 0
         reoptimize_lastly_flag = 0
@@ -51,6 +55,7 @@ def master_script(benchmark, num_programs, model, self_optimization_step, use_en
         last_working_optimized_code = original_code
         last_optimized_code = original_code
         num_success_iteration = 0
+        total_output_difference = 0
 
         if use_energy_patterns:
             optimization_pattern = filter_patterns(llm_assistant=pattern, source_code=original_code)
@@ -59,6 +64,9 @@ def master_script(benchmark, num_programs, model, self_optimization_step, use_en
         logger.info(f"energy optimization pattern selected: {optimization_pattern}")
 
         while True:
+            if total_output_difference == 3:
+                logger.error("Unable to produce functional equivalent programs.")
+                break
             # optimize code
             if reoptimize_lastly_flag == 0:
                 logger.info(f"Optimizing {program}, iteration {num_success_iteration}")
@@ -95,6 +103,7 @@ def master_script(benchmark, num_programs, model, self_optimization_step, use_en
                 reoptimize_lastly_flag = 1
                 evaluator_feedback = ""
                 compilation_errors = 0
+                total_output_difference += 1
                 continue
             else:
                 num_success_iteration += 1
@@ -102,6 +111,7 @@ def master_script(benchmark, num_programs, model, self_optimization_step, use_en
                 compilation_errors = 0
                 # Copy lastest optimized code for logic error re-optimization
                 last_working_optimized_code = last_optimized_code
+                total_output_difference = 0
                 
                 if num_success_iteration == self_optimization_step:
                     logger.info("Optimization Complete, writing results to file.....")

@@ -9,7 +9,6 @@ class Benchmark:
         self.evaluator_feedback_data = {}
         self.original_code = self.set_original_code()
         self.optimization_iteration = 0
-        self.set_original_energy()
 
     @abstractmethod
     def set_original_code(self):

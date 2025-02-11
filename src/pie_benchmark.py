@@ -25,12 +25,7 @@ class PIEBenchmark(Benchmark):
         self.original_code = None
         self.optimization_iteration = 0
 
-        # #PIE specific config parameters
-        # self.num_benchmarks = 5
-        # self.SUBMISSIONS_PER_BENCHMARK= 1
-
         self.set_original_code()
-        self.set_original_energy()
     
     def set_original_code(self):
         source_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}/{self.program}"
@@ -64,6 +59,7 @@ class PIEBenchmark(Benchmark):
             logger.info(f"Original code compile successfully.\n")
         except subprocess.CalledProcessError as e:
             logger.error(f"Original code compile failed: {e}\n")
+            return False
 
         self._run_rapl(problem_id)
 
@@ -72,6 +68,7 @@ class PIEBenchmark(Benchmark):
         #Append results to benchmark data dict
         self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_runtime, 3), len(self.original_code.splitlines()))
         logger.info(f"original_energy_data: {self.energy_data[0]}")
+        return True
 
     def pre_process(self):
         ast = CPPAST("cpp")
@@ -82,6 +79,8 @@ class PIEBenchmark(Benchmark):
         # Remove code block delimiters
         code = code.replace("```cpp", "")
         code = code.replace("```", "")
+        # Remove all comments
+        code = re.sub(r'//.*?$|/\*.*?\*/', '', code, flags=re.DOTALL | re.MULTILINE)
         return code
 
     def compile(self, optimized_code):
@@ -113,13 +112,14 @@ class PIEBenchmark(Benchmark):
         # Needed for makefiles
         os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}")
 
-        # Iterate through all test cases and perform correctnes check
+        # Iterate through all test cases and perform correctness check
         problem_id = self.program.split('_')[0]
         test_case_folder = f"{USER_PREFIX}/benchmark_pie/{problem_id}/test_cases"
-        input_files = glob.glob(f"{test_case_folder}/input.*.txt")
-        output_files = glob.glob(f"{test_case_folder}/output.*.txt")
-        assert (len(input_files) == len(output_files)), "Number of input files and output files do not match"
+        input_files = sorted(glob.glob(f"{test_case_folder}/input.*.txt"))
+        output_files = sorted(glob.glob(f"{test_case_folder}/output.*.txt"))
 
+        assert (len(input_files) == len(output_files)), "Number of input files and output files do not match"
+        
         for i, input_file in enumerate(input_files):
             with open(output_files[i], 'r') as file:
                 self.expect_test_output = self._process_output_content(file.read())
@@ -163,14 +163,15 @@ class PIEBenchmark(Benchmark):
     def _run_program(self, optimized, input_file):
         # Run the make command and capture the output in a variable
         if not optimized:
-            result = subprocess.Popen(["make", "run"], stdin=open(input_file, 'r'), text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='latin-1')
+            result = subprocess.run(["make", "run"], stdin=open(input_file, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
         else:
-            result = subprocess.Popen(["make", "run_optimized"], stdin=open(input_file, 'r'), text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='latin-1')
-        
-        stdout, stderr = result.communicate(timeout=10)
+            logger.info(f"Running optimized program with input file: {input_file}")
+            result = subprocess.run(["make", "run_optimized"], stdin=open(input_file, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
+            
+        logger.info(f"_run_program result: {result}")
 
         # Check for runtime errors
-        if result.returncode != 0:
+        if result.returncode is not None and result.returncode != 0:
             return
 
         # Filter out the unwanted lines
@@ -178,7 +179,7 @@ class PIEBenchmark(Benchmark):
             line for line in result.stdout.splitlines()
             if not (line.startswith("make[") or line.startswith("./"))
         )
-        
+        logger.info(f"filtered_output: {filtered_output}")
         return filtered_output
     
     def _compare_outputs(self, optimized_output):
@@ -351,7 +352,7 @@ def setup_benchmarks(valid_programs, source_code):
         
         #Copy the test case folder from all_test_cases/ into the program's folder
         problem_id = program.split('_')[0]
-        test_case_folder_src = f"{USER_PREFIX}/benchmark_pie/all_test_cases/{problem_id}"
+        test_case_folder_src = f"{USER_PREFIX}/benchmark_pie/merged_test_cases/{problem_id}"
         test_case_folder_dest = f"{folder_path}/test_cases"
         if not os.path.exists(test_case_folder_dest):
             shutil.copytree(test_case_folder_src, test_case_folder_dest)
