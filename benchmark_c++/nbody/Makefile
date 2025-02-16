@@ -9,12 +9,12 @@ compile_optimized:
 measure:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "./nbody.gpp-8.gpp_run 50000000" c++ n-body
-	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++/c++.csv
+	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++.csv
 
 measure_optimized:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "./optimized_nbody.gpp-8.gpp_run 50000000" c++ n-body
-	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++/c++.csv
+	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++.csv
 
 run:
 	./nbody.gpp-8.gpp_run 50000000

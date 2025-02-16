@@ -207,7 +207,7 @@ class PIEBenchmark(Benchmark):
     def _run_rapl(self, problem_id):
         # First clear the contents of the energy data log file
         logger.info(f"Benchmark.run: clearing content in c++.csv")
-        log_file_path = f"{USER_PREFIX}/src/runtime_logs/c++/c++.csv"
+        log_file_path = f"{USER_PREFIX}/src/runtime_logs/c++.csv"
         if os.path.exists(log_file_path):
             file = open(log_file_path, "w+")
             file.close()
@@ -231,7 +231,7 @@ class PIEBenchmark(Benchmark):
             logger.error(f"Benchmark.run: make measure failed: {e}\n")
 
     def _compute_avg(self):
-        energy_data_file = open(f"{USER_PREFIX}/src/runtime_logs/c++/c++.csv", "r")
+        energy_data_file = open(f"{USER_PREFIX}/src/runtime_logs/c++.csv", "r")
         benchmark_data = []
         for line in energy_data_file:
             parts = line.split(';')

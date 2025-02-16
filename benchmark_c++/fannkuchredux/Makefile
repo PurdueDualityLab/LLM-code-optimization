@@ -9,12 +9,12 @@ compile_optimized:
 measure:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "${USER_PREFIX}/benchmark_c++/fannkuchredux/fannkuchredux.gpp-5.gpp_run 12" c++ fannkuch-redux
-	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++/c++.csv
+	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++.csv
 
 measure_optimized:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "${USER_PREFIX}/benchmark_c++/fannkuchredux/optimized_fannkuchredux.gpp-5.gpp_run 12" c++ fannkuch-redux
-	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++/c++.csv
+	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++.csv
 
 run:
 	./fannkuchredux.gpp-5.gpp_run 12
