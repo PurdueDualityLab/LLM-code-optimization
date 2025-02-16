@@ -5,4 +5,4 @@ src/llm/__pycache__/
 src/abstract_syntax_trees/__pycache__/
 benchmark_pie/merged_test_cases
 benchmark_pie/p*
-src/runtime_logs/c++.csv
+src/runtime_logs
