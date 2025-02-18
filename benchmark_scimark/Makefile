@@ -22,27 +22,27 @@ compile:
 run:
 	$(JAVA) $(MAIN_CLASS)
 
-measure FFTBenchmark:
+measureFFTBenchmark:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "$(JAVA) $(FFTBENCHMARK_CLASS)" java FFTBenchmark
 	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
 
-measure SORBenchmark:
+measureSORBenchmark:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "$(JAVA) $(SORBENCHMARK_CLASS)" java SORBenchmark
 	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
 
-measure MonteCarloBenchmark:
+measureMonteCarloBenchmark:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "$(JAVA) $(MONTECARLOBENCHMARK_CLASS)" java MonteCarloBenchmark
 	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
 
-measure SparseCompRowBenchmark:
+measureSparseCompRowBenchmark:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "$(JAVA) $(SPARSECOMPROWBENCHMARK_CLASS)" java SparseCompRowBenchmark
 	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
 
-measure LUBenchmark:
+measureLUBenchmark:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "$(JAVA) $(LUBENCHMARK_CLASS)" java LUBenchmark
 	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
