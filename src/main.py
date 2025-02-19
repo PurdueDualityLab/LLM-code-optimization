@@ -10,7 +10,7 @@ from llm.generator_llm import llm_optimize, handle_compilation_error
 from llm.evaluator_llm import evaluator_llm
 from energy_language_benchmark import get_valid_energy_language_programs, EnergyLanguageBenchmark
 from pie_benchmark import get_valid_pie_programs, PIEBenchmark
-from llm.pattern_llm import filter_patterns
+from llm.advisor_llm import filter_patterns
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
@@ -23,7 +23,6 @@ def parse_arguments():
     parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "o3-mini", "deepseek-r1:671b","deepseek-r1:70b", "qwen2.5-coder:32b", "llama3.3", "codellama:70b"], help="llm used for inference")
     parser.add_argument("--self_optimization_step", type=int, default=5, help="number of LLM self-optimization step")
     parser.add_argument("--num_programs", type=int, default=5, help="number of programs from the benchmark to test")
-    parser.add_argument("--use_energy_patterns", type=int, default=0, help="aid generator LLM with potential energy optimization patterns")
 
     args = parser.parse_args()
     return args
@@ -35,11 +34,11 @@ def get_valid_programs(benchmark, num_programs):
         return get_valid_pie_programs(num_programs)
     return []
 
-def master_script(benchmark, num_programs, model, self_optimization_step, use_energy_patterns):
+def master_script(benchmark, num_programs, model, self_optimization_step):
     #create LLM agent
     generator = LLMAgent(api_key=openai_key, model=model, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
     evaluator = LLMAgent(api_key=openai_key, model=model, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
-    pattern = LLMAgent(api_key=openai_key, model=model, system_message="You are an expert in software energy optimization patterns. You will be given a list of optimization patterns and corresponding source code. Your task is to analyze the source code and determine which patterns are most suitable for improving its energy efficiency.")
+    advisor = LLMAgent(api_key=openai_key, model=model, system_message="You are an expert in software energy optimization patterns. You will be given a list of optimization patterns and corresponding source code. Your task is to analyze the source code and determine which patterns are most suitable for improving its energy efficiency.")
 
     for program in get_valid_programs(benchmark, num_programs):     
         benchmark_obj = EnergyLanguageBenchmark(program) if benchmark == "EnergyLanguage" else PIEBenchmark(program)
@@ -57,11 +56,8 @@ def master_script(benchmark, num_programs, model, self_optimization_step, use_en
         num_success_iteration = 0
         total_output_difference = 0
 
-        if use_energy_patterns:
-            optimization_pattern = filter_patterns(llm_assistant=pattern, source_code=original_code)
-        else:
-            optimization_pattern = None
-        logger.info(f"energy optimization pattern selected: {optimization_pattern}")
+        # filter optimization patterns for most applicable prompts
+        optimization_prompts = filter_patterns(llm_assistant=advisor, source_code=original_code)
 
         while True:
             if total_output_difference == 3:
@@ -74,12 +70,12 @@ def master_script(benchmark, num_programs, model, self_optimization_step, use_en
                     compilation_error_message = benchmark_obj.get_compilation_error()
                     last_optimized_code = handle_compilation_error(error_message=compilation_error_message, llm_assistant=generator)
                 else:
-                    last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, optimization_pattern=optimization_pattern)
+                    last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, optimization_prompts=optimization_prompts)
             else:
                 logger.info("re-optimizing from latest working optimization")
                 generator.clear_memory()
                 evaluator_feedback = ""
-                last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, optimization_pattern=optimization_pattern)
+                last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, optimization_prompts=optimization_prompts)
                 reoptimize_lastly_flag = 0
             
             # code post_process
@@ -137,10 +133,9 @@ def main():
     num_programs = args.num_programs
     model = args.llm
     self_optimization_step = args.self_optimization_step
-    use_energy_patterns = args.use_energy_patterns
        
     #run benchmark
-    master_script(benchmark, num_programs, model, self_optimization_step, use_energy_patterns)
+    master_script(benchmark, num_programs, model, self_optimization_step)
 
 if __name__ == "__main__":
     main()

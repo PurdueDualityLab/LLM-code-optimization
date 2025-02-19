@@ -292,7 +292,7 @@ class EnergyLanguageBenchmark(Benchmark):
 def get_valid_energy_language_programs():
     valid_programs = [
         "binarytrees.gpp-9.c++",
-        # "chameneosredux.gpp-5.c++",
+        "chameneosredux.gpp-5.c++",
         # "fannkuchredux.gpp-5.c++",
         # "fasta.gpp-5.c++",
         # "knucleotide.gpp-3.c++",
