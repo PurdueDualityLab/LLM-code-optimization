@@ -1,0 +1,67 @@
+{
+    "p02915_s995406644_t525143936.cpp": {
+        "energy_change": -46.0,
+        "runtime_change": 29.971724787935916,
+        "loc_change": 77.77777777777779
+    },
+    "p03593_s986310184_t207919771.cpp": {
+        "energy_change": -14.285714285714285,
+        "runtime_change": 2.4935511607910503,
+        "loc_change": 1.7241379310344827
+    },
+    "p00966_s372610250_t682399458.cpp": {
+        "energy_change": -29.72972972972973,
+        "runtime_change": 10.531053105310532,
+        "loc_change": 11.904761904761903
+    },
+    "p03063_s076716181_t260969035.cpp": "Unable to compile original code",
+    "p03854_s809070112_t865486990.cpp": {
+        "energy_change": -35.0,
+        "runtime_change": 15.356151711378368,
+        "loc_change": -66.95652173913044
+    },
+    "p02994_s475834242_t544380016.cpp": {
+        "energy_change": -20.000000000000007,
+        "runtime_change": 8.21554770318023,
+        "loc_change": -59.74025974025974
+    },
+    "p03048_s422425225_t552283199.cpp": {
+        "energy_change": -15.151515151515154,
+        "runtime_change": 10.588235294117647,
+        "loc_change": 8.695652173913043
+    },
+    "p02753_s334099038_t444421107.cpp": {
+        "energy_change": -18.181818181818187,
+        "runtime_change": -1.5720524017467263,
+        "loc_change": -7.6923076923076925
+    },
+    "p02978_s746969787_t358938907.cpp": {
+        "energy_change": -18.518518518518523,
+        "runtime_change": 15.606446140797281,
+        "loc_change": 17.94871794871795
+    },
+    "p00256_s975605520_t910609999.cpp": "Unable to produce functional equivalent programs.",
+    "p03343_s491126018_t553297150.cpp": "Unable to produce functional equivalent programs.",
+    "p03041_s926542188_t690952827.cpp": {
+        "energy_change": -27.027027027027025,
+        "runtime_change": 10.4006820119352,
+        "loc_change": 33.33333333333333
+    },
+    "p03500_s747475157_t880419775.cpp": {
+        "energy_change": -26.31578947368421,
+        "runtime_change": 18.518518518518526,
+        "loc_change": -23.021582733812952
+    },
+    "p02687_s898931830_t753431524.cpp": {
+        "energy_change": 0.0,
+        "runtime_change": 0.0,
+        "loc_change": 0.0
+    },
+    "p02608_s535632421_t918811385.cpp": {
+        "energy_change": -29.72972972972973,
+        "runtime_change": 10.9107303877367,
+        "loc_change": -34.78260869565217
+    },
+    "p02889_s176017267_t071584031.cpp": "Unable to produce functional equivalent programs.",
+    "p00653_s228766196_t076662470.cpp": "Unable to produce functional equivalent programs."
+}
