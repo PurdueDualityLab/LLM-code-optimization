@@ -64,9 +64,11 @@ class EnergyLanguageBenchmark(Benchmark):
         logger.info(f"original_energy_data: {self.energy_data[0]}")
         return True
 
-    def pre_process(self):
+    def pre_process(self, code):
         ast = CPPAST("cpp")
-        source_code_path = f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0]}/{self.program}"
+        source_code_path = f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0]}/ast_{self.program}"
+        with open(source_code_path, 'w') as file:
+            file.write(code)
         return ast.create_ast(source_code_path)
 
     def post_process(self, code):

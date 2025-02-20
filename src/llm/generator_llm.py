@@ -11,7 +11,7 @@ USER_PREFIX = os.getenv('USER_PREFIX')
 with open(f"{USER_PREFIX}/src/llm/llm_prompts/generator_prompt.txt", "r") as file:
     generator_prompt = file.read()
 
-def llm_optimize(code, llm_assistant, evaluator_feedback):
+def llm_optimize(code, llm_assistant, evaluator_feedback, ast):
     class Strategy(BaseModel):
         Strategy: str
         Pros: str
@@ -25,11 +25,12 @@ def llm_optimize(code, llm_assistant, evaluator_feedback):
         final_code: str
 
     if evaluator_feedback == "":
-        prompt = generator_prompt + f"Here is the code to optimize, follow the instruction to provide the optimized code WHILE STRICTLY MAINTAINING IT'S FUNCTIONAL EQUIVALENCE:\n{code}"
+        prompt = generator_prompt + f"Here is the code to optimize, follow the instruction to provide the optimized code WHILE STRICTLY MAINTAINING IT'S FUNCTIONAL EQUIVALENCE:\n{code}.\n" + f"Here is the AST of the source code: {ast}"
     else:
         prompt = f"The code you generated does not improve energy efficiency, please reoptimize WHILE MAINTAINING IT'S FUNCTIONAL CORRECTNESS. Here are some feedbacks: {evaluator_feedback}.\n Original code to optimize:\n {code}"
     
     logger.info(f"llm_optimize: Generator LLM Optimizing ....")
+    logger.info(f"prompt: {prompt}")
     
     llm_assistant.add_to_memory("user", prompt)
     llm_assistant.generate_response(OptimizationReasoning)
