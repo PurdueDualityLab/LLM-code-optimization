@@ -38,11 +38,14 @@ def master_script(benchmark, num_programs, model, self_optimization_step):
     generator = LLMAgent(api_key=openai_key, model=model, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
     evaluator = LLMAgent(api_key=openai_key, model=model, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
 
+    results = {}
+    
     for program in get_valid_programs(benchmark, num_programs):     
         benchmark_obj = EnergyLanguageBenchmark(program) if benchmark == "EnergyLanguage" else PIEBenchmark(program)
         original_code_compiles = benchmark_obj.set_original_energy()
         if not original_code_compiles:
             logger.error(f"Unable to compile original code for {program}")
+            results[program] = "Unable to compile original code"
             continue
         
         compilation_errors = 0
@@ -56,6 +59,7 @@ def master_script(benchmark, num_programs, model, self_optimization_step):
         while True:
             if total_output_difference == 3:
                 logger.error("Unable to produce functional equivalent programs.")
+                results[program] = "Unable to produce functional equivalent programs."
                 break
             # optimize code
             if reoptimize_lastly_flag == 0:
@@ -102,6 +106,8 @@ def master_script(benchmark, num_programs, model, self_optimization_step):
                 # Copy lastest optimized code for logic error re-optimization
                 last_working_optimized_code = last_optimized_code
                 total_output_difference = 0
+
+                evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
                 
                 if num_success_iteration == self_optimization_step:
                     logger.info("Optimization Complete, writing results to file.....")
@@ -112,13 +118,30 @@ def master_script(benchmark, num_programs, model, self_optimization_step):
                         os.makedirs(results_dir)
                     with open(f"{results_dir}/{program}.txt", "w+") as file:
                         file.write(str(dict_str))
+
+                    original_energy = evaluator_feedback_data["original"]["avg_energy"]
+                    original_runtime = evaluator_feedback_data["original"]["avg_runtime"]
+                    original_loc = evaluator_feedback_data["original"]["num_of_lines"]
+
+                    lowest_energy = evaluator_feedback_data["lowest_avg_energy"]["avg_energy"]
+                    lowest_runtime = evaluator_feedback_data["lowest_avg_energy"]["avg_runtime"]
+                    lowest_loc = evaluator_feedback_data["lowest_avg_energy"]["num_of_lines"]
+
+                    results[program] = {
+                        "energy_change": ((lowest_energy - original_energy) / original_energy) * 100,
+                        "runtime_change": ((lowest_runtime - original_runtime) / original_runtime) * 100,
+                        "loc_change": ((lowest_loc - original_loc) / original_loc) * 100,
+                    }
+
                     break
 
                 # getting feedback from the evaluator
                 logger.info("Regression test success, getting evaluator feedback")
-                evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
                 evaluator_feedback = evaluator_llm(evaluator_feedback_data=evaluator_feedback_data, llm_assistant=evaluator)
                 logger.info("Got evaluator feedback")
+
+    with open(f"{results_dir}/results.txt", "w+") as file:
+        json.dump(results, file, indent=4)
 
 def main():
     args=parse_arguments()
