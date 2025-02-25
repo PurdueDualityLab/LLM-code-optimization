@@ -6,7 +6,6 @@ public class Kernel {
 
     public static double measureFFT(int N, double mintime, Random R) {
         // initialize FFT data as complex (N real/img pairs)
-
         double[] x = RandomVector(2 * N, R);
         double[] oldx = NewVectorCopy(x);
         long cycles = 1;
@@ -26,7 +25,17 @@ public class Kernel {
         }
         // approx Mflops
 
-        final double EPS = 1.0e-10;
+        final double EPS = 3.0e-17;
+        double[] regressionX = x.clone();
+        // final double EPS = 1.0e-10;
+        double FFTresult = FFT.test(x);
+        double FFTOptimizedResult = FFTOptimized.test(regressionX);
+        System.out.println("FFT result: " + FFTresult);
+        System.out.println("FFTOptimized result: " + FFTOptimizedResult);
+        if (Math.abs(FFTOptimizedResult - FFTresult) > 0) {
+            System.out.println("Regression test failed");
+            return 0.0;
+        }
         if (FFT.test(x) / N > EPS)
             return 0.0;
 
