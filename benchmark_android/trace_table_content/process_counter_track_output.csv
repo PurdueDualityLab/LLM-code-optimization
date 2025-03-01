@@ -1,0 +1,209 @@
+id,name,type,parent_id,source_arg_set_id,machine_id,unit,description,upid
+17,DispSync:ModelLocked,atrace_counter,,,,,,42
+21,HW_VSYNC_ON_8141241408256768,atrace_counter,,,,,,42
+22,VSYNC-app,atrace_counter,,,,,,42
+24,HW_VSYNC_8141241408256768,atrace_counter,,,,,,42
+27,ws.xsoh.etar.debug/com.android.calendar.AllInOneActivity#0,atrace_counter,,,,,,42
+28,VSYNC-sf,atrace_counter,,,,,,42
+29,PrevFramePending,atrace_counter,,,,,,42
+30,PrevFrameMissed,atrace_counter,,,,,,42
+31,PrevHwcFrameMissed,atrace_counter,,,,,,42
+32,PrevGpuFrameMissed,atrace_counter,,,,,,42
+33,60fps,atrace_counter,,,,,,42
+34,hasClientComposition,atrace_counter,,,,,,42
+36,LumaSamplingStep,atrace_counter,,,,,,42
+37,Total Buffer Size,atrace_counter,,,,,,42
+42,TX - ActivityRecord{643f407 u0 ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity#0,atrace_counter,,,,,,42
+47,TX - com.android.systemui.ImageWallpaper#0,atrace_counter,,,,,,42
+48,TX - dd5ed14 ws.xsoh.etar.debug/com.android.calendar.AllInOneActivity#0,atrace_counter,,,,,,42
+49,TX - ws.xsoh.etar.debug/com.android.calendar.AllInOneActivity#0,atrace_counter,,,,,,42
+51,TX - ImeContainer#0,atrace_counter,,,,,,42
+52,TX - animationLayer#0,atrace_counter,,,,,,42
+53,TX - boostedAnimationLayer#0,atrace_counter,,,,,,42
+54,TX - StatusBar#0,atrace_counter,,,,,,42
+55,TX - NavigationBar0#0,atrace_counter,,,,,,42
+56,TexturePoolSize,atrace_counter,,,,,,42
+57,TX - d29d859 ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity#0,atrace_counter,,,,,,42
+58,ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity#0,atrace_counter,,,,,,42
+59,ImageManagerQueueDepth,atrace_counter,,,,,,42
+60,TX - ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity#0,atrace_counter,,,,,,42
+61,TX - Surface(name=4b8e0e6 StatusBar)/@0x75f7511 - animation-leash#0,atrace_counter,,,,,,42
+62,TX - Surface(name=e479a99 NavigationBar0)/@0x5763676 - animation-leash#0,atrace_counter,,,,,,42
+67,TX - Surface(name=ActivityRecord{9a959c0 u0 ws.xsoh.etar.debug/com.android.calendar.AllInOneActivity)/@0xf357817 - animation-bounds#0,atrace_counter,,,,,,42
+68,TX - Surface(name=ActivityRecord{9a959c0 u0 ws.xsoh.etar.debug/com.android.calendar.AllInOneActivity)/@0xf357817 - animation-leash#0,atrace_counter,,,,,,42
+69,TX - Surface(name=ActivityRecord{643f407 u0 ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity)/@0xc11e0f6 - animation-bounds#0,atrace_counter,,,,,,42
+70,TX - Surface(name=ActivityRecord{643f407 u0 ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity)/@0xc11e0f6 - animation-leash#0,atrace_counter,,,,,,42
+72,TX - Surface(name=52716b9 InputMethod)/@0x8ac14ac - animation-leash#1,atrace_counter,,,,,,42
+73,TX - ActivityRecord{9a959c0 u0 ws.xsoh.etar.debug/com.android.calendar.AllInOneActivity#0,atrace_counter,,,,,,42
+74,ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity#1,atrace_counter,,,,,,42
+75,TX - Surface(name=Dim Layer for - Task=11)/@0xf27673a - animation-leash#0,atrace_counter,,,,,,42
+76,TX - Dim Layer for - Task=11#0,atrace_counter,,,,,,42
+77,TX - Surface(name=7d457c4 ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity)/@0x824db5c - animation-leash#0,atrace_counter,,,,,,42
+78,TX - 7d457c4 ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity#0,atrace_counter,,,,,,42
+79,TX - ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity#1,atrace_counter,,,,,,42
+80,TX - Surface(name=4b8e0e6 StatusBar)/@0x75f7511 - animation-leash#1,atrace_counter,,,,,,42
+81,TX - Surface(name=e479a99 NavigationBar0)/@0x5763676 - animation-leash#1,atrace_counter,,,,,,42
+86,TX - Surface(name=Dim Layer for - DisplayArea.Root)/@0x80b5163 - animation-leash#1,atrace_counter,,,,,,42
+87,TX - Dim Layer for - DisplayArea.Root#0,atrace_counter,,,,,,42
+93,TX - Surface(name=52716b9 InputMethod)/@0x8ac14ac - animation-leash#0,atrace_counter,,,,,,42
+94,TX - ActivityRecord{df688f0 u0 ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity#0,atrace_counter,,,,,,42
+96,TX - Surface(name=ActivityRecord{df688f0 u0 ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity)/@0x7a29923 - animation-bounds#0,atrace_counter,,,,,,42
+97,TX - Surface(name=ActivityRecord{df688f0 u0 ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity)/@0x7a29923 - animation-leash#0,atrace_counter,,,,,,42
+98,TX - db3ddfa ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity#0,atrace_counter,,,,,,42
+109,TX - Surface(name=Dim Layer for - Task=11)/@0x4ded747 - animation-leash#0,atrace_counter,,,,,,42
+110,TX - Surface(name=2805c29 ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity)/@0x6566761 - animation-leash#0,atrace_counter,,,,,,42
+111,TX - 2805c29 ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity#0,atrace_counter,,,,,,42
+115,TX - Surface(name=Dim Layer for - DisplayArea.Root)/@0xa1c206a - animation-leash#1,atrace_counter,,,,,,42
+116,TX - ActivityRecord{9a62ba5 u0 ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity#0,atrace_counter,,,,,,42
+118,TX - Surface(name=ActivityRecord{9a62ba5 u0 ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity)/@0x1a65dcc - animation-bounds#0,atrace_counter,,,,,,42
+119,TX - Surface(name=ActivityRecord{9a62ba5 u0 ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity)/@0x1a65dcc - animation-leash#0,atrace_counter,,,,,,42
+120,TX - e60a307 ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity#0,atrace_counter,,,,,,42
+121,TX - Surface(name=Dim Layer for - Task=11)/@0x6ae5e92 - animation-leash#0,atrace_counter,,,,,,42
+122,TX - Surface(name=da6fe5c ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity)/@0xa2bcf4 - animation-leash#0,atrace_counter,,,,,,42
+123,TX - da6fe5c ws.xsoh.etar.debug/com.android.calendar.EventInfoActivity#0,atrace_counter,,,,,,42
+130,TX - Surface(name=Dim Layer for - DisplayArea.Root)/@0xc079e89 - animation-leash#1,atrace_counter,,,,,,42
+134,oom_score_adj,oom_score_adj,,,,,,23
+135,mem.rss.file,process_memory,,,,,,23
+136,mem.rss.anon,process_memory,,,,,,23
+137,oom_score_adj,oom_score_adj,,,,,,33
+138,mem.rss.file,process_memory,,,,,,33
+139,mem.rss.anon,process_memory,,,,,,33
+140,oom_score_adj,oom_score_adj,,,,,,34
+141,mem.rss.file,process_memory,,,,,,34
+142,mem.rss.anon,process_memory,,,,,,34
+143,oom_score_adj,oom_score_adj,,,,,,36
+144,oom_score_adj,oom_score_adj,,,,,,35
+145,mem.rss.anon,process_memory,,,,,,15
+146,mem.rss.anon,process_memory,,,,,,46
+147,mem.rss.anon,process_memory,,,,,,13
+148,oom_score_adj,oom_score_adj,,,,,,55
+149,oom_score_adj,oom_score_adj,,,,,,22
+150,oom_score_adj,oom_score_adj,,,,,,58
+151,oom_score_adj,oom_score_adj,,,,,,57
+152,oom_score_adj,oom_score_adj,,,,,,30
+153,oom_score_adj,oom_score_adj,,,,,,56
+154,oom_score_adj,oom_score_adj,,,,,,59
+155,oom_score_adj,oom_score_adj,,,,,,52
+156,oom_score_adj,oom_score_adj,,,,,,53
+157,mem.rss.anon,process_memory,,,,,,44
+158,oom_score_adj,oom_score_adj,,,,,,54
+159,mem.rss.anon,process_memory,,,,,,54
+160,oom_score_adj,oom_score_adj,,,,,,65
+161,mem.rss.file,process_memory,,,,,,65
+162,mem.rss.anon,process_memory,,,,,,65
+163,oom_score_adj,oom_score_adj,,,,,,66
+164,mem.rss.file,process_memory,,,,,,66
+165,mem.rss.anon,process_memory,,,,,,66
+166,oom_score_adj,oom_score_adj,,,,,,73
+167,mem.rss.file,process_memory,,,,,,73
+168,mem.rss.anon,process_memory,,,,,,73
+169,oom_score_adj,oom_score_adj,,,,,,74
+170,mem.rss.file,process_memory,,,,,,74
+171,mem.rss.anon,process_memory,,,,,,74
+172,oom_score_adj,oom_score_adj,,,,,,78
+173,mem.rss.file,process_memory,,,,,,78
+174,mem.rss.anon,process_memory,,,,,,78
+175,mem.rss.anon,process_memory,,,,,,50
+176,mem.rss.file,process_memory,,,,,,50
+177,mem.rss.file,process_memory,,,,,,44
+178,mem.rss.anon,process_memory,,,,,,51
+179,mem.rss.file,process_memory,,,,,,15
+180,oom_score_adj,oom_score_adj,,,,,,86
+181,mem.rss.file,process_memory,,,,,,86
+182,mem.rss.anon,process_memory,,,,,,86
+183,mem.rss.anon,process_memory,,,,,,42
+184,oom_score_adj,oom_score_adj,,,,,,87
+185,mem.rss.file,process_memory,,,,,,87
+186,mem.rss.anon,process_memory,,,,,,48
+187,mem.rss.anon,process_memory,,,,,,87
+188,oom_score_adj,oom_score_adj,,,,,,83
+189,mem.rss.anon,process_memory,,,,,,83
+190,oom_score_adj,oom_score_adj,,,,,,50
+191,mem.rss.shmem,process_memory,,,,,,83
+192,oom_score_adj,oom_score_adj,,,,,,91
+193,mem.rss.file,process_memory,,,,,,91
+194,mem.rss.anon,process_memory,,,,,,91
+195,oom_score_adj,oom_score_adj,,,,,,92
+196,mem.rss.file,process_memory,,,,,,92
+197,mem.rss.anon,process_memory,,,,,,92
+198,oom_score_adj,oom_score_adj,,,,,,26
+199,oom_score_adj,oom_score_adj,,,,,,93
+200,mem.rss.file,process_memory,,,,,,93
+201,mem.rss.anon,process_memory,,,,,,93
+202,oom_score_adj,oom_score_adj,,,,,,94
+203,mem.rss.file,process_memory,,,,,,94
+204,mem.rss.anon,process_memory,,,,,,94
+205,oom_score_adj,oom_score_adj,,,,,,95
+206,mem.rss.file,process_memory,,,,,,95
+207,mem.rss.anon,process_memory,,,,,,95
+208,oom_score_adj,oom_score_adj,,,,,,96
+209,mem.rss.file,process_memory,,,,,,96
+210,mem.rss.anon,process_memory,,,,,,96
+211,oom_score_adj,oom_score_adj,,,,,,97
+212,mem.rss.file,process_memory,,,,,,97
+213,mem.rss.anon,process_memory,,,,,,97
+214,oom_score_adj,oom_score_adj,,,,,,98
+215,mem.rss.file,process_memory,,,,,,98
+216,mem.rss.anon,process_memory,,,,,,98
+217,oom_score_adj,oom_score_adj,,,,,,99
+218,mem.rss.file,process_memory,,,,,,99
+219,mem.rss.anon,process_memory,,,,,,99
+220,oom_score_adj,oom_score_adj,,,,,,100
+221,mem.rss.file,process_memory,,,,,,100
+222,mem.rss.anon,process_memory,,,,,,100
+223,oom_score_adj,oom_score_adj,,,,,,101
+224,mem.rss.file,process_memory,,,,,,101
+225,mem.rss.anon,process_memory,,,,,,101
+226,oom_score_adj,oom_score_adj,,,,,,102
+227,mem.rss.file,process_memory,,,,,,102
+228,mem.rss.anon,process_memory,,,,,,102
+229,oom_score_adj,oom_score_adj,,,,,,111
+230,mem.rss.file,process_memory,,,,,,111
+231,mem.rss.anon,process_memory,,,,,,111
+232,oom_score_adj,oom_score_adj,,,,,,112
+233,mem.rss.file,process_memory,,,,,,112
+234,mem.rss.anon,process_memory,,,,,,112
+235,oom_score_adj,oom_score_adj,,,,,,113
+236,mem.rss.file,process_memory,,,,,,113
+237,mem.rss.anon,process_memory,,,,,,113
+238,mem.rss.anon,process_memory,,,,,,71
+239,oom_score_adj,oom_score_adj,,,,,,114
+240,mem.rss.file,process_memory,,,,,,114
+241,mem.rss.anon,process_memory,,,,,,114
+242,oom_score_adj,oom_score_adj,,,,,,115
+243,mem.rss.file,process_memory,,,,,,115
+244,mem.rss.anon,process_memory,,,,,,115
+245,oom_score_adj,oom_score_adj,,,,,,116
+246,mem.rss.file,process_memory,,,,,,116
+247,mem.rss.anon,process_memory,,,,,,116
+248,mem.rss.anon,process_memory,,,,,,35
+249,oom_score_adj,oom_score_adj,,,,,,117
+250,mem.rss.file,process_memory,,,,,,117
+251,mem.rss.anon,process_memory,,,,,,117
+252,oom_score_adj,oom_score_adj,,,,,,118
+253,mem.rss.file,process_memory,,,,,,118
+254,mem.rss.anon,process_memory,,,,,,118
+255,oom_score_adj,oom_score_adj,,,,,,119
+256,mem.rss.file,process_memory,,,,,,119
+257,mem.rss.anon,process_memory,,,,,,119
+258,oom_score_adj,oom_score_adj,,,,,,120
+259,mem.rss.file,process_memory,,,,,,120
+260,mem.rss.anon,process_memory,,,,,,120
+261,oom_score_adj,oom_score_adj,,,,,,121
+262,mem.rss.file,process_memory,,,,,,121
+263,mem.rss.anon,process_memory,,,,,,121
+264,oom_score_adj,oom_score_adj,,,,,,122
+265,mem.rss.file,process_memory,,,,,,122
+266,mem.rss.anon,process_memory,,,,,,122
+267,oom_score_adj,oom_score_adj,,,,,,123
+268,mem.rss.file,process_memory,,,,,,123
+269,mem.rss.anon,process_memory,,,,,,123
+270,oom_score_adj,oom_score_adj,,,,,,124
+271,mem.rss.file,process_memory,,,,,,124
+272,mem.rss.anon,process_memory,,,,,,124
+273,oom_score_adj,oom_score_adj,,,,,,125
+274,mem.rss.file,process_memory,,,,,,125
+275,mem.rss.anon,process_memory,,,,,,125
+276,oom_score_adj,oom_score_adj,,,,,,126
+277,mem.rss.file,process_memory,,,,,,126
+278,mem.rss.anon,process_memory,,,,,,126

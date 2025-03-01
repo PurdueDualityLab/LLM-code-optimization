@@ -1,0 +1,9 @@
+id,name,type,parent_id,source_arg_set_id,machine_id,unit,description,cpu
+0,cpuidle,cpu_idle,,,,,,0
+1,cpuidle,cpu_idle,,,,,,3
+2,cpufreq,cpu_frequency,,,,,,0
+3,cpuidle,cpu_idle,,,,,,2
+4,cpuidle,cpu_idle,,,,,,1
+12,cpufreq,cpu_frequency,,,,,,2
+19,cpufreq,cpu_frequency,,,,,,3
+35,cpufreq,cpu_frequency,,,,,,1

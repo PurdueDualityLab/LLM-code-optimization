@@ -1,0 +1,27 @@
+--------- beginning of main
+I/perfetto(21214): probes_producer.cc:230  Ftrace setup (target_buf=243)
+I/perfetto(21214): ftrace_procfs.cc:176    enabled ftrace
+I/perfetto(  397): ing_service_impl.cc:758 Configured tracing session 233, #sources:1, duration:5000 ms, #buffers:1, total buffer size:4096 KB, total sessions:2, uid:1071 session name: ""
+I/perfetto(21214): probes_producer.cc:230  Ftrace setup (target_buf=244)
+I/perfetto(  397): ing_service_impl.cc:758 Configured tracing session 234, #sources:1, duration:5000 ms, #buffers:1, total buffer size:4096 KB, total sessions:3, uid:1071 session name: ""
+I/perfetto(21214): probes_producer.cc:230  Ftrace setup (target_buf=245)
+I/perfetto(21214): probes_producer.cc:329  Producer stop (id=371)
+I/perfetto(  397): ng_service_impl.cc:1948 Tracing session 233 ended, total sessions:2
+I/perfetto(  397): ing_service_impl.cc:758 Configured tracing session 235, #sources:1, duration:5000 ms, #buffers:1, total buffer size:4096 KB, total sessions:3, uid:1071 session name: ""
+I/perfetto(21214): probes_producer.cc:230  Ftrace setup (target_buf=246)
+I/perfetto(21214): probes_producer.cc:329  Producer stop (id=372)
+I/perfetto(  397): ng_service_impl.cc:1948 Tracing session 234 ended, total sessions:2
+I/perfetto(21214): probes_producer.cc:329  Producer stop (id=373)
+I/perfetto(  397): ng_service_impl.cc:1948 Tracing session 235 ended, total sessions:1
+I/perfetto(21214): probes_producer.cc:329  Producer stop (id=368)
+I/perfetto(21214): ftrace_procfs.cc:183    disabled ftrace
+I/perfetto(21214): probes_producer.cc:329  Producer stop (id=369)
+I/perfetto(21214): probes_producer.cc:329  Producer stop (id=370)
+I/perfetto(31014):    perfetto_cmd.cc:1210 Wrote 9687785 bytes into /data/misc/perfetto-traces/2025-02-25_11-59-6dbdd7.pftrace
+I/perfetto(  397): ng_service_impl.cc:1948 Tracing session 232 ended, total sessions:0
+Running perfetto --background --txt -o /data/misc/perfetto-traces/2025-02-25_11-59-6dbdd7.pftrace -t 20s -b 64mb --app 'ws.xsoh.etar.debug' sched freq idle am wm gfx memory
+[30m[44mTrace started. Press CTRL+C to stop[0m
+[0m
+[0m
+[1mPulling into ./trace_file.perfetto-trace[0m
+/data/misc/perfetto-traces/2025-02-25_11-59-6dbdd7.pftrace: 1 file pulled, 0 skipped. 675.9 MB/s (9687785 bytes in 0.014s)
