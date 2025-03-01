@@ -10,6 +10,7 @@ public class Kernel {
 
         double[] x = RandomVector(N, R);
         double[] y = new double[N];
+        double[] y_optimized = NewVectorCopy(y);
 
         // initialize square sparse matrix
         //
@@ -60,14 +61,23 @@ public class Kernel {
         long cycles = 1;
         while (true) {
             Q.start();
-            SparseCompRow.matmult(y, val, row, col, x, cycles);
+            SparseCompRowOptimized.matmult(y_optimized, val, row, col, x, cycles);
             Q.stop();
             if (Q.read() >= min_time) break;
 
             cycles *= 2;
         }
+
+        SparseCompRow.matmult(y, val, row, col, x, 1);
+        double regressionThreshold = 1.0e-10;
+        double difference = normabs(y, y_optimized); 
+        if (normabs(y, y_optimized) > regressionThreshold) {
+            System.out.println("Regression test failed with difference: " + difference);
+            return 0.0;
+        }
+
         // approx Mflops
-        return SparseCompRow.num_flops(N, nz, cycles) / Q.read() * 1.0e-6;
+        return SparseCompRowOptimized.num_flops(N, nz, cycles) / Q.read() * 1.0e-6;
     }
 
     private static double[] NewVectorCopy(double[] x) {

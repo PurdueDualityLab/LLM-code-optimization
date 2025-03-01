@@ -10,14 +10,23 @@ public class Kernel {
         long cycles = 1;
         while (true) {
             Q.start();
-            MonteCarlo.integrate(cycles);
+            MonteCarloOptimized.integrate(cycles);
             Q.stop();
             if (Q.read() >= min_time) break;
 
             cycles *= 2;
         }
         // approx Mflops
-        return MonteCarlo.num_flops(cycles) / Q.read() * 1.0e-6;
+
+        final double PI = 3.14159265358979323846;
+        double optimizedResult = MonteCarloOptimized.integrate(cycles);
+        double regressionThreshold = 1.6e-4;
+        if (Math.abs(optimizedResult - PI) > regressionThreshold) {
+            System.out.println("Regression test failed, difference: " + Math.abs(optimizedResult - PI));
+            return 0.0;
+        }
+
+        return MonteCarloOptimized.num_flops(cycles) / Q.read() * 1.0e-6;
     }
 
 

@@ -14,8 +14,8 @@ public class Kernel {
         while (true) {
             Q.start();
             for (int i = 0; i < cycles; i++) {
-                FFT.transform(x);    // forward transform
-                FFT.inverse(x);        // backward transform
+                FFTOptimized.transform(x);    // forward transform
+                FFTOptimized.inverse(x);        // backward transform
             }
             Q.stop();
             if (Q.read() >= mintime)
@@ -30,8 +30,10 @@ public class Kernel {
         // final double EPS = 1.0e-10;
         double FFTresult = FFT.test(x);
         double FFTOptimizedResult = FFTOptimized.test(regressionX);
+
         System.out.println("FFT result: " + FFTresult);
         System.out.println("FFTOptimized result: " + FFTOptimizedResult);
+        
         if (Math.abs(FFTOptimizedResult - FFTresult) > 0) {
             System.out.println("Regression test failed");
             return 0.0;

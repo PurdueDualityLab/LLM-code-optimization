@@ -17,7 +17,7 @@ public class Kernel {
             Q.start();
             for (int i = 0; i < cycles; i++) {
                 CopyMatrix(lu, A);
-                LU.factor(lu, pivot);
+                LUOptimized.factor(lu, pivot);
             }
             Q.stop();
             if (Q.read() >= min_time) break;
@@ -28,9 +28,24 @@ public class Kernel {
 
         // verify that LU is correct
         double[] b = RandomVector(N, R);
+        double[] b2 = NewVectorCopy(b);
+
         double[] x = NewVectorCopy(b);
+        double[] x2 = NewVectorCopy(b);
+
 
         LU.solve(lu, pivot, x);
+        LUOptimized.solve(lu, pivot, x2);
+
+        double LUerror = normabs(b, matvec(A, x));
+        double LUOptimizedError = normabs(b2, matvec(A, x2));
+
+        System.out.println( "LU error: " + LUerror);
+        System.out.println( "LUOptimized error: "+ LUOptimizedError);
+        if (Math.abs(LUerror - LUOptimizedError) > 0) {
+            System.out.println("Regression test failed for LUOptimized");
+            return 0.0;
+        }
 
         final double EPS = 1.0e-12;
         if (normabs(b, matvec(A, x)) / N > EPS)
