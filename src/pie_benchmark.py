@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import sys
 from utils import Logger
-
+import csv
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
@@ -63,10 +63,10 @@ class PIEBenchmark(Benchmark):
 
         self._run_rapl(problem_id)
 
-        avg_energy, avg_runtime = self._compute_avg()
+        avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
 
         #Append results to benchmark data dict
-        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_runtime, 3), len(self.original_code.splitlines()))
+        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_latency, 3), len(self.original_code.splitlines()))
         logger.info(f"original_energy_data: {self.energy_data[0]}")
         return True
 
@@ -141,10 +141,10 @@ class PIEBenchmark(Benchmark):
         problem_id = self.program.split('_')[0]
         self._run_rapl(problem_id)
     
-        avg_energy, avg_runtime = self._compute_avg()
+        avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
         
         #Append results to benchmark data dict
-        self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(avg_energy, 3), round(avg_runtime, 3), len(optimized_code.splitlines()))
+        self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(avg_energy, 3), round(avg_latency, 3), len(optimized_code.splitlines()))
         
         # Find the required benchmark elements
         self.evaluator_feedback_data = self._extract_content(self.energy_data)
@@ -233,33 +233,41 @@ class PIEBenchmark(Benchmark):
             logger.error(f"Benchmark.run: make measure failed: {e}\n")
 
     def _compute_avg(self):
-        energy_data_file = open(f"{USER_PREFIX}/src/runtime_logs/c++.csv", "r")
         benchmark_data = []
-        for line in energy_data_file:
-            parts = line.split(';')
-            benchmark_name = parts[0].strip()
-            energy_data = [vals.strip() for vals in parts[1].split(',')]
-            
-            #Remove empty strings for CPU, GPU, DRAM and convert remaining numbers to floats
-            energy_data = [float(num) for num in energy_data if num]
-            benchmark_data.append((benchmark_name, *energy_data))
-
-        energy_data_file.close()
+        throughput = 0  # Initialize throughput variable
+        with open(f'{USER_PREFIX}/src/runtime_logs/c++.csv', mode='r', newline='') as file:
+            csv_reader = csv.reader(file)
+            for index, row in enumerate(csv_reader):
+                if index == 5:
+                    throughput = row[1]
+                else:
+                    benchmark_name = row[0]
+                    energy = row[1]
+                    latency = row[2]
+                    cpu_cycles = row[3]
+                    peak_memory = row[4]
+                    benchmark_data.append((benchmark_name, energy, latency, cpu_cycles, peak_memory))
 
         #Find average energy usage and average runtime
         avg_energy = 0
-        avg_runtime = 0
+        avg_latency = 0
+        avg_cpu_cycles = 0
+        max_peak_memory = 0
         for data in benchmark_data:
-            if data[1] < 0 or data[2] < 0:
+            energy = float(data[1])
+            if energy < 0:
                 benchmark_data.remove(data)
             else:
-                avg_energy += data[1]
-                avg_runtime += data[2]
+                avg_energy += energy
+                avg_latency += float(data[2])
+                avg_cpu_cycles += float(data[3])
+                max_peak_memory = max(max_peak_memory, float(data[4]))
 
         avg_energy /= len(benchmark_data)
-        avg_runtime /= len(benchmark_data)
+        avg_latency /= len(benchmark_data)
+        avg_cpu_cycles /= len(benchmark_data)
 
-        return avg_energy, avg_runtime
+        return avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, float(throughput)
     
     def _extract_content(self, contents):
         # Convert keys to a sorted list to access the first and last elements

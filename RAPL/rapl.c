@@ -310,7 +310,7 @@ void rapl_after(FILE * fp , int core)
   result=read_msr(fd,MSR_PKG_ENERGY_STATUS);
   package_after=(double)result*energy_units;
   //  fprintf(fp,"Package energy: %.6fJ consumed\n",package_after-package_before);
-  fprintf(fp,"Energy: %.18f, ",package_after-package_before);  // PACKAGE
+  fprintf(fp,"%.18f, ",package_after-package_before);  // PACKAGE
 
   // result=read_msr(fd,MSR_PP0_ENERGY_STATUS);
   // pp0_after=(double)result*energy_units;

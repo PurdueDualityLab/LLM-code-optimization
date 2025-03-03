@@ -57,7 +57,7 @@ int main (int argc, char **argv) {
     gettimeofday(&total_start_time, 0);
 
     for (i = 0; i < ntimes; i++) {
-        fprintf(fp, "%s ; ", test);
+        fprintf(fp, "%s, ", test);
 
 #ifdef RUNTIME
         // Get the start time using gettimeofday
@@ -97,12 +97,12 @@ int main (int argc, char **argv) {
         long peak_mem_usage = peak_mem_after - peak_mem_before;
 
 #ifdef RUNTIME
-        fprintf(fp, "Latency (ms): %G, ", time_spent);  // Log runtime in milliseconds
+        fprintf(fp, "%G, ", time_spent);  // Log runtime in milliseconds
 #endif
 
         // Log CPU cycles and peak memory usage
-        fprintf(fp, "CPU Cycles: %lu, ", (unsigned long)cpu_cycles);  // Log CPU cycles used
-        fprintf(fp, "Peak Memory Usage (KB): %ld\n", peak_mem_usage);  // Peak memory usage (in KB)
+        fprintf(fp, "%lu, ", (unsigned long)cpu_cycles);  // Log CPU cycles used
+        fprintf(fp, "%ld\n", peak_mem_usage);  // Peak memory usage (in KB)
     }
 
     // End total time measurement
@@ -116,7 +116,7 @@ int main (int argc, char **argv) {
     double throughput = ntimes / total_time;
 
     // Log throughput
-    fprintf(fp, "Throughput: %f executions per second\n", throughput);
+    fprintf(fp, "Throughput (executions per second), %f\n", throughput);
 
     fclose(fp);
     fflush(stdout);
