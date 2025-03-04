@@ -10,6 +10,7 @@ from llm.generator_llm import llm_optimize, handle_compilation_error
 from llm.evaluator_llm import evaluator_llm
 from energy_language_benchmark import get_valid_energy_language_programs, EnergyLanguageBenchmark
 from pie_benchmark import get_valid_pie_programs, PIEBenchmark
+from scimark_benchmark import get_valid_scimark_programs, SciMarkBenchmark
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
@@ -18,7 +19,7 @@ logger = Logger("logs", sys.argv[2]).logger
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="LLM-Energy-Optimization")
-    parser.add_argument("--benchmark", type=str, default="EnergyLanguage", choices=["EnergyLanguage", "PIE", "Datacenter", "Android"], help="dataset used for experiment")
+    parser.add_argument("--benchmark", type=str, default="EnergyLanguage", choices=["EnergyLanguage", "PIE", "SciMark", "Datacenter", "Android"], help="dataset used for experiment")
     parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "o3-mini", "deepseek-r1:671b","deepseek-r1:70b", "qwen2.5-coder:32b", "llama3.3:70b", "codellama:70b"], help="llm used for inference")
     parser.add_argument("--self_optimization_step", type=int, default=5, help="number of LLM self-optimization step")
     parser.add_argument("--num_programs", type=int, default=5, help="number of programs from the benchmark to test")
@@ -31,7 +32,10 @@ def get_valid_programs(benchmark, num_programs):
         return get_valid_energy_language_programs()
     elif (benchmark == "PIE"):
         return get_valid_pie_programs(num_programs)
-    return []
+    elif (benchmark == "SciMark"):
+        return get_valid_scimark_programs()
+    else:
+        return []
 
 def master_script(benchmark, num_programs, model, self_optimization_step):
     #create LLM agent
@@ -40,8 +44,16 @@ def master_script(benchmark, num_programs, model, self_optimization_step):
 
     results = {}
     
-    for program in get_valid_programs(benchmark, num_programs):     
-        benchmark_obj = EnergyLanguageBenchmark(program) if benchmark == "EnergyLanguage" else PIEBenchmark(program)
+    for program in get_valid_programs(benchmark, num_programs):  
+        if benchmark == "EnergyLanguage":
+            benchmark_obj = EnergyLanguageBenchmark(program)
+        elif benchmark == "PIE":
+            benchmark_obj = PIEBenchmark(program)
+        elif benchmark == "SciMark":
+            benchmark_obj = SciMarkBenchmark(program)
+        else:
+            logger.error("Invalid benchmark")
+            break
         original_code_compiles = benchmark_obj.set_original_energy()
         if not original_code_compiles:
             logger.error(f"Unable to compile original code for {program}")
@@ -69,13 +81,15 @@ def master_script(benchmark, num_programs, model, self_optimization_step):
                     compilation_error_message = benchmark_obj.get_compilation_error()
                     last_optimized_code = handle_compilation_error(error_message=compilation_error_message, llm_assistant=generator)
                 else:
-                    ast = benchmark_obj.pre_process(last_optimized_code)
+                    # ast = benchmark_obj.pre_process(last_optimized_code)
+                    ast = benchmark_obj.pre_process()
                     last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast)
             else:
                 logger.info("re-optimizing from latest working optimization")
                 generator.clear_memory()
                 evaluator_feedback = ""
-                ast = benchmark_obj.pre_process(last_working_optimized_code)
+                # ast = benchmark_obj.pre_process(last_working_optimized_code)
+                ast = benchmark_obj.pre_process()
                 last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast)
                 reoptimize_lastly_flag = 0
             
