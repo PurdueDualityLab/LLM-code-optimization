@@ -11,6 +11,7 @@ from llm.evaluator_llm import evaluator_llm
 from energy_language_benchmark import get_valid_energy_language_programs, EnergyLanguageBenchmark
 from pie_benchmark import get_valid_pie_programs, PIEBenchmark
 from scimark_benchmark import get_valid_scimark_programs, SciMarkBenchmark
+from dacapo_benchmark import get_valid_dacapo_programs, DaCapoBenchmark
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
@@ -19,40 +20,45 @@ genai_api_key = os.getenv('GenAI_API_KEY')
 logger = Logger("logs", sys.argv[2]).logger
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="LLM-Energy-Optimization")
-    parser.add_argument("--benchmark", type=str, default="EnergyLanguage", choices=["EnergyLanguage", "PIE", "SciMark", "Datacenter", "Android"], help="dataset used for experiment")
+    parser = argparse.ArgumentParser(description="LLM-Code-Optimization")
+    parser.add_argument("--benchmark", type=str, default="EnergyLanguage", choices=["EnergyLanguage", "PIE", "SciMark", "Dacapobench", "Android"], help="dataset used for experiment")
     parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "o3-mini", "deepseek-r1:671b","deepseek-r1:70b", "qwen2.5-coder:32b", "llama3.3:70b", "codellama:70b"], help="llm used for inference")
     parser.add_argument("--self_optimization_step", type=int, default=5, help="number of LLM self-optimization step")
-    parser.add_argument("--num_programs", type=int, default=5, help="number of programs from the benchmark to test")
+    parser.add_argument("--num_programs", type=int, default=5, help="For PIE only, number of programs from the benchmark to test")
+    parser.add_argument("--application_name", type=str, default="fop", choices=["Fop", "Cassandra", "H2", "H2o", "Kafka", "Luindex", "Lusearch", "Spring", "Tomact", "Tradebeans", "Tradesoap", "Xalan"], help="For Dacapobench only, name of the application from the benchmark to test")
     parser.add_argument("--genai_studio", type=bool, default=False, help="Flag to indicate if genai_studio is used to inference open-source llms")
 
     args = parser.parse_args()
     return args
 
-def get_valid_programs(benchmark, num_programs):
+def get_valid_programs(benchmark, num_programs, application_name):
     if (benchmark == "EnergyLanguage"):
         return get_valid_energy_language_programs()
     elif (benchmark == "PIE"):
         return get_valid_pie_programs(num_programs)
     elif (benchmark == "SciMark"):
         return get_valid_scimark_programs()
+    elif (benchmark == "Dacapobench"):
+        return get_valid_dacapo_programs(application_name)
     else:
         return []
 
-def master_script(benchmark, num_programs, model, self_optimization_step, use_genai_studio):
+def master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio):
     #create LLM agent
     generator = LLMAgent(api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
     evaluator = LLMAgent(api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
 
     results = {}
     
-    for program in get_valid_programs(benchmark, num_programs):  
+    for program in get_valid_programs(benchmark, num_programs, application_name):  
         if benchmark == "EnergyLanguage":
             benchmark_obj = EnergyLanguageBenchmark(program)
         elif benchmark == "PIE":
             benchmark_obj = PIEBenchmark(program)
         elif benchmark == "SciMark":
             benchmark_obj = SciMarkBenchmark(program)
+        elif benchmark == "Dacapobench":
+            benchmark_obj = DaCapoBenchmark(program)
         else:
             logger.error("Invalid benchmark")
             break
@@ -168,9 +174,10 @@ def main():
     model = args.llm
     self_optimization_step = args.self_optimization_step
     use_genai_studio = args.genai_studio
+    application_name = args.application_name
        
     #run benchmark
-    master_script(benchmark, num_programs, model, self_optimization_step, use_genai_studio)
+    master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio)
 
 if __name__ == "__main__":
     main()
