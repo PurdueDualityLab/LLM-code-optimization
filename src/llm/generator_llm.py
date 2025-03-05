@@ -30,8 +30,10 @@ def llm_optimize(code, llm_assistant, evaluator_feedback, ast):
         prompt = f"The code you generated does not improve energy efficiency, please reoptimize WHILE MAINTAINING IT'S FUNCTIONAL CORRECTNESS. Here are some feedbacks: {evaluator_feedback}.\n Original code to optimize:\n {code}"
     
     logger.info(f"llm_optimize: Generator LLM Optimizing ....")
-    logger.info(f"prompt: {prompt}")
     
+    if llm_assistant.is_genai_studio():
+        prompt = prompt + "\n Strictly only output final code only."
+
     llm_assistant.add_to_memory("user", prompt)
     llm_assistant.generate_response(OptimizationReasoning)
 
@@ -39,7 +41,9 @@ def llm_optimize(code, llm_assistant, evaluator_feedback, ast):
     logger.info(response)
     
     try:
-        if (llm_assistant.is_openai_model()):
+        if llm_assistant.is_genai_studio():
+            final_code = response
+        elif (llm_assistant.is_openai_model()):
             content_dict = json.loads(response["content"])
             final_code = content_dict["final_code"]
         else:
@@ -64,12 +68,17 @@ def handle_compilation_error(error_message, llm_assistant):
         Then, consider if there's a need to use a different optimization strategy to compile successfully or if there are code changes which can fix this implementation strategy.
         Finally, update the code accordingly and ensure it compiles successfully. Ensure that the optimized code is both efficient and error-free and return it. """   
         
+    if llm_assistant.is_genai_studio():
+        prompt = prompt + "\n Strictly only output final code only."
+    
     llm_assistant.add_to_memory("user", compilation_error_prompt)
     llm_assistant.generate_response(ErrorReasoning)
     response = llm_assistant.get_last_msg()
 
     try:
-        if (llm_assistant.is_openai_model()):
+        if llm_assistant.is_genai_studio():
+            final_code = response
+        elif (llm_assistant.is_openai_model()):
             content_dict = json.loads(response["content"])
             final_code = content_dict["final_code"]
         else:

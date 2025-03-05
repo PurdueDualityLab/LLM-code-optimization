@@ -15,6 +15,7 @@ from scimark_benchmark import get_valid_scimark_programs, SciMarkBenchmark
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
 openai_key = os.getenv('API_KEY')
+genai_api_key = os.getenv('GenAI_API_KEY')
 logger = Logger("logs", sys.argv[2]).logger
 
 def parse_arguments():
@@ -23,6 +24,7 @@ def parse_arguments():
     parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "o3-mini", "deepseek-r1:671b","deepseek-r1:70b", "qwen2.5-coder:32b", "llama3.3:70b", "codellama:70b"], help="llm used for inference")
     parser.add_argument("--self_optimization_step", type=int, default=5, help="number of LLM self-optimization step")
     parser.add_argument("--num_programs", type=int, default=5, help="number of programs from the benchmark to test")
+    parser.add_argument("--genai_studio", type=bool, default=False, help="Flag to indicate if genai_studio is used to inference open-source llms")
 
     args = parser.parse_args()
     return args
@@ -37,10 +39,10 @@ def get_valid_programs(benchmark, num_programs):
     else:
         return []
 
-def master_script(benchmark, num_programs, model, self_optimization_step):
+def master_script(benchmark, num_programs, model, self_optimization_step, use_genai_studio):
     #create LLM agent
-    generator = LLMAgent(api_key=openai_key, model=model, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
-    evaluator = LLMAgent(api_key=openai_key, model=model, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
+    generator = LLMAgent(api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
+    evaluator = LLMAgent(api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
 
     results = {}
     
@@ -165,9 +167,10 @@ def main():
     num_programs = args.num_programs
     model = args.llm
     self_optimization_step = args.self_optimization_step
+    use_genai_studio = args.genai_studio
        
     #run benchmark
-    master_script(benchmark, num_programs, model, self_optimization_step)
+    master_script(benchmark, num_programs, model, self_optimization_step, use_genai_studio)
 
 if __name__ == "__main__":
     main()
