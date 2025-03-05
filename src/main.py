@@ -81,15 +81,13 @@ def master_script(benchmark, num_programs, model, self_optimization_step):
                     compilation_error_message = benchmark_obj.get_compilation_error()
                     last_optimized_code = handle_compilation_error(error_message=compilation_error_message, llm_assistant=generator)
                 else:
-                    # ast = benchmark_obj.pre_process(last_optimized_code)
-                    ast = benchmark_obj.pre_process()
+                    ast = benchmark_obj.pre_process(last_optimized_code)
                     last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast)
             else:
                 logger.info("re-optimizing from latest working optimization")
                 generator.clear_memory()
                 evaluator_feedback = ""
-                # ast = benchmark_obj.pre_process(last_working_optimized_code)
-                ast = benchmark_obj.pre_process()
+                ast = benchmark_obj.pre_process(last_working_optimized_code)
                 last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast)
                 reoptimize_lastly_flag = 0
             

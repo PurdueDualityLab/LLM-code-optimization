@@ -69,7 +69,7 @@ class SciMarkBenchmark(Benchmark):
         logger.info(f"original_energy_data: {self.energy_data[0]}")
         return True
 
-    def pre_process(self):
+    def pre_process(self, code):
         ast = JavaAST("Java")
         source_code_path = f"{USER_PREFIX}/benchmark_scimark/{self.program}/{self.program}Optimized.java"
         with open(source_code_path, 'r') as file:
