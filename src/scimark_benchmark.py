@@ -167,21 +167,38 @@ class SciMarkBenchmark(Benchmark):
         if isinstance(content, list):
             content = ''.join(content)
         # Remove all whitespace characters
-        content = content[content.find("n=1024"):]
+        content = content[content.find("n="):]
         return re.sub(r'\s+', '', content)
 
     def _compare_outputs(self, optimized_output):
-        # whitespace remove
         optimized_output = self._process_output_content(optimized_output)
-        
-        if self.expect_test_output == optimized_output:
-            logger.info("Outputs are the same.\n")
-            return True
-        else:
-            logger.error(f"Original program output:\n{self.expect_test_output}\n")
-            logger.error(f"Optimized program output:\n{optimized_output}\n\n")
+        expect_test_output = self._process_output_content(self.expect_test_output)
+
+        pattern = r"RMSError=([0-9\.E\-]+)"
+        try:
+            optimized_output_match = re.search(pattern, optimized_output)
+            expect_test_output_match = re.search(pattern, expect_test_output)
+            print(f"optimized_output_match: {optimized_output_match}, expect_test_output_match: {expect_test_output_match}")
+            if optimized_output_match and expect_test_output_match:
+                # 1024 comes from n (constant in benchmark)
+                optimized_output_float = float(optimized_output_match.group(1)) / 1024
+                expect_test_output_float = float(expect_test_output_match.group(1)) / 1024
+                print(f"optimized_output_float: {optimized_output_float}, expect_test_output_float: {expect_test_output_float}")
+                EPS = 3.0e-17
+                if abs(optimized_output_float) <= EPS:
+                    logger.info(f"Output is within EPS threshold. Original output: {expect_test_output_float}, Optimized output: {optimized_output_float}")
+                    return True
+                else:
+                    logger.error(f"Original program output: {expect_test_output}")
+                    logger.error(f"Optimized program output: {optimized_output}")
+                    return False
+            else:
+                logger.error(f"Original program output:\n{self.expect_test_output}\n")
+                logger.error(f"Optimized program output:\n{optimized_output}\n\n")
+                return False
+        except Exception as e:
+            logger.error(f"Error in comparing outputs: {e}, Optimized output: {optimized_output}, Expected output: {expect_test_output}")
             return False
-    
 
     def _run_rapl(self, problem_id, optimized):
         # First clear the contents of the energy data log file

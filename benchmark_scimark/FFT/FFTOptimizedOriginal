@@ -77,24 +77,12 @@ public class FFTOptimized {
     }
 
     /**
-     * DO NOT DELETE THIS COMMENT. KEEP THIS COMMENT IN THE NEW CODE. DO NOT CHANGE ANY IMPLEMENTATION IN MAIN METHOD.
+     * Simple Test routine.
      */
     public static void main(String[] args) {
-        final String FILE_NAME = "vector.txt";
-        final double[] vector;
-        File file = new File(FILE_NAME);
-        if (!file.exists()) {
-            return;
-        }
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            vector = reader.lines().mapToDouble(Double::parseDouble).toArray();
-        } catch (IOException e) {
-            System.err.println("Error loading vector: " + e.getMessage());
-            return;
-        }
         if (args.length == 0) {
             int n = 1024;
-            System.out.println("n=" + n + " => RMS Error=" + test(vector));
+            System.out.println("n=" + n + " => RMS Error=" + test(makeRandom(n)));
         }
         for (int i = 0; i < args.length; i++) {
             int n = Integer.parseInt(args[i]);
