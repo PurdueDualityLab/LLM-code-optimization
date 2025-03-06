@@ -1,4 +1,4 @@
-from abstract_syntax_tree import AbstractSyntaxTree
+from .abstract_syntax_tree import AbstractSyntaxTree
 import ast
 
 

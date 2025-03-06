@@ -176,6 +176,11 @@ def get_valid_classes():
     return benchmark_classes
 
     
+def get_valid_dacapo_programs(application_name):
+    '''
+    Temporary solution: hardcode a list of 10 classe names from this application
+    '''
+    return []
 
 
 def main():

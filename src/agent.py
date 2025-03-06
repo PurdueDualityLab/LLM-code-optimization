@@ -5,20 +5,23 @@ from utils import Logger
 import sys
 from ollama import Client
 from pydantic import BaseModel
+import requests
 
 logger = Logger("logs", sys.argv[2]).logger
 
 class LLMAgent:
-    def __init__(self, api_key, model, system_message="You are a helpful assistant."):
+    def __init__(self, api_key, genai_api_key, model, use_genai_studio, system_message="You are a helpful assistant."):
         if not model:
             raise ValueError("A model must be specified when creating a LLM Agent.")
         self.model = model
         self.system_message=system_message
         self.memory = [{"role": "system", "content": system_message}]
+        self.use_genai_studio = use_genai_studio
+        self.genai_api_key = genai_api_key
 
         if self.is_openai_model():
             self.client = OpenAI(api_key=api_key)
-        else:
+        elif not use_genai_studio:
             try:
                 subprocess.run(["ollama", "pull", model], check=True)
             except Exception as e:
@@ -32,7 +35,20 @@ class LLMAgent:
     
     def generate_response(self, response_format=BaseModel):
         try:
-            if (self.is_openai_model()):
+            if self.use_genai_studio:
+                url = "https://genai.rcac.purdue.edu/api/chat/completions"
+                headers = {
+                    "Authorization": f"Bearer {self.genai_api_key}",
+                    "Content-Type": "application/json"
+                }
+                body = {
+                    "model": self.model,
+                    "messages": self.memory,
+                }
+
+                response = requests.post(url, headers=headers, json=body).text
+                content = response['choices'][0]['message']['content']
+            elif (self.is_openai_model()):
                 response = self.client.beta.chat.completions.parse(
                     model = self.model,
                      messages = self.memory,
@@ -61,6 +77,9 @@ class LLMAgent:
     
     def is_openai_model(self):
         return self.model in ["gpt-4o", "o1", "o3-mini"]
+    
+    def is_genai_studio(self):
+        return self.use_genai_studio
 
 class OpenAIAssistant:
     def __init__(self, api_key: str, name: str, instructions: str, model: str = "gpt-4o"):
