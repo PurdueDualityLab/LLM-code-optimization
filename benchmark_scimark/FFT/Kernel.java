@@ -1,8 +1,42 @@
 package jnt.scimark2;
+import java.io.*;
 
 public class Kernel {
-    // each measurement returns approx Mflops
+    private static final String FILE_NAME = "vector.txt";
+    private static double[] x;
+    public static void main(String[] args) {
+        Random R = new Random(101010);
 
+        x = loadVector();
+
+        if (x == null) {
+            x = RandomVector(2 * 1024, R);
+            saveVector(FILE_NAME, x);
+        }
+    }
+
+    public static void saveVector(String fileName, double[] vector) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            for (double v : vector) {
+                writer.write(v + "\n");
+            }
+        } catch (IOException e) {
+            System.err.println("Error saving vector: " + e.getMessage());
+        }
+    }
+
+    public static double[] loadVector() {
+        File file = new File(FILE_NAME);
+        if (!file.exists()) {
+            return null; 
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            return reader.lines().mapToDouble(Double::parseDouble).toArray();
+        } catch (IOException e) {
+            System.err.println("Error loading vector: " + e.getMessage());
+            return null;
+        }
+    }
 
     public static double measureFFT(int N, double mintime, Random R) {
         // initialize FFT data as complex (N real/img pairs)

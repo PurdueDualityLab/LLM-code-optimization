@@ -107,19 +107,17 @@ class SciMarkBenchmark(Benchmark):
         return super().get_compilation_error()  
 
     def run_tests(self):
-        # Needed for makefiles
-        # os.chdir(f"{USER_PREFIX}/benchmark_scimark/{self.program}")
+        os.chdir(f"{USER_PREFIX}/benchmark_scimark/{self.program}")
 
-        # if (self.expect_test_output == None):   
-        #     self.expect_test_output = self._process_output_content(self._run_program(False))
+        if (self.expect_test_output == None):   
+            self.expect_test_output = self._process_output_content(self._run_program(False))
         
-        # optimized_output = self._run_program(True)
+        optimized_output = self._run_program(True)
 
-        # if not self._compare_outputs(optimized_output):
-        #     return False
-        # else:
-        #     return True
-        return True
+        if not self._compare_outputs(optimized_output):
+            return False
+        else:
+            return True
 
     def measure_energy(self, optimized_code):            
         #load the optimized code and data
@@ -148,15 +146,47 @@ class SciMarkBenchmark(Benchmark):
     def static_analysis(self, optimized_code):
         return super().static_analysis(optimized_code)
 
-    def _run_program(self, optimized, input_file):
-        return "output"
+    def _run_program(self, optimized):
+        # Run the make command and capture the output in a variable
+        if not optimized:
+            result = subprocess.run(["make", "run"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
+        else:
+            result = subprocess.run(["make", "run_optimized"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
+        
+        # Check for runtime errors
+        if result.returncode != 0:
+            return
+
+        # Filter out the unwanted lines
+        filtered_output = "\n".join(
+            line for line in result.stdout.splitlines()
+            if not (line.startswith("make[") or line.startswith("./"))
+        )
+        
+        return filtered_output
 
     def _process_output_content(self, content):
-        return "output"
+        """Remove all spaces, newline characters, and tabs for cleaner comparison."""
+        if content is None or not isinstance(content, str):
+           return content
+        # If content is a list of lines, join it into a single string
+        if isinstance(content, list):
+            content = ''.join(content)
+        # Remove all whitespace characters
+        content = content[content.find("n=1024"):]
+        return re.sub(r'\s+', '', content)
 
     def _compare_outputs(self, optimized_output):
-        return True
-
+        # whitespace remove
+        optimized_output = self._process_output_content(optimized_output)
+        
+        if self.expect_test_output == optimized_output:
+            logger.info("Outputs are the same.\n")
+            return True
+        else:
+            logger.error(f"Original program output:\n{self.expect_test_output}\n")
+            logger.error(f"Optimized program output:\n{optimized_output}\n\n")
+            return False
     
 
     def _run_rapl(self, problem_id):
@@ -281,9 +311,9 @@ class SciMarkBenchmark(Benchmark):
 def get_valid_scimark_programs():
     valid_programs = [
         "FFT",
-        "LU",
-        "MonteCarlo",
-        "SOR",
-        "SparseMatmult"
+        # "LU",
+        # "MonteCarlo",
+        # "SOR",
+        # "SparseMatmult"
     ]
     return valid_programs
