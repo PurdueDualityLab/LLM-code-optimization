@@ -2,9 +2,8 @@ from benchmark import Benchmark
 import os
 import subprocess
 import sys
-from utils import Logger
 from dotenv import load_dotenv
-from utils import Logger
+# from utils import Logger
 
 load_dotenv()
 # USER_PREFIX = os.getenv('USER_PREFIX')
@@ -15,8 +14,11 @@ USER_PREFIX = os.path.expanduser(os.getenv('USER_PREFIX'))
 
 class DaCapoBenchmark(Benchmark):
 
-    def __init__(self, program):
-        self.program = program
+    def __init__(self, test_name, class_name, benchmark_name):
+        #ex. test_name = PDFNumsArray, class_name = pdf, program = fop
+        self.test_name = test_name
+        self.class_name = class_name
+        self.program = benchmark_name
         self.compilation_error = None
         self.energy_data = {}
         self.evaluator_feedback_data = {}
@@ -24,82 +26,121 @@ class DaCapoBenchmark(Benchmark):
         self.original_code = None
         self.optimization_iteration = 0
         self.set_original_code()
+        
 
+    
+    def set_original_code(self):
+        source_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/{self.program}-2.8/{self.program}-core/src/main/java/org/apache/{self.program}/{self.class_name}/{self.test_name}.java"
+        #the above path still is not general enough for all bms, apache only works for fop and 2.8 is only for fop
+
+        with open(source_path, 'r') as file:
+            self.original_code = file.read() 
+        
+    def get_original_code(self):
+        return self.original_code
+    
+    def set_optimization_iteration(self, num):
+        return super().set_optimization_iteration(num)
+    
+    def get_optimization_iteration(self):
+        return super().get_optimization_iteration()
+    
     def set_original_energy(self):
         # logger.info("Run benchmark on the original code")
 
-        # print(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program.split('.')[0].split('_')[-1]}")
-        # os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program.split('.')[0].split('_')[-1]}")  
+        # compile
+        # Needed for makefiles
+        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/{self.program}-2.8/{self.program}-core/")
+        print(os.getcwd())
 
-        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/")  
-        # get current directory
-        current_dir = os.getcwd()
-        print(f"Current directory: {current_dir}")
-        try: 
-            result = subprocess.run(
-                ["make", "compile", f"BENCHMARK={self.program}"], 
-                check=True,
-                capture_output=True,
-                text=True
-            )
+        try:
+            result = subprocess.run(["make", "compile", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.test_name}"], check=True, capture_output=True, text=True)
+            # logger.info("Original code compile successfully.\n")
             print(result.stdout)
             self.compilation_error = result.stdout + result.stderr
-            # logger.info(f"Original code compile successfully.\n")
         except subprocess.CalledProcessError as e:
             # logger.error(f"Original code compile failed: {e}\n")
-            print(f"Original code compile failed: {e}\n")
+            return False
+        
+        #run make measure using make file for same test class
+        if not self._run_rapl():
             return False
 
-        self._run_rapl()
-
+        #compute avg energy and avg runtime
         avg_energy, avg_runtime = self._compute_avg()
-
-        #Append results to benchmark data dict
         self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_runtime, 3), len(self.original_code.splitlines()))
         # logger.info(f"original_energy_data: {self.energy_data[0]}")
         print(f"original_energy_data: {self.energy_data[0]}")
+        
         return True
+    
+    def pre_process(self, code):
+        #java ast does not exist
+        pass
+    
+    def post_process(self, code):
+        #java ast does not exist
+        pass
 
+    def compile(self, optimized_code):
+        #not sure if this is needed since it doesnt get called in main
+        pass
 
+    def get_compilation_error(self):
+        return super().get_compilation_error()
+    
+    def run_tests(self):
 
-    def set_original_code(self):
-        # capitalize first letter of program name
-        file_name = self.program.capitalize()
-        source_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/harness/src/org/dacapo/harness/{file_name}.java"
-        with open(source_path, 'r') as file:
-            self.original_code = file.read()
+        #make sure all tests pass
+        #run tests
+        #return true if all tests pass, false otherwise
+
+        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/{self.program}-2.8/{self.program}-core/")
+        print(os.getcwd())
+
+        try:
+            result = subprocess.run(["make", "run", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.test_name}"], check=True, capture_output=True, text=True)
+            print(result.stdout)
+        except subprocess.CalledProcessError as e:
+            print(f"Make run failed: {e}\n")
+            return False
+     
+    
+        
 
     def _run_rapl(self):
+
         # First clear the contents of the energy data log file
         # logger.info(f"Benchmark.run: clearing content in c++.csv")
-        # log_file_path = f"{USER_PREFIX}/src/runtime_logs/java/Java.csv"
-        # if os.path.exists(log_file_path):
-
-        #     file = open(log_file_path, "w+")
-        #     file.close()
+        log_file_path = f"{USER_PREFIX}/src/runtime_logs/java.csv"
+        if os.path.exists(log_file_path):
+            file = open(log_file_path, "w")
+            file.close()
 
         #run make measure using make file
-        #change current directory to benchmarks/folder to run make file
-        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/")
-        current_dir = os.getcwd()
-        # logger.info(f"Current directory: {current_dir}")
+        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/{self.program}-2.8/{self.program}-core/")
+        print(os.getcwd())
 
         try:
             if (self.optimization_iteration == 0):
-                result = subprocess.run(["make", "measure", f"BENCHMARK={self.program}"], check=True, capture_output=True, text=True)
+                result = subprocess.run(["make", "measure", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.test_name}"], check=True, capture_output=True, text=True)
             else:
-                result = subprocess.run(["make", "measure_optimized", f"BENCHMARK={self.program}"], check=True, capture_output=True, text=True)
-            
-            # logger.info("Benchmark.run: make measure successfully\n")
+                result = subprocess.run(["make", "measure_optimized", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.test_name}"], check=True, capture_output=True, text=True)
+            # logger.info("Original code compile successfully.\n")
             print(result.stdout)
         except subprocess.CalledProcessError as e:
-            # logger.error(f"Benchmark.run: make measure failed: {e}\n")
-            print(f"Benchmark.run: make measure failed: {e}\n")
+            print(f"Make measure failed: {e}\n")
+            #to get the error message, might have to return the error message from here
+            return False
+        
+        return True
 
     def _compute_avg(self):
-        energy_data_file = open(f"{USER_PREFIX}/src/runtime_logs/java/Java.csv", "r")
+        energy_data_file = open(f"{USER_PREFIX}/src/runtime_logs/java.csv", "r")
         benchmark_data = []
         for line in energy_data_file:
+            if line.startswith("Throughput"):
+                continue
             parts = line.split(';')
             benchmark_name = parts[0].strip()
             energy_data = [vals.strip() for vals in parts[1].split(',')]
@@ -125,11 +166,22 @@ class DaCapoBenchmark(Benchmark):
 
         return avg_energy, avg_runtime
         
+def get_valid_classes():
+
+    benchmark_classes = {'fop': {'pdf': ['PDFNumsArrayTestCase']},
+                        # 'biojava': {'bio': ['BiojavaBenchmark']},
+                        # 'spring': {'spring': ['SpringBenchmark']}
+                         } 
+
+    return benchmark_classes
+
+    
+
 
 def main():
 
 
-    ff = DaCapoBenchmark('fop')
+    ff = DaCapoBenchmark('PDFNumsArray', 'pdf', 'fop')
     
     ff.set_original_code()
     ff.set_original_energy()
