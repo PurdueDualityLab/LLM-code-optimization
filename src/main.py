@@ -124,7 +124,6 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                 continue
             else:
                 num_success_iteration += 1
-                benchmark_obj.set_optimization_iteration(num_success_iteration)
                 compilation_errors = 0
                 # Copy lastest optimized code for logic error re-optimization
                 last_working_optimized_code = last_optimized_code

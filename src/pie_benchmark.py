@@ -35,12 +35,6 @@ class PIEBenchmark(Benchmark):
     def get_original_code(self):
         return self.original_code
     
-    def set_optimization_iteration(self, num):
-        return super().set_optimization_iteration(num)
-    
-    def get_optimization_iteration(self):
-        return super().get_optimization_iteration()
-    
     def set_original_energy(self):
         logger.info("Run benchmark on the original code")
 
@@ -61,7 +55,7 @@ class PIEBenchmark(Benchmark):
             logger.error(f"Original code compile failed: {e}\n")
             return False
 
-        self._run_rapl(problem_id)
+        self._run_rapl(problem_id, optimized=False)
 
         avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
 
@@ -139,7 +133,7 @@ class PIEBenchmark(Benchmark):
         logger.info(f"Iteration {self.optimization_iteration + 1}, run benchmark on the optimized code")
         
         problem_id = self.program.split('_')[0]
-        self._run_rapl(problem_id)
+        self._run_rapl(problem_id, optimized=True)
     
         avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
         
@@ -206,7 +200,7 @@ class PIEBenchmark(Benchmark):
         # Remove all whitespace characters
         return re.sub(r'\s+', '', content)
 
-    def _run_rapl(self, problem_id):
+    def _run_rapl(self, problem_id, optimized):
         # First clear the contents of the energy data log file
         logger.info(f"Benchmark.run: clearing content in c++.csv")
         log_file_path = f"{USER_PREFIX}/src/runtime_logs/c++.csv"
@@ -224,9 +218,11 @@ class PIEBenchmark(Benchmark):
             input_file = "input.0.txt"
             measure_unoptimized = ["make", "measure", f"input={input_file}", f"problem_id={problem_id}"]
             measure_optimized = ["make", "measure_optimized", f"input={input_file}", f"problem_id={problem_id}"]
-            if (self.optimization_iteration == 0):
+            if not optimized:
+                logger.info("Make measure on original program\n")
                 subprocess.run(measure_unoptimized, check=True, capture_output=True, text=True)
             else:
+                logger.info("Make measure on optimized program\n")
                 subprocess.run(measure_optimized, check=True, capture_output=True, text=True)
             logger.info("Benchmark.run: make measure successfully\n")
         except subprocess.CalledProcessError as e:

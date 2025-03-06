@@ -39,12 +39,6 @@ class DaCapoBenchmark(Benchmark):
     def get_original_code(self):
         return self.original_code
     
-    def set_optimization_iteration(self, num):
-        return super().set_optimization_iteration(num)
-    
-    def get_optimization_iteration(self):
-        return super().get_optimization_iteration()
-    
     def set_original_energy(self):
         # logger.info("Run benchmark on the original code")
 
@@ -63,7 +57,7 @@ class DaCapoBenchmark(Benchmark):
             return False
         
         #run make measure using make file for same test class
-        if not self._run_rapl():
+        if not self._run_rapl(optimized=False):
             return False
 
         #compute avg energy and avg runtime
@@ -108,7 +102,7 @@ class DaCapoBenchmark(Benchmark):
     
         
 
-    def _run_rapl(self):
+    def _run_rapl(self, optimized):
 
         # First clear the contents of the energy data log file
         # logger.info(f"Benchmark.run: clearing content in c++.csv")
@@ -122,7 +116,7 @@ class DaCapoBenchmark(Benchmark):
         print(os.getcwd())
 
         try:
-            if (self.optimization_iteration == 0):
+            if not optimized:
                 result = subprocess.run(["make", "measure", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.test_name}"], check=True, capture_output=True, text=True)
             else:
                 result = subprocess.run(["make", "measure_optimized", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.test_name}"], check=True, capture_output=True, text=True)
