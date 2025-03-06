@@ -11,7 +11,7 @@ from llm.evaluator_llm import evaluator_llm
 from energy_language_benchmark import get_valid_energy_language_programs, EnergyLanguageBenchmark
 from pie_benchmark import get_valid_pie_programs, PIEBenchmark
 from scimark_benchmark import get_valid_scimark_programs, SciMarkBenchmark
-from dacapo_benchmark import get_valid_dacapo_programs, DaCapoBenchmark
+from dacapo_benchmark import get_valid_dacapo_classes, DaCapoBenchmark
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
@@ -39,7 +39,7 @@ def get_valid_programs(benchmark, num_programs, application_name):
     elif (benchmark == "SciMark"):
         return get_valid_scimark_programs()
     elif (benchmark == "Dacapobench"):
-        return get_valid_dacapo_programs(application_name)
+        return get_valid_dacapo_classes(application_name)
     else:
         return []
 

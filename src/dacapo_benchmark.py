@@ -166,22 +166,14 @@ class DaCapoBenchmark(Benchmark):
 
         return avg_energy, avg_runtime
         
-def get_valid_classes():
+def get_valid_dacapo_classes(application_name):
 
     benchmark_classes = {'fop': {'pdf': ['PDFNumsArrayTestCase']},
                         # 'biojava': {'bio': ['BiojavaBenchmark']},
                         # 'spring': {'spring': ['SpringBenchmark']}
                          } 
 
-    return benchmark_classes
-
-    
-def get_valid_dacapo_programs(application_name):
-    '''
-    Temporary solution: hardcode a list of 10 classe names from this application
-    '''
-    return []
-
+    return benchmark_classes   
 
 def main():
 
