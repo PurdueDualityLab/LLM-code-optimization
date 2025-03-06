@@ -198,12 +198,13 @@ class SciMarkBenchmark(Benchmark):
         logger.info(f"Current directory: {current_dir}")
 
         try:
-            input_file = "input.0.txt"
-            measure_unoptimized = ["make", "measure", f"input={input_file}", f"problem_id={problem_id}"]
-            measure_optimized = ["make", "measure_optimized", f"input={input_file}", f"problem_id={problem_id}"]
+            measure_unoptimized = ["make", "measure"]
+            measure_optimized = ["make", "measure_optimized"]
             if not optimized:
+                logger.info("Make measure on original program\n")
                 subprocess.run(measure_unoptimized, check=True, capture_output=True, text=True)
             else:
+                logger.info("Make measure on optimized program\n")
                 subprocess.run(measure_optimized, check=True, capture_output=True, text=True)
             logger.info("Benchmark.run: make measure successfully\n")
         except subprocess.CalledProcessError as e:
