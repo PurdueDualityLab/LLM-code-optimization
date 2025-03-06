@@ -38,5 +38,11 @@ measure_optimized:
 	sudo ${USER_PREFIX}/RAPL/main "$(JAVA) $(OPTIMIZED_CLASS)" java FFTOptimized
 	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
 
+measure_mflops:
+	$(JAVA) $(FFTBENCHMARK_CLASS) false
+
+measure_mflops_optimized:
+	$(JAVA) $(FFTBENCHMARK_CLASS) true
+
 clean:
 	rm -rf *.class

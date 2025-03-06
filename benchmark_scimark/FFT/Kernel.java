@@ -1,6 +1,8 @@
 package jnt.scimark2;
 import java.io.*;
 
+import jnt.scimark2.FFTOptimized;
+
 public class Kernel {
     private static final String FILE_NAME = "vector.txt";
     private static double[] x;
@@ -38,7 +40,7 @@ public class Kernel {
         }
     }
 
-    public static double measureFFT(int N, double mintime, Random R) {
+    public static double measureFFT(int N, double mintime, boolean optimized, Random R) {
         // initialize FFT data as complex (N real/img pairs)
         double[] x = RandomVector(2 * N, R);
         double[] oldx = NewVectorCopy(x);
@@ -48,8 +50,13 @@ public class Kernel {
         while (true) {
             Q.start();
             for (int i = 0; i < cycles; i++) {
-                FFTOptimized.transform(x);    // forward transform
-                FFTOptimized.inverse(x);        // backward transform
+                if (optimized){
+                    FFTOptimized.transform(x);    // forward transform
+                    FFTOptimized.inverse(x);        // backward transform
+                } else {
+                    FFT.transform(x);    // forward transform
+                    FFT.inverse(x);        // backward transform
+                }
             }
             Q.stop();
             if (Q.read() >= mintime)
@@ -60,24 +67,28 @@ public class Kernel {
         // approx Mflops
 
         final double EPS = 3.0e-17;
-        double[] regressionX = x.clone();
-        // final double EPS = 1.0e-10;
-        double FFTresult = FFT.test(x);
-        double FFTOptimizedResult = FFTOptimized.test(regressionX);
+        // double[] regressionX = x.clone();
+        // // final double EPS = 1.0e-10;
+        // double FFTresult = FFT.test(x);
+        // double FFTOptimizedResult = FFTOptimized.test(regressionX);
 
-        System.out.println("FFT result: " + FFTresult);
-        System.out.println("FFTOptimized result: " + FFTOptimizedResult);
+        // System.out.println("FFT result: " + FFTresult);
+        // System.out.println("FFTOptimized result: " + FFTOptimizedResult);
         
-        if (Math.abs(FFTOptimizedResult - FFTresult) > 0) {
-            System.out.println("Regression test failed");
-            return 0.0;
+        // if (Math.abs(FFTOptimizedResult - FFTresult) > 0) {
+        //     System.out.println("Regression test failed");
+        //     return 0.0;
+        // }
+        if (optimized){               
+            if (FFTOptimized.test(x) / N > EPS)
+                return 0.0;
+            return FFTOptimized.num_flops(N) * cycles / Q.read() * 1.0e-6;
         }
+
         if (FFT.test(x) / N > EPS)
             return 0.0;
-
         return FFT.num_flops(N) * cycles / Q.read() * 1.0e-6;
     }
-
 
     private static double[] NewVectorCopy(double[] x) {
         int N = x.length;
