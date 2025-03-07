@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import sys
 from utils import Logger
-
+import csv
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
@@ -35,12 +35,6 @@ class PIEBenchmark(Benchmark):
     def get_original_code(self):
         return self.original_code
     
-    def set_optimization_iteration(self, num):
-        return super().set_optimization_iteration(num)
-    
-    def get_optimization_iteration(self):
-        return super().get_optimization_iteration()
-    
     def set_original_energy(self):
         logger.info("Run benchmark on the original code")
 
@@ -61,18 +55,20 @@ class PIEBenchmark(Benchmark):
             logger.error(f"Original code compile failed: {e}\n")
             return False
 
-        self._run_rapl(problem_id)
+        self._run_rapl(problem_id, optimized=False)
 
-        avg_energy, avg_runtime = self._compute_avg()
+        avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
 
         #Append results to benchmark data dict
-        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_runtime, 3), len(self.original_code.splitlines()))
+        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_latency, 3), len(self.original_code.splitlines()))
         logger.info(f"original_energy_data: {self.energy_data[0]}")
         return True
 
-    def pre_process(self):
+    def pre_process(self, code):
         ast = CPPAST("cpp")
-        source_code_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}/{self.program}"
+        source_code_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}/ast_{self.program}"
+        with open(source_code_path, 'w') as file:
+            file.write(code)
         return ast.create_ast(source_code_path)
 
     def post_process(self, code):
@@ -137,12 +133,12 @@ class PIEBenchmark(Benchmark):
         logger.info(f"Iteration {self.optimization_iteration + 1}, run benchmark on the optimized code")
         
         problem_id = self.program.split('_')[0]
-        self._run_rapl(problem_id)
+        self._run_rapl(problem_id, optimized=True)
     
-        avg_energy, avg_runtime = self._compute_avg()
+        avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
         
         #Append results to benchmark data dict
-        self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(avg_energy, 3), round(avg_runtime, 3), len(optimized_code.splitlines()))
+        self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(avg_energy, 3), round(avg_latency, 3), len(optimized_code.splitlines()))
         
         # Find the required benchmark elements
         self.evaluator_feedback_data = self._extract_content(self.energy_data)
@@ -204,10 +200,10 @@ class PIEBenchmark(Benchmark):
         # Remove all whitespace characters
         return re.sub(r'\s+', '', content)
 
-    def _run_rapl(self, problem_id):
+    def _run_rapl(self, problem_id, optimized):
         # First clear the contents of the energy data log file
         logger.info(f"Benchmark.run: clearing content in c++.csv")
-        log_file_path = f"{USER_PREFIX}/src/runtime_logs/c++/c++.csv"
+        log_file_path = f"{USER_PREFIX}/src/runtime_logs/c++.csv"
         if os.path.exists(log_file_path):
             file = open(log_file_path, "w+")
             file.close()
@@ -222,42 +218,52 @@ class PIEBenchmark(Benchmark):
             input_file = "input.0.txt"
             measure_unoptimized = ["make", "measure", f"input={input_file}", f"problem_id={problem_id}"]
             measure_optimized = ["make", "measure_optimized", f"input={input_file}", f"problem_id={problem_id}"]
-            if (self.optimization_iteration == 0):
+            if not optimized:
+                logger.info("Make measure on original program\n")
                 subprocess.run(measure_unoptimized, check=True, capture_output=True, text=True)
             else:
+                logger.info("Make measure on optimized program\n")
                 subprocess.run(measure_optimized, check=True, capture_output=True, text=True)
             logger.info("Benchmark.run: make measure successfully\n")
         except subprocess.CalledProcessError as e:
             logger.error(f"Benchmark.run: make measure failed: {e}\n")
 
     def _compute_avg(self):
-        energy_data_file = open(f"{USER_PREFIX}/src/runtime_logs/c++/c++.csv", "r")
         benchmark_data = []
-        for line in energy_data_file:
-            parts = line.split(';')
-            benchmark_name = parts[0].strip()
-            energy_data = [vals.strip() for vals in parts[1].split(',')]
-            
-            #Remove empty strings for CPU, GPU, DRAM and convert remaining numbers to floats
-            energy_data = [float(num) for num in energy_data if num]
-            benchmark_data.append((benchmark_name, *energy_data))
-
-        energy_data_file.close()
+        throughput = 0  # Initialize throughput variable
+        with open(f'{USER_PREFIX}/src/runtime_logs/c++.csv', mode='r', newline='') as file:
+            csv_reader = csv.reader(file)
+            for index, row in enumerate(csv_reader):
+                if index == 10:
+                    throughput = row[1]
+                else:
+                    benchmark_name = row[0]
+                    energy = row[1]
+                    latency = row[2]
+                    cpu_cycles = row[3]
+                    peak_memory = row[4]
+                    benchmark_data.append((benchmark_name, energy, latency, cpu_cycles, peak_memory))
 
         #Find average energy usage and average runtime
         avg_energy = 0
-        avg_runtime = 0
+        avg_latency = 0
+        avg_cpu_cycles = 0
+        max_peak_memory = 0
         for data in benchmark_data:
-            if data[1] < 0 or data[2] < 0:
+            energy = float(data[1])
+            if energy < 0:
                 benchmark_data.remove(data)
             else:
-                avg_energy += data[1]
-                avg_runtime += data[2]
+                avg_energy += energy
+                avg_latency += float(data[2])
+                avg_cpu_cycles += float(data[3])
+                max_peak_memory = max(max_peak_memory, float(data[4]))
 
         avg_energy /= len(benchmark_data)
-        avg_runtime /= len(benchmark_data)
+        avg_latency /= len(benchmark_data)
+        avg_cpu_cycles /= len(benchmark_data)
 
-        return avg_energy, avg_runtime
+        return avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, float(throughput)
     
     def _extract_content(self, contents):
         # Convert keys to a sorted list to access the first and last elements

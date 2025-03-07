@@ -1,4 +1,4 @@
-You are tasked with optimizing the following C++ code to improve its energy efficiency. This involves reducing CPU cycles, minimizing memory access, and optimizing I/O operations. Please follow these steps and guidelines:
+You are tasked with optimizing the following code to improve its energy efficiency. This involves reducing CPU cycles, minimizing memory access, and optimizing I/O operations. Please follow these steps and guidelines:
 
 Task Instructions:
 - Analyze the code: Examine the provided C++ code in detail.

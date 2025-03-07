@@ -1,0 +1,2 @@
+If you are experiencing problems, please see the known issues for your release: https://perfetto.dev/docs/data-sources/native-heap-profiler#known-issues-android11.
+Output directory heap_trace not empty

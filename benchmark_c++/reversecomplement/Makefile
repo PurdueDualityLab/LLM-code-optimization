@@ -9,12 +9,12 @@ compile_optimized:
 measure:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "./revcomp.gpp-4.gpp_run 0 < revcomp-input25000000.txt" c++ reverse-complement
-	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++/c++.csv
+	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++.csv
 
 measure_optimized:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "./optimized_revcomp.gpp-4.gpp_run 0 < revcomp-input25000000.txt" c++ reverse-complement
-	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++/c++.csv
+	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++.csv
 
 run:
 	./revcomp.gpp-4.gpp_run 0 < revcomp-input25000000.txt

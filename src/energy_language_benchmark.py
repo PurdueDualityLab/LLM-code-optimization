@@ -64,9 +64,11 @@ class EnergyLanguageBenchmark(Benchmark):
         logger.info(f"original_energy_data: {self.energy_data[0]}")
         return True
 
-    def pre_process(self):
+    def pre_process(self, code):
         ast = CPPAST("cpp")
-        source_code_path = f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0]}/{self.program}"
+        source_code_path = f"{USER_PREFIX}/benchmark_c++/{self.program.split('.')[0]}/ast_{self.program}"
+        with open(source_code_path, 'w') as file:
+            file.write(code)
         return ast.create_ast(source_code_path)
 
     def post_process(self, code):
@@ -185,7 +187,7 @@ class EnergyLanguageBenchmark(Benchmark):
     def _run_rapl(self):
         # First clear the contents of the energy data log file
         logger.info(f"Benchmark.run: clearing content in c++.csv")
-        log_file_path = f"{USER_PREFIX}/src/runtime_logs/c++/c++.csv"
+        log_file_path = f"{USER_PREFIX}/src/runtime_logs/c++.csv"
         if os.path.exists(log_file_path):
             file = open(log_file_path, "w+")
             file.close()
@@ -206,7 +208,7 @@ class EnergyLanguageBenchmark(Benchmark):
             logger.error(f"Benchmark.run: make measure failed: {e}\n")
 
     def _compute_avg(self):
-        energy_data_file = open(f"{USER_PREFIX}/src/runtime_logs/c++/c++.csv", "r")
+        energy_data_file = open(f"{USER_PREFIX}/src/runtime_logs/c++.csv", "r")
         benchmark_data = []
         for line in energy_data_file:
             parts = line.split(';')

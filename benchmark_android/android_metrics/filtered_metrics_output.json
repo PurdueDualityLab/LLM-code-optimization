@@ -1,0 +1,2185 @@
+{
+  "metric": {
+    "android_cpu": {
+      "process_info": [
+        {
+          "name": "ws.xsoh.etar.debug",
+          "process": {
+            "name": "ws.xsoh.etar.debug",
+            "uid": 10166,
+            "pid": 5803
+          },
+          "metrics": {
+            "mcycles": 0,
+            "runtime_ns": 780349355,
+            "min_freq_khz": 1,
+            "max_freq_khz": 2,
+            "avg_freq_khz": 0
+          },
+          "threads": [
+            {
+              "name": "xsoh.etar.debug",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 208906777,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 35249962,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 40953762,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 66767006,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 65936047,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 208906777,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "RenderThread",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 479775029,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 125662989,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 121655786,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 97475379,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 134980875,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 479775029,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Jit thread pool",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 25347422,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 4740085,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 6373795,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 7747291,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 6486251,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 25347422,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Binder:5803_E",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 3740215,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 850626,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 973336,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 987167,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 929086,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 3740215,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Binder:5803_8",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 2179167,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 645999,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 378459,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 277334,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 877375,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 2179167,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "queued-work-loo",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 57708,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 44250,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 5541,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 7917,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 57708,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "RenderThread",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 48583,
+                "min_freq_khz": 2,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 48583,
+                    "min_freq_khz": 2,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 2
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 48583,
+                    "min_freq_khz": 2,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "HeapTaskDaemon",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 29202417,
+                "min_freq_khz": 2,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 29202417,
+                    "min_freq_khz": 2,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 2
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 29202417,
+                    "min_freq_khz": 2,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "ReferenceQueueD",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 6948207,
+                "min_freq_khz": 1,
+                "max_freq_khz": 1,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 6948207,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 6948207,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "FinalizerDaemon",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 5756374,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 16625,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 5739749,
+                    "min_freq_khz": 2,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 2
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 5756374,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "FinalizerWatchd",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 66667,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 66667,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 66667,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Binder:5803_F",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 631624,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 189374,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 161583,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 132791,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 147876,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 631624,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "IntentService[A",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 789459,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 107958,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 227291,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 382834,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 71376,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 789459,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "IntentService[A",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 454041,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 370875,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 83166,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 454041,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "IntentService[A",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 1126459,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 416543,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 174666,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 535250,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 1126459,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "IntentService[A",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 766875,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 753125,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 13750,
+                    "min_freq_khz": 2,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 2
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 766875,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "IntentService[A",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 766251,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 379209,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 272875,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 114167,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 766251,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Thread-99",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 1998667,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 1177583,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 226834,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 594250,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 1998667,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Binder:5803_3",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 3507290,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 1900623,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 134416,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 513294,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 958957,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 3507290,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Binder:5803_D",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 37750,
+                "min_freq_khz": 1,
+                "max_freq_khz": 1,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 37750,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 37750,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Binder:5803_10",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 26959,
+                "min_freq_khz": 1,
+                "max_freq_khz": 1,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 26959,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 26959,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Binder:5803_5",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 91833,
+                "min_freq_khz": 1,
+                "max_freq_khz": 1,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 19208,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 54333,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 18292,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 91833,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Profile Saver",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 15917,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 4209,
+                    "min_freq_khz": 2,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 2
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 7458,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 4250,
+                    "min_freq_khz": 2,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 2
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 15917,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "RenderThread",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 36875,
+                "min_freq_khz": 1,
+                "max_freq_khz": 1,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 36875,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 36875,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "IntentService[A",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 557292,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 557292,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 557292,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "IntentService[A",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 660790,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 494624,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 166166,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 660790,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "IntentService[A",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 1251415,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 392041,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 580623,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 222918,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 55833,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 1251415,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "IntentService[A",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 493207,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 175000,
+                    "min_freq_khz": 2,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 2
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 305832,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 12375,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 493207,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "IntentService[A",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 351582,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 195332,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 145792,
+                    "min_freq_khz": 2,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 2
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 10458,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 351582,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Thread-100",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 793668,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 793668,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 793668,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "RenderThread",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 36000,
+                "min_freq_khz": 1,
+                "max_freq_khz": 1,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 36000,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 36000,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "IntentService[A",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 545541,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 71375,
+                    "min_freq_khz": 2,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 2
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 234999,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 239167,
+                    "min_freq_khz": 2,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 2
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 545541,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "IntentService[A",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 510667,
+                "min_freq_khz": 1,
+                "max_freq_khz": 1,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 92000,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 418667,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 510667,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "IntentService[A",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 1151333,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 389627,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 559040,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 159541,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 43125,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 1151333,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "IntentService[A",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 612418,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 115209,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 497209,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 612418,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "IntentService[A",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 410751,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 79250,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 130793,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 200708,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 410751,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Thread-101",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 554624,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 1,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 199208,
+                    "min_freq_khz": 2,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 2
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 355416,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 554624,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 2,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Binder:5803_1",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 50583,
+                "min_freq_khz": 1,
+                "max_freq_khz": 1,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 2,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 43375,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 7208,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 50583,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Binder:5803_7",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 30500,
+                "min_freq_khz": 1,
+                "max_freq_khz": 1,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 30500,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 30500,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Binder:5803_4",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 21584,
+                "min_freq_khz": 1,
+                "max_freq_khz": 1,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 21584,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 21584,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Binder:5803_9",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 21709,
+                "min_freq_khz": 1,
+                "max_freq_khz": 1,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 2000,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 19709,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 21709,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Binder:5803_C",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 6500,
+                "min_freq_khz": 1,
+                "max_freq_khz": 1,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 6500,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 6500,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Binder:5803_B",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 9875,
+                "min_freq_khz": 1,
+                "max_freq_khz": 1,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 0,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 9875,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 9875,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Binder:5803_2",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 750,
+                "min_freq_khz": 1,
+                "max_freq_khz": 1,
+                "avg_freq_khz": 0
+              },
+              "core": [
+                {
+                  "id": 3,
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 750,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1
+                  }
+                }
+              ],
+              "core_type": [
+                {
+                  "type": "unknown",
+                  "metrics": {
+                    "mcycles": 0,
+                    "runtime_ns": 750,
+                    "min_freq_khz": 1,
+                    "max_freq_khz": 1,
+                    "avg_freq_khz": 0
+                  }
+                }
+              ]
+            }
+          ],
+          "core": [
+            {
+              "id": 0,
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 173613827,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              }
+            },
+            {
+              "id": 1,
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 204416258,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              }
+            },
+            {
+              "id": 2,
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 176010137,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              }
+            },
+            {
+              "id": 3,
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 226309133,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              }
+            }
+          ],
+          "core_type": [
+            {
+              "type": "unknown",
+              "metrics": {
+                "mcycles": 0,
+                "runtime_ns": 780349355,
+                "min_freq_khz": 1,
+                "max_freq_khz": 2,
+                "avg_freq_khz": 0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "android_mem": {
+      "process_metrics": [
+        {
+          "process_name": "ws.xsoh.etar.debug",
+          "total_counters": {
+            "anon_rss": {
+              "min": 100122624.0,
+              "max": 110817280.0,
+              "avg": 105994090.57309,
+              "delta": 7544832.0
+            },
+            "anon_and_swap": {
+              "min": 100122624.0,
+              "max": 110817280.0,
+              "avg": 105994090.57309,
+              "delta": 7544832.0
+            }
+          }
+        }
+      ]
+    }
+  }
+}

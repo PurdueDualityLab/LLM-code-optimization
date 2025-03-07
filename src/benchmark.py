@@ -19,14 +19,6 @@ class Benchmark:
         return self.original_code
     
     @abstractmethod
-    def set_optimization_iteration(self, num):
-        self.optimization_iteration = num
-    
-    @abstractmethod
-    def get_optimization_iteration(self):
-        return self.optimization_iteration
-    
-    @abstractmethod
     def set_original_energy(self):
         pass
     
@@ -80,5 +72,7 @@ class Benchmark:
         if not self.run_tests():
             return Status.RUNTIME_ERROR_OR_TEST_FAILED
         if not self.measure_energy(optimized_code):
+            self.optimization_iteration += 1
             return Status.ALL_TEST_PASSED
+        self.optimization_iteration += 1
         return Status.PERFORMANCE_IMPROVED     

@@ -9,12 +9,12 @@ compile_optimized:
 measure:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "./knucleotide.gpp-3.gpp_run 0 < knucleotide-input25000000.txt" c++ k-nucleotide
-	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++/c++.csv
+	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++.csv
 
 measure_optimized:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "./optimized_knucleotide.gpp-3.gpp_run 0 < knucleotide-input25000000.txt" c++ k-nucleotide
-	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++/c++.csv
+	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++.csv
 
 run:
 	./knucleotide.gpp-3.gpp_run 0 < knucleotide-input25000000.txt

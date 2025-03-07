@@ -9,12 +9,12 @@ compile_optimized:
 measure:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "${USER_PREFIX}/benchmark_c++/binarytrees/binarytrees.gpp-9.gpp_run 21" c++ binary-trees
-	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++/c++.csv
+	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++.csv
 
 measure_optimized:
 	sudo modprobe msr
 	sudo ${USER_PREFIX}/RAPL/main "${USER_PREFIX}/benchmark_c++/binarytrees/optimized_binarytrees.gpp-9.gpp_run 21" c++ binary-trees
-	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++/c++.csv
+	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/c++.csv
 
 run:
 	./binarytrees.gpp-9.gpp_run 21

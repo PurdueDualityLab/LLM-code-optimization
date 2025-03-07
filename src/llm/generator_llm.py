@@ -11,7 +11,9 @@ USER_PREFIX = os.getenv('USER_PREFIX')
 with open(f"{USER_PREFIX}/src/llm/llm_prompts/generator_prompt.txt", "r") as file:
     generator_prompt = file.read()
 
-def llm_optimize(code, llm_assistant, evaluator_feedback, optimization_prompts):
+
+# Look at changes on main (ast)
+def llm_optimize(code, llm_assistant, evaluator_feedback, optimization_prompts, ast):
     class Strategy(BaseModel):
         Prompt: str
         Pros: str
@@ -28,6 +30,7 @@ def llm_optimize(code, llm_assistant, evaluator_feedback, optimization_prompts):
     logger.info(formatted_prompts)
     
     updated_generator_prompt = generator_prompt.replace('{optimization_prompts}', formatted_prompts)
+    # add ast to prompt
     if evaluator_feedback == "":
         prompt = updated_generator_prompt + f"Here is the code to optimize, follow the instruction to provide the optimized code WHILE MAINTAINING IT'S FUNCTIONAL CORRECTNESS:\n{code}"
     else:
@@ -35,6 +38,9 @@ def llm_optimize(code, llm_assistant, evaluator_feedback, optimization_prompts):
     
     logger.info(f"llm_optimize: Generator LLM Optimizing ....")
     
+    if llm_assistant.is_genai_studio():
+        prompt = prompt + "\n Strictly only output final code only."
+
     llm_assistant.add_to_memory("user", prompt)
     llm_assistant.generate_response(OptimizationReasoning)
 
@@ -42,7 +48,9 @@ def llm_optimize(code, llm_assistant, evaluator_feedback, optimization_prompts):
     logger.info(response)
     
     try:
-        if (llm_assistant.is_openai_model()):
+        if llm_assistant.is_genai_studio():
+            final_code = response
+        elif (llm_assistant.is_openai_model()):
             content_dict = json.loads(response["content"])
             final_code = content_dict["final_code"]
         else:
@@ -67,12 +75,17 @@ def handle_compilation_error(error_message, llm_assistant):
         Then, consider if there's a need to use a different optimization prompt to compile successfully or if there are code changes which can fix this implementation.
         Finally, update the code accordingly and ensure it compiles successfully. Ensure that the optimized code is both efficient and error-free and return it. """   
         
+    if llm_assistant.is_genai_studio():
+        prompt = prompt + "\n Strictly only output final code only."
+    
     llm_assistant.add_to_memory("user", compilation_error_prompt)
     llm_assistant.generate_response(ErrorReasoning)
     response = llm_assistant.get_last_msg()
 
     try:
-        if (llm_assistant.is_openai_model()):
+        if llm_assistant.is_genai_studio():
+            final_code = response
+        elif (llm_assistant.is_openai_model()):
             content_dict = json.loads(response["content"])
             final_code = content_dict["final_code"]
         else:
