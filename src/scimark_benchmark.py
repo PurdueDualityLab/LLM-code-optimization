@@ -208,7 +208,8 @@ class SciMarkBenchmark(Benchmark):
         optimized_output_float = float(optimized_output) / 1024
         expect_test_output_float = float(self.expect_test_output) / 1024
         print(f"optimized_output_float: {optimized_output_float}, expect_test_output_float: {expect_test_output_float}")
-        EPS = 1.0e-10
+        # EPS = 3.0e-17 # FFT
+        EPS = 1.0e-10 # LU
         if abs(optimized_output_float) <= EPS:
             logger.info(f"Output is within EPS threshold. Original output: {expect_test_output_float}, Optimized output: {optimized_output_float}")
             return True
