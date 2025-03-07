@@ -11,16 +11,13 @@ JFLAGS = -d .
 
 SRCS = *.java  
 RANDOM_SRC = ../Random.java
-STOPWATCH_SRC = ../Stopwatch.java
 FFTBENCHMARK_CLASS = jnt/scimark2/FFTBenchmark
 
 MAIN_CLASS = jnt/scimark2/FFT
 OPTIMIZED_CLASS = jnt.scimark2.FFTOptimized
-KERNEL_CLASS = jnt.scimark2.Kernel
 
 compile:
-	$(JAVAC) $(JFLAGS) $(SRCS) $(RANDOM_SRC) $(STOPWATCH_SRC)
-	$(JAVA) $(KERNEL_CLASS)
+	$(JAVAC) $(JFLAGS) $(SRCS) $(RANDOM_SRC)
 
 run:
 	@$(JAVA) $(MAIN_CLASS)

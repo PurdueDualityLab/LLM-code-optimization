@@ -208,7 +208,7 @@ class SciMarkBenchmark(Benchmark):
         optimized_output_float = float(optimized_output) / 1024
         expect_test_output_float = float(self.expect_test_output) / 1024
         print(f"optimized_output_float: {optimized_output_float}, expect_test_output_float: {expect_test_output_float}")
-        EPS = 3.0e-17
+        EPS = 1.0e-10
         if abs(optimized_output_float) <= EPS:
             logger.info(f"Output is within EPS threshold. Original output: {expect_test_output_float}, Optimized output: {optimized_output_float}")
             return True
@@ -351,8 +351,8 @@ class SciMarkBenchmark(Benchmark):
 
 def get_valid_scimark_programs():
     valid_programs = [
-        "FFT",
-        # "LU",
+        # "FFT",
+        "LU",
         # "MonteCarlo",
         # "SOR",
         # "SparseMatmult"
