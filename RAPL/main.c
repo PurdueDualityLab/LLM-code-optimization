@@ -55,7 +55,7 @@ int main (int argc, char **argv) {
     // Language name
     strcpy(language, argv[2]);
     // Path to language .csv file
-    strcpy(path, "/home/hpeng/E2COOL/src/runtime_logs/");
+    strcpy(path, "/home/rishi/E2COOL/src/runtime_logs/");
     strcat(language, ".csv");
     strcat(path, language);
     // Test name
@@ -74,7 +74,7 @@ int main (int argc, char **argv) {
     gettimeofday(&total_start_time, 0);
 
     for (i = 0; i < ntimes; i++) {
-        fprintf(fp, "%s, ", test);
+        fprintf(fp, "%s; ", test);
 
 #ifdef RUNTIME
         // Get the start time using gettimeofday

@@ -79,13 +79,14 @@ public class FFT {
      * Simple Test routine.
      */
     public static void main(String[] args) {
+        double MULTIPLIER = 3.3333333333333e6;
         if (args.length == 0) {
             int n = 1024;
-            System.out.println(test(makeRandom(n)));
+            System.out.println(test(makeRandom(n)) / 1024 * MULTIPLIER);
         }
         for (int i = 0; i < args.length; i++) {
             int n = Integer.parseInt(args[i]);
-            System.out.println(test(makeRandom(n)));
+            System.out.println(test(makeRandom(n)) / 1024 * MULTIPLIER);
         }
     }
     /* ______________________________________________________________________ */

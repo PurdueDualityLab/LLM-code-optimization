@@ -8,18 +8,40 @@ package jnt.scimark2;
  * of 1's so that L and U can be stored compactly in
  * a NxN matrix.
  */
-public class LUOptimzied {
+public class LUOptimized {
     private final double[][] LU_;
     private final int[] pivot_;
 
+    public static void main(String[] args) {
+        Random R = new Random(101010); // Given constant
+        int N = 100; // Given constant
+        
+        double[][] A = RandomMatrix(N, N, R);
+        double[][] lu = new double[N][N];
+        int[] pivot = new int[N];
 
+        CopyMatrix(lu, A);
+
+        int status = factor(lu, pivot);
+        if (status != 0) {
+            System.err.println("LU factorization failed due to singular matrix.");
+            return;
+        }
+        
+        double[] b = RandomVector(N, R);
+        double[] x = new_copy(b);
+
+        solve(lu, pivot, x);
+        System.out.println(normabs(b, matvec(A, x)) / 1024);
+    }
     /**
      * Initalize LU factorization from matrix.
      *
      * @param A (in) the matrix to associate with this
      *          factorization.
      */
-    public LU(double[][] A) {
+
+    public LUOptimized(double[][] A) {
         int M = A.length;
         int N = A[0].length;
 
@@ -45,6 +67,83 @@ public class LUOptimzied {
      * ones, and is not explicitly stored.
      */
 
+    private static double[] NewVectorCopy(double[] x) {
+        int N = x.length;
+
+        double[] y = new double[N];
+        System.arraycopy(x, 0, y, 0, N);
+
+        return y;
+    }
+
+    private static double[][] RandomMatrix(int M, int N, Random R) {
+        double[][] A = new double[M][N];
+
+        for (int i = 0; i < N; i++)
+            for (int j = 0; j < N; j++)
+                A[i][j] = R.nextDouble();
+        return A;
+    }
+
+    private static double[] RandomVector(int N, Random R) {
+        double[] A = new double[N];
+
+        for (int i = 0; i < N; i++)
+            A[i] = R.nextDouble();
+        return A;
+    }
+
+    private static double[] matvec(double[][] A, double[] x) {
+        int N = x.length;
+        double[] y = new double[N];
+
+        matvec(A, x, y);
+
+        return y;
+    }
+
+    private static void matvec(double[][] A, double[] x, double[] y) {
+        int M = A.length;
+        int N = A[0].length;
+
+        for (int i = 0; i < M; i++) {
+            double sum = 0.0;
+            double[] Ai = A[i];
+            for (int j = 0; j < N; j++)
+                sum += Ai[j] * x[j];
+
+            y[i] = sum;
+        }
+    }
+
+    private static double normabs(double[] x, double[] y) {
+        int N = x.length;
+        double sum = 0.0;
+
+        for (int i = 0; i < N; i++)
+            sum += Math.abs(x[i] - y[i]);
+
+        return sum;
+    }
+
+    private static void CopyMatrix(double[][] B, double[][] A) {
+        int M = A.length;
+        int N = A[0].length;
+
+        int remainder = N & 3;         // N mod 4;
+
+        for (int i = 0; i < M; i++) {
+            double[] Bi = B[i];
+            double[] Ai = A[i];
+            System.arraycopy(Ai, 0, Bi, 0, remainder);
+            for (int j = remainder; j < N; j += 4) {
+                Bi[j] = Ai[j];
+                Bi[j + 1] = Ai[j + 1];
+                Bi[j + 2] = Ai[j + 2];
+                Bi[j + 3] = Ai[j + 3];
+            }
+        }
+    }
 
     public static double num_flops(int N) {
         // rougly 2/3*N^3
