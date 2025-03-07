@@ -12,7 +12,7 @@ load_dotenv()
 USER_PREFIX = os.path.expanduser(os.getenv('USER_PREFIX'))
 
 
-# logger = Logger("logs", sys.argv[2]).logger
+logger = Logger("logs", sys.argv[2]).logger
 
 class DaCapoBenchmark(Benchmark):
 
@@ -42,7 +42,7 @@ class DaCapoBenchmark(Benchmark):
         return self.original_code
     
     def set_original_energy(self):
-        # logger.info("Run benchmark on the original code")
+        logger.info("Run benchmark on the original code")
 
         # compile
         # Needed for makefiles
@@ -52,11 +52,11 @@ class DaCapoBenchmark(Benchmark):
 
         try:
             result = subprocess.run(["make", "compile", f"BENCHMARK={self.program}", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.test_name}"], check=True, capture_output=True, text=True)
-            # logger.info("Original code compile successfully.\n")
+            logger.info("Original code compile successfully.\n")
             print(result.stdout)
             self.compilation_error = result.stdout + result.stderr
         except subprocess.CalledProcessError as e:
-            # logger.error(f"Original code compile failed: {e}\n")
+            logger.error(f"Original code compile failed: {e}\n")
             print(f"Original code compile failed: {e}\n") 
             print(e.stderr + e.stdout)
             return False
@@ -68,8 +68,8 @@ class DaCapoBenchmark(Benchmark):
         #compute avg energy and avg runtime
         avg_energy, avg_runtime = self._compute_avg()
         self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_runtime, 3), len(self.original_code.splitlines()))
-        # logger.info(f"original_energy_data: {self.energy_data[0]}")
-        print(f"original_energy_data: {self.energy_data[0]}")
+        logger.info(f"original_energy_data: {self.energy_data[0]}")
+        # print(f"original_energy_data: {self.energy_data[0]}")
         
         return True
     
@@ -154,7 +154,7 @@ class DaCapoBenchmark(Benchmark):
         
     def measure_energy(self, optimized_code):
         
-        self._run_rapl()
+        self._run_rapl(optimized=True)
 
         avg_energy, avg_runtime = self._compute_avg()
         self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(avg_energy, 3), round(avg_runtime, 3), len(optimized_code.splitlines()))
@@ -169,7 +169,7 @@ class DaCapoBenchmark(Benchmark):
     def _run_rapl(self, optimized):
 
         # First clear the contents of the energy data log file
-        # logger.info(f"Benchmark.run: clearing content in c++.csv")
+        logger.info(f"Benchmark.run: clearing content in c++.csv")
         log_file_path = f"{USER_PREFIX}/src/runtime_logs/java.csv"
         if os.path.exists(log_file_path):
             file = open(log_file_path, "w")
@@ -181,7 +181,7 @@ class DaCapoBenchmark(Benchmark):
 
         try:
             result = subprocess.run(["make", "measure", f"BENCHMARK={self.program}", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.test_name}"], check=True, capture_output=True, text=True)
-            # logger.info("Original code compile successfully.\n")
+            logger.info("Original code compile successfully.\n")
             print(result.stdout)
             return True
         except subprocess.CalledProcessError as e:
@@ -249,8 +249,8 @@ class DaCapoBenchmark(Benchmark):
 
         # print all values
         for key, (source_code, avg_energy, avg_runtime, num_of_lines) in contents.items():
-            # logger.info(f"key: {key}, avg_energy: {avg_energy}, avg_runtime: {avg_runtime}, num_of_lines: {num_of_lines}")
-            print(f"key: {key}, avg_energy: {avg_energy}, avg_runtime: {avg_runtime}, num_of_lines: {num_of_lines}")
+            logger.info(f"key: {key}, avg_energy: {avg_energy}, avg_runtime: {avg_runtime}, num_of_lines: {num_of_lines}")
+            # print(f"key: {key}, avg_energy: {avg_energy}, avg_runtime: {avg_runtime}, num_of_lines: {num_of_lines}")
 
         # Extract the first(original) and last(current) elements
         first_key = keys[0]
@@ -300,7 +300,7 @@ class DaCapoBenchmark(Benchmark):
         # logger.info("Lowest Average Energy: Average Energy: {}, Average Runtime: {}".format(benchmark_info["lowest_avg_energy"]["avg_energy"], benchmark_info["lowest_avg_energy"]["avg_runtime"]))
         # logger.info("Current: Average Energy: {}, Average Runtime: {}".format(benchmark_info["current"]["avg_energy"], benchmark_info["current"]["avg_runtime"]))
     
-def get_valid_dacapo_programs(application_name):
+def get_valid_dacapo_classes(application_name):
     '''
     Temporary solution: hardcode a list of 10 classe names from this application
     '''
@@ -312,13 +312,13 @@ def get_valid_dacapo_programs(application_name):
     return benchmark_classes[application_name]
 
 #just to test the code
-# def main():
+def main():
 
 
-#     ff = DaCapoBenchmark('PDFNumsArray', 'pdf', 'fop')
-#     ff.set_original_energy()
-#     # status = ff.static_analysis(ff.original_code)
-#     # print(f"Status: {status}")
+    ff = DaCapoBenchmark('PDFNumsArray', 'pdf', 'fop')
+    ff.set_original_energy()
+    # status = ff.static_analysis(ff.original_code)
+    # print(f"Status: {status}")
 
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()
