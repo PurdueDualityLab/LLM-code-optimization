@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from abstract_syntax_trees.java_ast import JavaAST
 from status import Status
 from utils import Logger
+import csv
 
 load_dotenv()
 # USER_PREFIX = os.getenv('USER_PREFIX')
@@ -62,15 +63,13 @@ class DaCapoBenchmark(Benchmark):
             return False
         
         #run make measure using make file for same test class
-        if not self._run_rapl(optimized=False):
+        if not self._run_rapl():
             return False
 
         #compute avg energy and avg runtime
-        avg_energy, avg_runtime = self._compute_avg()
-        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_runtime, 3), len(self.original_code.splitlines()))
-        logger.info(f"original_energy_data: {self.energy_data[0]}")
-        # print(f"original_energy_data: {self.energy_data[0]}")
-        
+        avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
+
+        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_latency, 3),  avg_cpu_cycles, max_peak_memory, round(throughput, 3), len(self.original_code.splitlines()))        
         return True
     
     def pre_process(self, code):
@@ -154,19 +153,18 @@ class DaCapoBenchmark(Benchmark):
         
     def measure_energy(self, optimized_code):
         
-        self._run_rapl(optimized=True)
+        self._run_rapl()
 
         avg_energy, avg_runtime = self._compute_avg()
         self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(avg_energy, 3), round(avg_runtime, 3), len(optimized_code.splitlines()))
 
         self.evaluator_feedback_data = self._extract_content(self.energy_data)
 
-
         self._print_benchmark_info(self.evaluator_feedback_data)
         
         return True
 
-    def _run_rapl(self, optimized):
+    def _run_rapl(self):
 
         # First clear the contents of the energy data log file
         logger.info(f"Benchmark.run: clearing content in c++.csv")
@@ -185,41 +183,46 @@ class DaCapoBenchmark(Benchmark):
             print(result.stdout)
             return True
         except subprocess.CalledProcessError as e:
-            print(f"Make measure failed: {e}\n")
+            logger.error(f"Make measure failed: {e}\n")
             #to get the error message, might have to return the error message from here
             return False
     
-
     def _compute_avg(self):
-        energy_data_file = open(f"{USER_PREFIX}/src/runtime_logs/java.csv", "r")
         benchmark_data = []
-        for line in energy_data_file:
-            if line.startswith("Throughput"):
-                continue
-            parts = line.split(';')
-            benchmark_name = parts[0].strip()
-            energy_data = [vals.strip() for vals in parts[1].split(',')]
-            
-            #Remove empty strings for CPU, GPU, DRAM and convert remaining numbers to floats
-            energy_data = [float(num) for num in energy_data if num]
-            benchmark_data.append((benchmark_name, *energy_data))
-
-        energy_data_file.close()
+        throughput = 0  # Initialize throughput variable
+        with open(f'{USER_PREFIX}/src/runtime_logs/java.csv', mode='r', newline='') as file:
+            csv_reader = csv.reader(file)
+            for index, row in enumerate(csv_reader):
+                if index == 10:
+                    throughput = row[1]
+                else:
+                    benchmark_name = row[0]
+                    energy = row[1]
+                    latency = row[2]
+                    cpu_cycles = row[3]
+                    peak_memory = row[4]
+                    benchmark_data.append((benchmark_name, energy, latency, cpu_cycles, peak_memory))
 
         #Find average energy usage and average runtime
         avg_energy = 0
-        avg_runtime = 0
+        avg_latency = 0
+        avg_cpu_cycles = 0
+        max_peak_memory = 0
         for data in benchmark_data:
-            if data[1] < 0 or data[2] < 0:
+            energy = float(data[1])
+            if energy < 0:
                 benchmark_data.remove(data)
             else:
-                avg_energy += data[1]
-                avg_runtime += data[2]
+                avg_energy += energy
+                avg_latency += float(data[2])
+                avg_cpu_cycles += float(data[3])
+                max_peak_memory = max(max_peak_memory, float(data[4]))
 
         avg_energy /= len(benchmark_data)
-        avg_runtime /= len(benchmark_data)
+        avg_latency /= len(benchmark_data)
+        avg_cpu_cycles /= len(benchmark_data)
 
-        return avg_energy, avg_runtime
+        return avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, float(throughput)
         
     def get_evaluator_feedback_data(self):
         return super().get_evaluator_feedback_data()
@@ -245,12 +248,12 @@ class DaCapoBenchmark(Benchmark):
             restore_original()
         
     def _extract_content(self, contents):
+        # Convert keys to a sorted list to access the first and last elements
         keys = list(contents.keys())
 
         # print all values
-        for key, (source_code, avg_energy, avg_runtime, num_of_lines) in contents.items():
-            logger.info(f"key: {key}, avg_energy: {avg_energy}, avg_runtime: {avg_runtime}, num_of_lines: {num_of_lines}")
-            # print(f"key: {key}, avg_energy: {avg_energy}, avg_runtime: {avg_runtime}, num_of_lines: {num_of_lines}")
+        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, max_peak_memory, throughput, num_of_lines) in contents.items():
+            logger.info(f"key: {key}, avg_energy: {avg_energy}, avg_runtime: {avg_runtime}, avg_cpu_cycles: {avg_cpu_cycles}, max_peak_memory: {max_peak_memory}, throughput: {throughput}, num_of_lines: {num_of_lines}")
 
         # Extract the first(original) and last(current) elements
         first_key = keys[0]
@@ -263,7 +266,7 @@ class DaCapoBenchmark(Benchmark):
         # Loop through the contents to find the key with the lowest avg_energy
         min_avg_energy = float('inf')
         min_energy_key = None
-        for key, (source_code, avg_energy, avg_runtime, num_of_lines) in contents.items():
+        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, max_peak_memory, throughput, num_of_lines) in contents.items():
             if avg_energy < min_avg_energy:
                 min_avg_energy = avg_energy
                 min_energy_key = key
@@ -276,30 +279,38 @@ class DaCapoBenchmark(Benchmark):
                 "source_code": first_value[0],
                 "avg_energy": first_value[1],
                 "avg_runtime": first_value[2],
-                "num_of_lines": first_value[3]
+                "avg_cpu_cycles": first_value[3],
+                "max_peak_memory": first_value[4],
+                "throughput": first_value[5],
+                "num_of_lines": first_value[6]
             },
             "lowest_avg_energy": {
                 "source_code": min_value[0],
                 "avg_energy": min_value[1],
                 "avg_runtime": min_value[2],
-                "num_of_lines": min_value[3]
+                "avg_cpu_cycles": min_value[3],
+                "max_peak_memory": min_value[4],
+                "throughput": min_value[5],
+                "num_of_lines": min_value[6]
             },
             "current": {
                 "source_code": last_value[0],
                 "avg_energy": last_value[1],
                 "avg_runtime": last_value[2],
-                "num_of_lines": last_value[3]
+                "avg_cpu_cycles": last_value[3],
+                "max_peak_memory": last_value[4],
+                "throughput": last_value[5],
+                "num_of_lines": last_value[6]
             }
         }
         
         return benchmark_info
     
     def _print_benchmark_info(self, benchmark_info):
-        pass
-        # logger.info("Original: Average Energy: {}, Average Runtime: {}".format(benchmark_info["original"]["avg_energy"], benchmark_info["original"]["avg_runtime"]))
-        # logger.info("Lowest Average Energy: Average Energy: {}, Average Runtime: {}".format(benchmark_info["lowest_avg_energy"]["avg_energy"], benchmark_info["lowest_avg_energy"]["avg_runtime"]))
-        # logger.info("Current: Average Energy: {}, Average Runtime: {}".format(benchmark_info["current"]["avg_energy"], benchmark_info["current"]["avg_runtime"]))
-    
+        logger.info("Original: Average Energy: {}, Average Runtime: {}, Average CPU Cycles: {}, Max Peak Memory: {}, Throughput: {}".format(benchmark_info["original"]["avg_energy"], benchmark_info["original"]["avg_runtime"], benchmark_info["original"]["avg_cpu_cycles"], benchmark_info["original"]["max_peak_memory"], benchmark_info["original"]["throughput"]))
+        logger.info("Lowest Average Energy: Average Energy: {}, Average Runtime: {}, Average CPU Cycles: {}, Max Peak Memory: {}, Throughput: {}".format(benchmark_info["lowest_avg_energy"]["avg_energy"], benchmark_info["lowest_avg_energy"]["avg_runtime"], benchmark_info["lowest_avg_energy"]["avg_cpu_cycles"], benchmark_info["lowest_avg_energy"]["max_peak_memory"], benchmark_info["lowest_avg_energy"]["throughput"]))
+        logger.info("Current: Average Energy: {}, Average Runtime: {}, Average CPU Cycles: {}, Max Peak Memory: {}, Throughput: {}".format(benchmark_info["current"]["avg_energy"], benchmark_info["current"]["avg_runtime"], benchmark_info["current"]["avg_cpu_cycles"], benchmark_info["current"]["max_peak_memory"], benchmark_info["current"]["throughput"]))
+
 def get_valid_dacapo_classes(application_name):
     '''
     Temporary solution: hardcode a list of 10 classe names from this application
@@ -316,7 +327,7 @@ def main():
 
 
     ff = DaCapoBenchmark('PDFNumsArray', 'pdf', 'fop')
-    ff.set_original_energy()
+    #ff.set_original_energy()
     # status = ff.static_analysis(ff.original_code)
     # print(f"Status: {status}")
 

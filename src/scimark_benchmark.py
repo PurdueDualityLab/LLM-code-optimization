@@ -251,7 +251,7 @@ class SciMarkBenchmark(Benchmark):
         with open(f'{USER_PREFIX}/src/runtime_logs/java.csv', mode='r', newline='') as file:
             csv_reader = csv.reader(file)
             for index, row in enumerate(csv_reader):
-                if index == 5:
+                if index == 10:
                     throughput = row[1]
                 else:
                     benchmark_name = row[0]

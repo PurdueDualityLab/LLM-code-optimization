@@ -8,6 +8,7 @@
 #include <sys/resource.h>  // For getrusage
 
 #define RUNTIME 1
+#define WARMUP_RUNS 3  // Number of warm-up iterations
 
 // Function to read the time-stamp counter (CPU cycles)
 static inline uint64_t read_tsc() {
@@ -17,16 +18,27 @@ static inline uint64_t read_tsc() {
 }
 
 // Function to get peak memory usage
-void get_peak_memory_usage(long *peak_mem) {
-    struct rusage usage;
-    getrusage(RUSAGE_SELF, &usage);
+void get_peak_memory_usage(long *mem) {
+    FILE *file = fopen("/proc/self/status", "r");
+    if (!file) return -1;
 
-    *peak_mem = usage.ru_maxrss; // Peak memory usage in kilobytes
+    char line[256];
+    long peak_mem = -1;
+
+    while (fgets(line, sizeof(line), file)) {
+        if (strncmp(line, "VmHWM:", 6) == 0) {  
+            sscanf(line, "VmHWM: %ld kB", &peak_mem);
+            break;
+        }
+    }
+
+    fclose(file);
+    *mem = peak_mem;
 }
 
 int main (int argc, char **argv) {
     char command[500]="", language[500]="", test[500]="", path[500]="";
-    int ntimes = 5;
+    int ntimes = 10;
     int core = 0;
     int i=0;
 
@@ -43,7 +55,7 @@ int main (int argc, char **argv) {
     // Language name
     strcpy(language, argv[2]);
     // Path to language .csv file
-    strcpy(path, "/home/rishi/E2COOL/src/runtime_logs/");
+    strcpy(path, "/home/hpeng/E2COOL/src/runtime_logs/");
     strcat(language, ".csv");
     strcat(path, language);
     // Test name
@@ -53,11 +65,16 @@ int main (int argc, char **argv) {
 
     rapl_init(core);
 
+    // **Warm-up Phase**
+    for (i = 0; i < WARMUP_RUNS; i++) {
+        system(command);  // Run the command but don't record performance
+    }
+
     // Start total time measurement for throughput calculation
     gettimeofday(&total_start_time, 0);
 
     for (i = 0; i < ntimes; i++) {
-        fprintf(fp, "%s; ", test);
+        fprintf(fp, "%s, ", test);
 
 #ifdef RUNTIME
         // Get the start time using gettimeofday
