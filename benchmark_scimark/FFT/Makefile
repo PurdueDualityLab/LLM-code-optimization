@@ -23,10 +23,10 @@ compile:
 	$(JAVA) $(KERNEL_CLASS)
 
 run:
-	$(JAVA) $(MAIN_CLASS)
+	@$(JAVA) $(MAIN_CLASS)
 
 run_optimized:
-	$(JAVA) $(OPTIMIZED_CLASS)
+	@$(JAVA) $(OPTIMIZED_CLASS)
 
 measure:
 	sudo modprobe msr
@@ -39,10 +39,10 @@ measure_optimized:
 	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
 
 measure_mflops:
-	$(JAVA) $(FFTBENCHMARK_CLASS) false
+	@$(JAVA) $(FFTBENCHMARK_CLASS) false
 
 measure_mflops_optimized:
-	$(JAVA) $(FFTBENCHMARK_CLASS) true
+	@$(JAVA) $(FFTBENCHMARK_CLASS) true
 
 clean:
 	rm -rf *.class
