@@ -11,19 +11,35 @@ JFLAGS = -d .
 
 SRCS = *.java  
 RANDOM_SRC = ../Random.java
-STOPWATCH_SRC = ../Stopwatch.java
-MONTECARLOBENCHMARK_CLASS = jnt/scimark2/MonteCarloBenchmark
+FFTBENCHMARK_CLASS = jnt/scimark2/MonteCarloBenchmark	
+
+MAIN_CLASS = jnt/scimark2/MonteCarlo
+OPTIMIZED_CLASS = jnt.scimark2.MonteCarloOptimized
 
 compile:
-	$(JAVAC) $(JFLAGS) $(SRCS) $(RANDOM_SRC) $(STOPWATCH_SRC)
+	$(JAVAC) $(JFLAGS) $(SRCS) $(RANDOM_SRC) 
 
 run:
-	$(JAVA) $(MAIN_CLASS)
+	@$(JAVA) $(MAIN_CLASS)
+
+run_optimized:
+	@$(JAVA) $(OPTIMIZED_CLASS)
 
 measure:
 	sudo modprobe msr
-	sudo ${USER_PREFIX}/RAPL/main "$(JAVA) $(MONTECARLOBENCHMARK_CLASS)" java MonteCarloBenchmark
+	sudo ${USER_PREFIX}/RAPL/main "$(JAVA) $(MAIN_CLASS)" java MonteCarlo
 	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
+
+measure_optimized:
+	sudo modprobe msr
+	sudo ${USER_PREFIX}/RAPL/main "$(JAVA) $(OPTIMIZED_CLASS)" java MonteCarloOptimized
+	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
+
+measure_mflops:
+	@$(JAVA) $(FFTBENCHMARK_CLASS) false
+
+measure_mflops_optimized:
+	@$(JAVA) $(FFTBENCHMARK_CLASS) true
 
 clean:
 	rm -rf *.class

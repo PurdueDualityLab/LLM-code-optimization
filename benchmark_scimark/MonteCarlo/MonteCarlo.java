@@ -31,13 +31,18 @@ package jnt.scimark2;
 public class MonteCarlo {
     final static int SEED = 113;
 
+    public static void main(String[] args) {
+        int cycles = 1073741824;
+        double result = integrate(cycles);
+        System.out.println(result);
+    } 
+
     public static double num_flops(long Num_samples) {
         // 3 flops in x^2+y^2 and 1 flop in random routine
 
         return ((double) Num_samples) * 4.0;
 
     }
-
 
     public static double integrate(long Num_samples) {
 
