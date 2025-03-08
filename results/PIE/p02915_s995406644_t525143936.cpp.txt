@@ -1,0 +1,56 @@
+{
+    "0": [
+        "#include<bits/stdc++.h>\nusing namespace std;\n\nint main(){\n    long long int a,b=1,c;\n    cin>>a;\n  cout<<pow(a,3)<<endl;\n\n}\n",
+        0.403,
+        2.448,
+        7339054.019455253,
+        448.0,
+        0.354,
+        9
+    ],
+    "1": [
+        "#include<bits/stdc++.h>\nusing namespace std;\n\nint main(){\n    long long int a;\n    cin >> a;\n    cout << a * a * a << endl;\n    return 0;\n}",
+        0.394,
+        2.402,
+        7200589.025291828,
+        460.0,
+        0.531494140625,
+        9
+    ],
+    "2": [
+        "#include<bits/stdc++.h>\nusing namespace std;\n\nint main(){\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    long long int a;\n    cin >> a;\n    cout << a * a * a << '\\n';\n    return 0;\n}",
+        0.354,
+        2.177,
+        6525919.241245137,
+        420.0,
+        0.4290771484375,
+        11
+    ],
+    "3": [
+        "#include<bits/stdc++.h>\nusing namespace std;\n\nint main(){\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    long long int a;\n    cin >> a;\n    cout << a * a * a << '\\n';\n    return 0;\n}",
+        0.331,
+        2.345,
+        7029705.614785993,
+        440.0,
+        0.18218994140625,
+        11
+    ],
+    "4": [
+        "#include<bits/stdc++.h>\nusing namespace std;\n\nint main(){\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    long long int a;\n    cin >> a;\n    cout << a * a * a << '\\n';\n    return 0;\n}\n\n\n",
+        0.307,
+        2.282,
+        6841975.881322958,
+        420.0,
+        1.38763427734375,
+        13
+    ],
+    "5": [
+        "#include<bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    long long int a;\n    cin >> a;\n    cout << a * a * a << '\\n';\n    return 0;\n}\n\n\n\n",
+        0.369,
+        2.532,
+        7589362.445525291,
+        412.0,
+        0.4208984375,
+        14
+    ]
+}

@@ -11,9 +11,10 @@ import sys
 from utils import Logger
 import csv
 
+
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
-logger = Logger("logs", sys.argv[2]).logger
+logger = Logger("logs", sys.argv[2] if len(sys.argv) > 2 else "default").logger
 
 class PIEBenchmark(Benchmark):
     def __init__(self, program):
@@ -63,11 +64,15 @@ class PIEBenchmark(Benchmark):
         self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_latency, 3),  avg_cpu_cycles, max_peak_memory, round(throughput, 3), len(self.original_code.splitlines()))
         return True
 
-    def pre_process(self, code):
+    def pre_process(self, code=None):
         ast = CPPAST("cpp")
-        source_code_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}/ast_{self.program}"
-        with open(source_code_path, 'w') as file:
-            file.write(code)
+        source_code_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}/{self.program}"
+        
+        # If code is provided, write it to the file first
+        if code:
+            with open(source_code_path, 'w') as file:
+                file.write(code)
+            
         return ast.create_ast(source_code_path)
 
     def post_process(self, code):
@@ -207,61 +212,182 @@ class PIEBenchmark(Benchmark):
             file = open(log_file_path, "w+")
             file.close()
 
-        #run make measure using make file
+        # Get all test cases
+        test_case_folder = f"{USER_PREFIX}/benchmark_pie/{problem_id}/test_cases"
+        input_files = sorted(glob.glob(f"{test_case_folder}/input.*.txt"))
+        
         #change current directory to benchmarks/folder to run make file
         os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}")
         current_dir = os.getcwd()
         logger.info(f"Current directory: {current_dir}")
 
+        # Store per-test-case energy measurements
+        self.test_case_measurements = {}
+        
+        # Add logging for number of test cases
+        logger.info(f"Running energy measurements for {len(input_files)} test cases")
+
+        # Run RAPL for each test case
+        for i, input_file in enumerate(input_files):
+            try:
+                measure_unoptimized = ["make", "measure", f"input={input_file}", f"problem_id={problem_id}"]
+                measure_optimized = ["make", "measure_optimized", f"input={input_file}", f"problem_id={problem_id}"]
+                
+                test_case_id = os.path.basename(input_file).replace("input.", "").replace(".txt", "")
+                logger.info(f"Running test case {i+1}/{len(input_files)}: {test_case_id}")
+                
+                # Get the current size of the CSV to know where this test case's data begins
+                current_lines = []
+                if os.path.exists(log_file_path):
+                    with open(log_file_path, 'r') as f:
+                        current_lines = f.readlines()
+                
+                if (not optimized):
+                    subprocess.run(measure_unoptimized, check=True, capture_output=True, text=True)
+                else:
+                    subprocess.run(measure_optimized, check=True, capture_output=True, text=True)
+                
+                # Read the CSV to get this test case's measurements
+                if os.path.exists(log_file_path):
+                    with open(log_file_path, 'r') as f:
+                        lines = f.readlines()
+                        if len(lines) > len(current_lines):
+                            # Find new lines that were added
+                            for line in lines[len(current_lines):]:
+                                if line.strip():  # Skip empty lines
+                                    # Parse the energy data from the line
+                                    energy, runtime = self._parse_measurement_line(line)
+                                    if energy is not None:
+                                        self.test_case_measurements[test_case_id] = {
+                                            'energy': energy,
+                                            'runtime': runtime
+                                        }
+                                        logger.info(f"Test case {test_case_id}: Energy = {energy:.6f} J, Runtime = {runtime:.6f} s")
+                
+                logger.info(f"Energy measurement completed for test case {input_file}\n")
+            except subprocess.CalledProcessError as e:
+                logger.error(f"Benchmark.run: make measure failed for test case {input_file}: {e}\n")
+        
+        # Display summary of all test case measurements
+        self._print_test_case_summary()
+
+    def _parse_measurement_line(self, line):
+        """Parse energy and runtime from a measurement line in the CSV"""
         try:
-            input_file = "input.0.txt"
-            measure_unoptimized = ["make", "measure", f"input={input_file}", f"problem_id={problem_id}"]
-            measure_optimized = ["make", "measure_optimized", f"input={input_file}", f"problem_id={problem_id}"]
-            if not optimized:
-                logger.info("Make measure on original program\n")
-                subprocess.run(measure_unoptimized, check=True, capture_output=True, text=True)
+            line = line.strip()
+            # Try parsing with semicolon format first
+            if ';' in line:
+                parts = line.split(';')
+                if len(parts) >= 2:
+                    energy_data = [vals.strip() for vals in parts[1].split(',')]
+                    if len(energy_data) >= 2:
+                        return float(energy_data[0]), float(energy_data[1])
+            # Try comma-only format
             else:
-                logger.info("Make measure on optimized program\n")
-                subprocess.run(measure_optimized, check=True, capture_output=True, text=True)
-            logger.info("Benchmark.run: make measure successfully\n")
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Benchmark.run: make measure failed: {e}\n")
+                parts = line.split(',')
+                if len(parts) >= 3:  # Assuming column 1 is name, 2 is energy, 3 is runtime
+                    return float(parts[1]), float(parts[2])
+        except (ValueError, IndexError) as e:
+            logger.warning(f"Failed to parse measurement line: {line}, error: {e}")
+        
+        return None, None
+
+    def _print_test_case_summary(self):
+        """Print a summary of all test case measurements"""
+        if not hasattr(self, 'test_case_measurements') or not self.test_case_measurements:
+            logger.info("No test case measurements available to summarize")
+            return
+        
+        logger.info("\n===== TEST CASE ENERGY MEASUREMENTS SUMMARY =====")
+        logger.info(f"{'Test Case':<10} {'Energy (J)':<15} {'Runtime (s)':<15}")
+        logger.info("-" * 45)
+        
+        # Sort test cases by ID
+        sorted_test_cases = sorted(self.test_case_measurements.keys(), 
+                                  key=lambda x: int(x) if x.isdigit() else x)
+        
+        total_energy = 0
+        total_runtime = 0
+        count = 0
+        
+        # Print each test case's measurements
+        for test_id in sorted_test_cases:
+            data = self.test_case_measurements[test_id]
+            energy = data.get('energy', 0)
+            runtime = data.get('runtime', 0)
+            
+            logger.info(f"{test_id:<10} {energy:<15.6f} {runtime:<15.6f}")
+            
+            total_energy += energy
+            total_runtime += runtime
+            count += 1
+        
+        # Print averages if we have data
+        if count > 0:
+            logger.info("-" * 45)
+            logger.info(f"{'Average':<10} {total_energy/count:<15.6f} {total_runtime/count:<15.6f}")
+        
+        logger.info("=" * 45 + "\n")
 
     def _compute_avg(self):
         benchmark_data = []
+        
         throughput = 0  # Initialize throughput variable
         with open(f'{USER_PREFIX}/src/runtime_logs/c++.csv', mode='r', newline='') as file:
             csv_reader = csv.reader(file)
             for index, row in enumerate(csv_reader):
-                if index == 10:
-                    throughput = row[1]
-                else:
-                    benchmark_name = row[0]
-                    energy = row[1]
-                    latency = row[2]
-                    cpu_cycles = row[3]
-                    peak_memory = row[4]
-                    benchmark_data.append((benchmark_name, energy, latency, cpu_cycles, peak_memory))
-
+                # Skip empty rows
+                if not row:
+                    continue
+                    
+                # Make defensive check on the row length
+                if len(row) >= 1:
+                    # Check if this is the throughput row
+                    if len(row) >= 2 and index == 10:
+                        throughput = row[1]
+                    # Otherwise, process as a data row if it has enough columns
+                    elif len(row) >= 5:
+                        benchmark_name = row[0]
+                        energy = row[1]
+                        latency = row[2]
+                        cpu_cycles = row[3]
+                        peak_memory = row[4]
+                        benchmark_data.append((benchmark_name, energy, latency, cpu_cycles, peak_memory))
+        
         #Find average energy usage and average runtime
         avg_energy = 0
         avg_latency = 0
         avg_cpu_cycles = 0
         max_peak_memory = 0
+        
+        valid_measurements = 0
+        
+        # Process the benchmark data
         for data in benchmark_data:
-            energy = float(data[1])
-            if energy < 0:
-                benchmark_data.remove(data)
-            else:
+            try:
+                energy = float(data[1])
+                if energy < 0:
+                    continue
+                    
                 avg_energy += energy
                 avg_latency += float(data[2])
                 avg_cpu_cycles += float(data[3])
                 max_peak_memory = max(max_peak_memory, float(data[4]))
-
-        avg_energy /= len(benchmark_data)
-        avg_latency /= len(benchmark_data)
-        avg_cpu_cycles /= len(benchmark_data)
-
+                valid_measurements += 1
+            except (ValueError, IndexError) as e:
+                # Skip entries with conversion errors
+                logger.warning(f"Error processing data entry: {e} - {data}")
+        
+        # Handle the case where there are no valid measurements
+        if valid_measurements == 0:
+            logger.error("No valid measurements found")
+            return 0, 0, 0, 0, 0
+        
+        # Calculate averages
+        avg_energy /= valid_measurements
+        avg_latency /= valid_measurements
+        avg_cpu_cycles /= valid_measurements
+        
         return avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, float(throughput)
     
     def _extract_content(self, contents):

@@ -1,0 +1,56 @@
+{
+    "0": [
+        "#include <cstdio>\n#include <utility>\n#include <vector>\nstatic const int MAXN = 104;\nstatic const int ALPHA = 26;\n\nint h, w;\nint ct[ALPHA] = { 0 };\nstd::vector<std::vector<std::pair<int, int>>> groups[5];\nchar s[MAXN][MAXN];\n\nint main()\n{\n    scanf(\"%d%d\", &h, &w); getchar();\n    for (int i = 0; i < h; ++i) {\n        for (int j = 0; j < w; ++j)\n            ++ct[getchar() - 'a'];\n        getchar();\n    }\n\n    for (int i = 0; i < (h + 1) / 2; ++i)\n        for (int j = 0; j < (w + 1) / 2; ++j) {\n            std::vector<std::pair<int, int>> g;\n            g.push_back({ i, j });\n            if (i * 2 != h - 1) {\n                g.push_back({ h - 1 - i, j });\n                if (j * 2 != w - 1) {\n                    g.push_back({ i, w - 1 - j });\n                    g.push_back({ h - 1 - i, w - 1 - j });\n                }\n            } else {\n                if (j * 2 != w - 1)\n                    g.push_back({ i, w - 1 - j });\n            }\n            //for (auto pos : g) printf(\" (%d %d)\", pos.first, pos.second); putchar('\\n');\n            groups[g.size()].push_back(g);\n        }\n\n    for (int i = 0; i < ALPHA; ++i) {\n        for (int j = 4; j >= 1; --j)\n            while (ct[i] >= j && !groups[j].empty()) {\n                ct[i] -= j;\n                for (auto pos : groups[j].back())\n                    s[pos.first][pos.second] = i + 'a';\n                groups[j].pop_back();\n            }\n    }\n\n    for (int i = 1; i <= 4; ++i) if (!groups[i].empty()) { puts(\"No\"); return 0; }\n\n    /*for (int i = 0; i < h; ++i) {\n        for (int j = 0; j < w; ++j) putchar(s[i][j]);\n        putchar('\\n');\n    }*/\n    puts(\"Yes\");\n\n    return 0;\n}\n",
+        0.324,
+        2.291,
+        6867807.688090737,
+        396.0,
+        0.296,
+        58
+    ],
+    "1": [
+        "#include <cstdio>\n#include <utility>\n#include <vector>\nstatic const int MAXN = 104;\nstatic const int ALPHA = 26;\n\nint h, w;\nint ct[ALPHA] = { 0 };\nstd::vector<std::vector<std::pair<int, int>>> groups[5];\nchar s[MAXN][MAXN];\n\nint main()\n{\n    scanf(\"%d%d\", &h, &w);\n    for (int i = 0; i < h; ++i) {\n        for (int j = 0; j < w; ++j) {\n            char ch;\n            scanf(\" %c\", &ch);\n            ++ct[ch - 'a'];\n        }\n    }\n\n    for (int i = 0; i < (h + 1) / 2; ++i) {\n        for (int j = 0; j < (w + 1) / 2; ++j) {\n            std::vector<std::pair<int, int>> g;\n            g.push_back({ i, j });\n            if (i * 2 != h - 1) {\n                g.push_back({ h - 1 - i, j });\n                if (j * 2 != w - 1) {\n                    g.push_back({ i, w - 1 - j });\n                    g.push_back({ h - 1 - i, w - 1 - j });\n                }\n            } else if (j * 2 != w - 1) {\n                g.push_back({ i, w - 1 - j });\n            }\n            \n            groups[g.size()].push_back(std::move(g));\n        }\n    }\n\n    for (int i = 0; i < ALPHA; ++i) {\n        for (int j = 4; j >= 1; --j)\n            while (ct[i] >= j && !groups[j].empty()) {\n                ct[i] -= j;\n                for (const auto& pos : groups[j].back())\n                    s[pos.first][pos.second] = i + 'a';\n                groups[j].pop_back();\n            }\n    }\n\n    for (int i = 1; i <= 4; ++i) if (!groups[i].empty()) { puts(\"No\"); return 0; }\n\n    puts(\"Yes\");\n    return 0;\n}\n\n\n\n",
+        0.334,
+        2.281,
+        6838106.994328923,
+        404.0,
+        0.46685791015625,
+        58
+    ],
+    "2": [
+        "#include <cstdio>\n#include <utility>\n#include <vector>\n#include <iostream>\n#include <sstream>\n\nstatic const int MAXN = 104;\nstatic const int ALPHA = 26;\n\nint h, w;\nint ct[ALPHA] = { 0 };\nstd::vector<std::vector<std::pair<int, int>>> groups[5];\nchar s[MAXN][MAXN];\n\nint main()\n{\n    \n    std::cin >> h >> w;\n    std::cin.ignore();  \n\n    std::string buffer;\n    for (int i = 0; i < h; ++i) {\n        std::getline(std::cin, buffer);\n        for (int j = 0; j < w; ++j) {\n            ++ct[buffer[j] - 'a'];\n        }\n    }\n\n    \n    for (int i = 0; i < 5; ++i) groups[i].reserve((h * w) / 4);\n    \n    for (int i = 0; i < (h + 1) / 2; ++i) {\n        for (int j = 0; j < (w + 1) / 2; ++j) {\n            std::vector<std::pair<int, int>> g;\n            g.reserve(4);  \n            g.push_back({ i, j });\n            if (i * 2 != h - 1) {\n                g.push_back({ h - 1 - i, j });\n                if (j * 2 != w - 1) {\n                    g.push_back({ i, w - 1 - j });\n                    g.push_back({ h - 1 - i, w - 1 - j });\n                }\n            } else if (j * 2 != w - 1) {\n                g.push_back({ i, w - 1 - j });\n            }\n            groups[g.size()].push_back(std::move(g));\n        }\n    }\n\n    for (int i = 0; i < ALPHA; ++i) {\n        for (int j = 4; j >= 1; --j)\n            while (ct[i] >= j && !groups[j].empty()) {\n                ct[i] -= j;\n                for (const auto& pos : groups[j].back())\n                    s[pos.first][pos.second] = i + 'a';\n                groups[j].pop_back();\n            }\n    }\n\n    for (int i = 1; i <= 4; ++i) if (!groups[i].empty()) { puts(\"No\"); return 0; }\n\n    puts(\"Yes\");\n    return 0;\n}\n\n",
+        0.391,
+        2.463,
+        7384881.361058601,
+        436.0,
+        0.56280517578125,
+        65
+    ],
+    "3": [
+        "#include <cstdio>\n#include <utility>\n#include <vector>\n\nstatic const int MAXN = 104;\nstatic const int ALPHA = 26;\n\nint h, w;\nint ct[ALPHA] = { 0 };\nstd::vector<std::vector<std::pair<int, int>>> groups[5];\nchar s[MAXN][MAXN];\n\nint main()\n{\n    scanf(\"%d%d\", &h, &w);\n    getchar();  \n    for (int i = 0; i < h; ++i) {\n        for (int j = 0; j < w; ++j) {\n            ++ct[getchar() - 'a'];\n        }\n        getchar(); \n    }\n\n    for (int i = 0; i < 5; ++i) {\n        groups[i].reserve((h * w) / 4);\n    }\n\n    for (int i = 0; i < (h + 1) / 2; ++i) {\n        for (int j = 0; j < (w + 1) / 2; ++j) {\n            std::vector<std::pair<int, int>> g;\n            g.reserve(4);\n            g.push_back({ i, j });\n            if (i * 2 != h - 1) {\n                g.push_back({ h - 1 - i, j });\n                if (j * 2 != w - 1) {\n                    g.push_back({ i, w - 1 - j });\n                    g.push_back({ h - 1 - i, w - 1 - j });\n                }\n            } else if (j * 2 != w - 1) {\n                g.push_back({ i, w - 1 - j });\n            }\n            groups[g.size()].push_back(g);\n        }\n    }\n\n    for (int i = 0; i < ALPHA; ++i) {\n        for (int j = 4; j >= 1; --j)\n            while (ct[i] >= j && !groups[j].empty()) {\n                ct[i] -= j;\n                for (const auto& pos : groups[j].back())\n                    s[pos.first][pos.second] = i + 'a';\n                groups[j].pop_back();\n            }\n    }\n\n    for (int i = 1; i <= 4; ++i) {\n        if (!groups[i].empty()) {\n            puts(\"No\");\n            return 0;\n        }\n    }\n    puts(\"Yes\");\n    return 0;\n}",
+        0.33,
+        2.107,
+        6316828.506616257,
+        412.0,
+        0.4603271484375,
+        64
+    ],
+    "4": [
+        "#include <cstdio>\n#include <utility>\n#include <vector>\n#include <algorithm>\n\nstatic const int MAXN = 104;\nstatic const int ALPHA = 26;\n\nint h, w;\nint ct[ALPHA] = { 0 };\nstd::vector<std::vector<std::pair<int, int>>> groups[5];\nchar s[MAXN][MAXN];\n\nint main()\n{\n    scanf(\"%d%d\", &h, &w);\n    getchar();  \n    for (int i = 0; i < h; ++i) {\n        for (int j = 0; j < w; ++j) {\n            ++ct[getchar() - 'a'];\n        }\n        getchar(); \n    }\n\n    \n    for (int i = 0; i < (h + 1) / 2; ++i) {\n        for (int j = 0; j < (w + 1) / 2; ++j) {\n            std::vector<std::pair<int, int>> g = {{i, j}};\n            if (i * 2 != h - 1)\n                g.push_back({h - 1 - i, j});\n            if (j * 2 != w - 1)\n                g.push_back({i, w - 1 - j});\n            if (i * 2 != h - 1 && j * 2 != w - 1)\n                g.push_back({h - 1 - i, w - 1 - j});\n            groups[g.size()].push_back(std::move(g));\n        }\n    }\n\n    \n    for (int i = 0; i < ALPHA; ++i) {\n        for (int j = 4; j >= 1; --j) {\n            while (ct[i] >= j && !groups[j].empty()) {\n                ct[i] -= j;\n                for (const auto& pos : groups[j].back())\n                    s[pos.first][pos.second] = i + 'a';\n                groups[j].pop_back();\n            }\n        }\n    }\n\n    \n    for (int i = 1; i <= 4; ++i) {\n        if (!groups[i].empty()) {\n            puts(\"No\");\n            return 0;\n        }\n    }\n    puts(\"Yes\");\n    return 0;\n}\n",
+        0.353,
+        2.189,
+        6562541.712665406,
+        436.0,
+        0.1595458984375,
+        60
+    ],
+    "5": [
+        "#include <cstdio>\n#include <utility>\n#include <vector>\n#include <algorithm>\n\nstatic const int MAXN = 104;\nstatic const int ALPHA = 26;\n\nint h, w;\nint ct[ALPHA] = { 0 };\nstd::vector<std::vector<std::pair<int, int>>> groups[5];\nchar s[MAXN][MAXN];\n\nint main() {\n    \n    if (scanf(\"%d %d\", &h, &w) != 2) return 1; \n\n    \n    int c;\n    for (int i = 0; i < h; ++i) {\n        for (int j = 0; j < w; ++j) {\n            while ((c = getchar()) != EOF && (c < 'a' || c > 'z'));  \n            if (c != EOF) ++ct[c - 'a'];\n        }\n    }\n\n    \n    for (int i = 0; i < 5; ++i) {\n        groups[i].reserve((h * w) / 4 + 1); \n    }\n\n    \n    for (int i = 0; i < (h + 1) / 2; ++i) {\n        for (int j = 0; j < (w + 1) / 2; ++j) {  \n            std::vector<std::pair<int, int>> group;\n            group.reserve(4);\n            group.emplace_back(i, j);\n            if (i * 2 != h - 1) group.emplace_back(h - 1 - i, j);\n            if (j * 2 != w - 1) group.emplace_back(i, w - 1 - j);\n            if (i * 2 != h - 1 && j * 2 != w - 1) group.emplace_back(h - 1 - i, w - 1 - j);\n            groups[group.size()].emplace_back(std::move(group));\n        }\n    }\n\n    \n    for (int i = 0; i < ALPHA; ++i) {\n        for (int j = 4; j >= 1; --j) {\n            while (ct[i] >= j && !groups[j].empty()) {\n                ct[i] -= j;\n                for (const auto &pos : groups[j].back()) {\n                    s[pos.first][pos.second] = i + 'a';\n                }\n                groups[j].pop_back();\n            }\n        }\n    }\n\n    \n    for (int i = 1; i <= 4; ++i) {\n        if (!groups[i].empty()) {\n            puts(\"No\");\n            return 0;\n        }\n    }\n    puts(\"Yes\");\n    return 0;\n}",
+        0.433,
+        2.639,
+        7909647.97731569,
+        396.0,
+        0.35467529296875,
+        67
+    ]
+}
