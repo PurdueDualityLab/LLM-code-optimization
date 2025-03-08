@@ -209,10 +209,16 @@ class SciMarkBenchmark(Benchmark):
         optimized_output_float = float(optimized_output) / 1024
         expect_test_output_float = float(self.expect_test_output) / 1024
         print(f"optimized_output_float: {optimized_output_float}, expect_test_output_float: {expect_test_output_float}")
-        # EPS = 3.0e-17 # FFT
-        # EPS = 1.0e-10 # LU
-        # EPS = math.pi # MonteCarlo
-        EPS = 0.002 # SOR, found good threshold through testing
+        
+        if self.program == "FFT":
+            EPS = 3.0e-17
+        elif self.program == "LU":
+            EPS = 1.0e-10
+        elif self.program == "MonteCarlo":
+            EPS = math.pi
+        elif self.program == "SOR":
+            EPS = 0.002 # SOR, found good threshold through testing
+        
         if abs(optimized_output_float) <= EPS:
             logger.info(f"Output is within EPS threshold. Original output: {expect_test_output_float}, Optimized output: {optimized_output_float}")
             return True
