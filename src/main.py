@@ -136,8 +136,8 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                 
                 if num_success_iteration == self_optimization_step:
                     logger.info("Optimization Complete, writing results to file.....")
-
-                    dict_str = json.dumps(benchmark_obj.get_energy_data(), indent=4)
+                    energy_data = benchmark_obj.get_energy_data()
+                    dict_str = json.dumps(energy_data, indent=4)
                     results_dir = f"{USER_PREFIX}/results/{benchmark}"
                     if not os.path.exists(results_dir):
                         os.makedirs(results_dir)
@@ -146,15 +146,24 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
 
                     original_energy = evaluator_feedback_data["original"]["avg_energy"]
                     original_runtime = evaluator_feedback_data["original"]["avg_runtime"]
+                    original_cpu_cycles = evaluator_feedback_data["original"]["avg_cpu_cycles"]
+                    original_peak_memory = evaluator_feedback_data["original"]["max_peak_memory"]
+                    original_throughput = evaluator_feedback_data["original"]["throughput"]
                     original_loc = evaluator_feedback_data["original"]["num_of_lines"]
 
                     lowest_energy = evaluator_feedback_data["lowest_avg_energy"]["avg_energy"]
                     lowest_runtime = evaluator_feedback_data["lowest_avg_energy"]["avg_runtime"]
+                    lowest_cpu_cycles = evaluator_feedback_data["lowest_avg_energy"]["avg_cpu_cycles"]
+                    lowest_peak_memory = evaluator_feedback_data["lowest_avg_energy"]["max_peak_memory"]
+                    lowest_throughput = evaluator_feedback_data["lowest_avg_energy"]["throughput"]
                     lowest_loc = evaluator_feedback_data["lowest_avg_energy"]["num_of_lines"]
 
                     results[program] = {
                         "energy_change": ((lowest_energy - original_energy) / original_energy) * 100,
                         "runtime_change": ((lowest_runtime - original_runtime) / original_runtime) * 100,
+                        "cpu_cycles_change": ((lowest_cpu_cycles - original_cpu_cycles) / original_cpu_cycles) * 100,
+                        "peak_memory_change": ((lowest_peak_memory - original_peak_memory) / original_peak_memory) * 100,
+                        "throughput_change": ((lowest_throughput - original_throughput) / original_throughput) * 100,
                         "loc_change": ((lowest_loc - original_loc) / original_loc) * 100,
                     }
 

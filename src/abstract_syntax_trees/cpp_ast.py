@@ -10,7 +10,6 @@ class CPPAST(AbstractSyntaxTree):
         command = f"clang++ -Xclang -ast-dump -fsyntax-only {source_code_path} | grep -A 1000 {source_code_path}"
         ast = subprocess.run(command, shell=True, capture_output=True, text=True)
         ast = ast.stdout
-        print(ast)
         return self.clean_ast(ast)
     
     def clean_ast(self, ast_text):

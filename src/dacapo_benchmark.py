@@ -155,8 +155,8 @@ class DaCapoBenchmark(Benchmark):
         
         self._run_rapl()
 
-        avg_energy, avg_runtime = self._compute_avg()
-        self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(avg_energy, 3), round(avg_runtime, 3), len(optimized_code.splitlines()))
+        avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
+        self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(avg_energy, 3), round(avg_latency, 3), avg_cpu_cycles, max_peak_memory, throughput, len(optimized_code.splitlines()))
 
         self.evaluator_feedback_data = self._extract_content(self.energy_data)
 

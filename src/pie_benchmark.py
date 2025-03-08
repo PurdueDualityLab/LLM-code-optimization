@@ -60,8 +60,7 @@ class PIEBenchmark(Benchmark):
         avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
 
         #Append results to benchmark data dict
-        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_latency, 3), len(self.original_code.splitlines()))
-        logger.info(f"original_energy_data: {self.energy_data[0]}")
+        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_latency, 3),  avg_cpu_cycles, max_peak_memory, round(throughput, 3), len(self.original_code.splitlines()))
         return True
 
     def pre_process(self, code):
@@ -138,7 +137,7 @@ class PIEBenchmark(Benchmark):
         avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
         
         #Append results to benchmark data dict
-        self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(avg_energy, 3), round(avg_latency, 3), len(optimized_code.splitlines()))
+        self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(avg_energy, 3), round(avg_latency, 3), avg_cpu_cycles, max_peak_memory, throughput, len(optimized_code.splitlines()))
         
         # Find the required benchmark elements
         self.evaluator_feedback_data = self._extract_content(self.energy_data)
@@ -270,8 +269,8 @@ class PIEBenchmark(Benchmark):
         keys = list(contents.keys())
 
         # print all values
-        for key, (source_code, avg_energy, avg_runtime, num_of_lines) in contents.items():
-            logger.info(f"key: {key}, avg_energy: {avg_energy}, avg_runtime: {avg_runtime}, num_of_lines: {num_of_lines}")
+        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, max_peak_memory, throughput, num_of_lines) in contents.items():
+            logger.info(f"key: {key}, avg_energy: {avg_energy}, avg_runtime: {avg_runtime}, avg_cpu_cycles: {avg_cpu_cycles}, max_peak_memory: {max_peak_memory}, throughput: {throughput}, num_of_lines: {num_of_lines}")
 
         # Extract the first(original) and last(current) elements
         first_key = keys[0]
@@ -281,15 +280,15 @@ class PIEBenchmark(Benchmark):
         last_value = contents[last_key]
 
 
-        # Loop through the contents to find the key with the lowest avg_energy
-        min_avg_energy = float('inf')
-        min_energy_key = None
-        for key, (source_code, avg_energy, avg_runtime, num_of_lines) in contents.items():
-            if avg_energy < min_avg_energy:
-                min_avg_energy = avg_energy
-                min_energy_key = key
+        # Loop through the contents to find the key with the lowest avg_runtime
+        min_avg_runtime = float('inf')
+        min_runtime_key = None
+        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, max_peak_memory, throughput, num_of_lines) in list(contents.items())[1:]:
+            if avg_runtime < min_avg_runtime:
+                min_avg_runtime = avg_runtime
+                min_runtime_key = key
 
-        min_value = contents[min_energy_key]
+        min_value = contents[min_runtime_key]
 
         # Prepare results in a structured format (dictionary)
         benchmark_info = {
@@ -297,28 +296,37 @@ class PIEBenchmark(Benchmark):
                 "source_code": first_value[0],
                 "avg_energy": first_value[1],
                 "avg_runtime": first_value[2],
-                "num_of_lines": first_value[3]
+                "avg_cpu_cycles": first_value[3],
+                "max_peak_memory": first_value[4],
+                "throughput": first_value[5],
+                "num_of_lines": first_value[6]
             },
             "lowest_avg_energy": {
                 "source_code": min_value[0],
                 "avg_energy": min_value[1],
                 "avg_runtime": min_value[2],
-                "num_of_lines": min_value[3]
+                "avg_cpu_cycles": min_value[3],
+                "max_peak_memory": min_value[4],
+                "throughput": min_value[5],
+                "num_of_lines": min_value[6]
             },
             "current": {
                 "source_code": last_value[0],
                 "avg_energy": last_value[1],
                 "avg_runtime": last_value[2],
-                "num_of_lines": last_value[3]
+                "avg_cpu_cycles": last_value[3],
+                "max_peak_memory": last_value[4],
+                "throughput": last_value[5],
+                "num_of_lines": last_value[6]
             }
         }
         
         return benchmark_info
     
     def _print_benchmark_info(self, benchmark_info):
-        logger.info("Original: Average Energy: {}, Average Runtime: {}".format(benchmark_info["original"]["avg_energy"], benchmark_info["original"]["avg_runtime"]))
-        logger.info("Lowest Average Energy: Average Energy: {}, Average Runtime: {}".format(benchmark_info["lowest_avg_energy"]["avg_energy"], benchmark_info["lowest_avg_energy"]["avg_runtime"]))
-        logger.info("Current: Average Energy: {}, Average Runtime: {}".format(benchmark_info["current"]["avg_energy"], benchmark_info["current"]["avg_runtime"]))
+        logger.info("Original: Average Energy: {}, Average Runtime: {}, Average CPU Cycles: {}, Max Peak Memory: {}, Throughput: {}".format(benchmark_info["original"]["avg_energy"], benchmark_info["original"]["avg_runtime"], benchmark_info["original"]["avg_cpu_cycles"], benchmark_info["original"]["max_peak_memory"], benchmark_info["original"]["throughput"]))
+        logger.info("Lowest Average Energy: Average Energy: {}, Average Runtime: {}, Average CPU Cycles: {}, Max Peak Memory: {}, Throughput: {}".format(benchmark_info["lowest_avg_energy"]["avg_energy"], benchmark_info["lowest_avg_energy"]["avg_runtime"], benchmark_info["lowest_avg_energy"]["avg_cpu_cycles"], benchmark_info["lowest_avg_energy"]["max_peak_memory"], benchmark_info["lowest_avg_energy"]["throughput"]))
+        logger.info("Current: Average Energy: {}, Average Runtime: {}, Average CPU Cycles: {}, Max Peak Memory: {}, Throughput: {}".format(benchmark_info["current"]["avg_energy"], benchmark_info["current"]["avg_runtime"], benchmark_info["current"]["avg_cpu_cycles"], benchmark_info["current"]["max_peak_memory"], benchmark_info["current"]["throughput"]))
 
 def get_valid_pie_programs(num_programs):
     slow_fast_pairs = []
