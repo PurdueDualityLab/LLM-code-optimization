@@ -61,7 +61,7 @@ public class Kernel {
         long cycles = 1;
         while (true) {
             Q.start();
-            SparseCompRowOptimized.matmult(y_optimized, val, row, col, x, cycles);
+            SparseCompRow.matmult(y_optimized, val, row, col, x, cycles);
             Q.stop();
             if (Q.read() >= min_time) break;
 
@@ -77,7 +77,7 @@ public class Kernel {
         }
 
         // approx Mflops
-        return SparseCompRowOptimized.num_flops(N, nz, cycles) / Q.read() * 1.0e-6;
+        return SparseCompRow.num_flops(N, nz, cycles) / Q.read() * 1.0e-6;
     }
 
     private static double[] NewVectorCopy(double[] x) {
