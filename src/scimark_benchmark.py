@@ -211,7 +211,8 @@ class SciMarkBenchmark(Benchmark):
         print(f"optimized_output_float: {optimized_output_float}, expect_test_output_float: {expect_test_output_float}")
         # EPS = 3.0e-17 # FFT
         # EPS = 1.0e-10 # LU
-        EPS = math.pi # MonteCarlo
+        # EPS = math.pi # MonteCarlo
+        EPS = 0.002 # SOR, found good threshold through testing
         if abs(optimized_output_float) <= EPS:
             logger.info(f"Output is within EPS threshold. Original output: {expect_test_output_float}, Optimized output: {optimized_output_float}")
             return True
@@ -356,8 +357,8 @@ def get_valid_scimark_programs():
     valid_programs = [
         # "FFT",
         # "LU",
-        "MonteCarlo",
-        # "SOR",
+        # "MonteCarlo",
+        "SOR",
         # "SparseMatmult"
     ]
     return valid_programs

@@ -11,7 +11,7 @@ JFLAGS = -d .
 
 SRCS = *.java  
 RANDOM_SRC = ../Random.java
-FFTBENCHMARK_CLASS = jnt/scimark2/MonteCarloBenchmark	
+BENCHMARK_CLASS = jnt/scimark2/MonteCarloBenchmark	
 
 MAIN_CLASS = jnt/scimark2/MonteCarlo
 OPTIMIZED_CLASS = jnt.scimark2.MonteCarloOptimized
@@ -36,10 +36,10 @@ measure_optimized:
 	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
 
 measure_mflops:
-	@$(JAVA) $(FFTBENCHMARK_CLASS) false
+	@$(JAVA) $(BENCHMARK_CLASS) false
 
 measure_mflops_optimized:
-	@$(JAVA) $(FFTBENCHMARK_CLASS) true
+	@$(JAVA) $(BENCHMARK_CLASS) true
 
 clean:
 	rm -rf *.class
