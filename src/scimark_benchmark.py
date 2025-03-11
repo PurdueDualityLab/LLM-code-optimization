@@ -233,6 +233,8 @@ class SciMarkBenchmark(Benchmark):
             EPS = math.pi
         elif self.program == "SOR":
             EPS = 0.002 # SOR, found good threshold through testing
+        elif self.program == "SparseCompRow":
+            EPS = 1.0e-10
         
         if abs(optimized_output_float) <= EPS:
             logger.info(f"Output is within EPS threshold. Original output: {expect_test_output_float}, Optimized output: {optimized_output_float}")
@@ -377,7 +379,7 @@ def get_valid_scimark_programs():
         # "FFT",
         # "LU",
         # "MonteCarlo",
-        "SOR",
-        # "SparseMatmult"
+        # "SOR",
+        "SparseCompRow"
     ]
     return valid_programs

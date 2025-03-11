@@ -1,0 +1,3 @@
+[submodule "src/sandbox/flamegraph/FlameGraph"]
+	path = src/sandbox/flamegraph/FlameGraph
+	url = https://github.com/brendangregg/FlameGraph
