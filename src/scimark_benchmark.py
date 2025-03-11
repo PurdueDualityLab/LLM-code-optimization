@@ -46,18 +46,25 @@ class SciMarkBenchmark(Benchmark):
                 ["make", "compile"], 
                 check=True,
                 capture_output=True,
-                text=True
+                text=True,
+                timeout=120
             )
             self.compilation_error = compile_result.stdout + compile_result.stderr
             logger.info(f"Original code compile successfully.\n")
+        except subprocess.TimeoutExpired:
+            logger.error("Make compile timeout")
+            return False
         except subprocess.CalledProcessError as e:
             logger.error(f"Original code compile failed: {e}\n")
             return False
         
         # get mflops
         try:
-            measure_result = subprocess.run(["make", "measure_mflops"], check=True, capture_output=True, text=True)
+            measure_result = subprocess.run(["make", "measure_mflops"], check=True, capture_output=True, text=True, timeout=120)
             logger.info(f"Original code mlops measure successfully.\n")
+        except subprocess.TimeoutExpired:
+            logger.error("Make measure_mflops timeout")
+            return False
         except subprocess.CalledProcessError as e:
             logger.error(f"Original code mflops measure failed: {e}\n")
             return False
@@ -138,28 +145,31 @@ class SciMarkBenchmark(Benchmark):
         try:
             measure_result = subprocess.run(["make", "measure_mflops_optimized"], check=True, capture_output=True, text=True)
             logger.info(f"Optimized code mlops measure successfully.\n")
+            # Filter out the unwanted lines
+            mflops = "\n".join(
+                line for line in measure_result.stdout.splitlines()
+                if not (line.startswith("make[") or line.startswith("./"))
+            )
         except subprocess.CalledProcessError as e:
             logger.error(f"Optimized code mflops measure failed: {e}\n")
-
-        # Filter out the unwanted lines
-        mflops = "\n".join(
-            line for line in measure_result.stdout.splitlines()
-            if not (line.startswith("make[") or line.startswith("./"))
-        )
+            mflops = 0
         
         self._run_rapl(optimized=True)
-    
-        avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
-        
+            
         #Append results to benchmark data dict
         avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
-        self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(avg_energy, 3), round(avg_latency, 3), avg_cpu_cycles, max_peak_memory, throughput, mflops, len(optimized_code.splitlines()))
+        original_data = self.energy_data[0]
+        energy_change = original_data[1] / avg_energy
+        speedup = original_data[2] / avg_latency
+        cpu_change = original_data[3] / avg_cpu_cycles
+        memory_change = original_data[4] / max_peak_memory
+        throughput_change = throughput / original_data[5]
+        mflops_change = mflops / original_data[6]
+
+        self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(energy_change, 3), round(speedup, 3), cpu_change, memory_change, throughput_change, mflops_change, len(optimized_code.splitlines()))
         
         # Find the required benchmark elements
         self.evaluator_feedback_data = self._extract_content(self.energy_data)
-        
-        # Print the benchmark information
-        self._print_benchmark_info(self.evaluator_feedback_data)
 
     def get_energy_data(self):
         return super().get_energy_data()
@@ -171,15 +181,20 @@ class SciMarkBenchmark(Benchmark):
         return super().static_analysis(optimized_code)
 
     def _run_program(self, optimized):
-        # Run the make command and capture the output in a variable
-        if not optimized:
-            result = subprocess.run(["make", "run"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
-        else:
-            result = subprocess.run(["make", "run_optimized"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
+        try:
+            if not optimized:
+                result = subprocess.run(["make", "run"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1', timeout=120)
+            else:
+                result = subprocess.run(["make", "run_optimized"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1', timeout=120)
+        except subprocess.TimeoutExpired:
+            logger.error("Timeout expired while running the make command")
+            return None
         
+        logger.info(f"_run_program result: {result}")
+       
         # Check for runtime errors
-        if result.returncode != 0:
-            return
+        if result.returncode is not None and result.returncode != 0:
+            return None
 
         # Filter out the unwanted lines
         filtered_output = "\n".join(
@@ -246,13 +261,18 @@ class SciMarkBenchmark(Benchmark):
             measure_optimized = ["make", "measure_optimized"]
             if not optimized:
                 logger.info("Make measure on original program\n")
-                subprocess.run(measure_unoptimized, check=True, capture_output=True, text=True)
+                subprocess.run(measure_unoptimized, check=True, capture_output=True, text=True, timeout=120)
             else:
                 logger.info("Make measure on optimized program\n")
-                subprocess.run(measure_optimized, check=True, capture_output=True, text=True)
+                subprocess.run(measure_optimized, check=True, capture_output=True, text=True, timeout=120)
             logger.info("Benchmark.run: make measure successfully\n")
+            return True
+        except subprocess.TimeoutExpired:
+            logger.error("Make measure timeout")
+            return False
         except subprocess.CalledProcessError as e:
             logger.error(f"Benchmark.run: make measure failed: {e}\n")
+            return False
 
     def _compute_avg(self):
         benchmark_data = []
@@ -295,10 +315,6 @@ class SciMarkBenchmark(Benchmark):
         # Convert keys to a sorted list to access the first and last elements
         keys = list(contents.keys())
 
-        # print all values
-        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, max_peak_memory, throughput, mflops, num_of_lines) in contents.items():
-            logger.info(f"key: {key}, avg_energy: {avg_energy}, avg_runtime: {avg_runtime}, avg_cpu_cycles: {avg_cpu_cycles}, max_peak_memory: {max_peak_memory}, throughput: {throughput}, mflops: {mflops}, num_of_lines: {num_of_lines}")
-
         # Extract the first(original) and last(current) elements
         first_key = keys[0]
         last_key = keys[-1]
@@ -306,16 +322,19 @@ class SciMarkBenchmark(Benchmark):
         first_value = contents[first_key]
         last_value = contents[last_key]
 
+        logger.info(f"key 0, avg_energy: {first_value[1]}, avg_runtime: {first_value[2]}, avg_cpu_cycles: {first_value[3]}, max_peak_memory: {first_value[4]}, throughput: {first_value[5]}, mflops: {first_value[6]}, num_of_lines: {first_value[7]}")
+        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, max_peak_memory, throughput, mflops, num_of_lines) in contents.items():
+            logger.info(f"key: {key}, avg_energy_improvement: {avg_energy}, avg_speedup: {avg_runtime}, avg_cpu_improvement: {avg_cpu_cycles}, avg_memory_improvement: {max_peak_memory}, avg_throughput_improvement: {throughput}, average_mflops_improvement: {mflops}, num_of_lines: {num_of_lines}")
 
         # Loop through the contents to find the key with the lowest avg_energy
-        min_avg_energy = float('inf')
-        min_energy_key = None
-        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, max_peak_memory, throughput, mflops, num_of_lines) in contents.items():
-            if avg_energy < min_avg_energy:
-                min_avg_energy = avg_energy
-                min_energy_key = key
+        max_avg_speedup = float('-inf')
+        max_avg_speedup_key = None
+        for key, (source_code, avg_energy, avg_speedup, avg_cpu_cycles, max_peak_memory, throughput, mflops, num_of_lines) in contents.items():
+            if avg_speedup > max_avg_speedup:
+                max_avg_speedup = avg_speedup
+                max_avg_speedup_key = key
 
-        min_value = contents[min_energy_key]
+        max_value = contents[max_avg_speedup_key]
 
         # Prepare results in a structured format (dictionary)
         benchmark_info = {
@@ -329,35 +348,29 @@ class SciMarkBenchmark(Benchmark):
                 "mflops": first_value[6],
                 "num_of_lines": first_value[7]
             },
-            "lowest_avg_energy": {
-                "source_code": min_value[0],
-                "avg_energy": min_value[1],
-                "avg_runtime": min_value[2],
-                "avg_cpu_cycles": min_value[3],
-                "max_peak_memory": min_value[4],
-                "throughput": min_value[5],
-                "mflops": min_value[6],
-                "num_of_lines": min_value[7]
+            "max_avg_speedup": {
+                "source_code": max_value[0],
+                "avg_energy_improvement": max_value[1],
+                "avg_speedup": max_value[2],
+                "avg_cpu_improvement": max_value[3],
+                "avg_memory_improvement": max_value[4],
+                "avg_throughput_improvement": max_value[5],
+                "mflops_improvement": max_value[6],
+                "num_of_lines": max_value[7]
             },
             "current": {
                 "source_code": last_value[0],
-                "avg_energy": last_value[1],
-                "avg_runtime": last_value[2],
-                "avg_cpu_cycles": last_value[3],
-                "max_peak_memory": last_value[4],
-                "throughput": last_value[5],
-                "mflops": last_value[6],
+                "avg_energy_improvement": last_value[1],
+                "avg_speedup": last_value[2],
+                "avg_cpu_improvement": last_value[3],
+                "avg_memory_improvement": last_value[4],
+                "avg_throughput_improvement": last_value[5],
+                "mflops_improvement": last_value[6],
                 "num_of_lines": last_value[7]
             }
         }
         
         return benchmark_info
-    
-    def _print_benchmark_info(self, benchmark_info):
-        logger.info("Original: Average Energy: {}, Average Runtime: {}, Average CPU Cycles: {}, Max Peak Memory: {}, Throughput: {}, mflops: {}".format(benchmark_info["original"]["avg_energy"], benchmark_info["original"]["avg_runtime"], benchmark_info["original"]["avg_cpu_cycles"], benchmark_info["original"]["max_peak_memory"], benchmark_info["original"]["throughput"], benchmark_info["original"]["mflops"]))
-        logger.info("Lowest Average Energy: Average Energy: {}, Average Runtime: {}, Average CPU Cycles: {}, Max Peak Memory: {}, Throughput: {}, mflops: {}".format(benchmark_info["lowest_avg_energy"]["avg_energy"], benchmark_info["lowest_avg_energy"]["avg_runtime"], benchmark_info["lowest_avg_energy"]["avg_cpu_cycles"], benchmark_info["lowest_avg_energy"]["max_peak_memory"], benchmark_info["lowest_avg_energy"]["throughput"], benchmark_info["lowest_avg_energy"]["mflops"]))
-        logger.info("Current: Average Energy: {}, Average Runtime: {}, Average CPU Cycles: {}, Max Peak Memory: {}, Throughput: {}, mflops: {}".format(benchmark_info["current"]["avg_energy"], benchmark_info["current"]["avg_runtime"], benchmark_info["current"]["avg_cpu_cycles"], benchmark_info["current"]["max_peak_memory"], benchmark_info["current"]["throughput"], benchmark_info["current"]["mflops"]))
-
 
 def get_valid_scimark_programs():
     valid_programs = [

@@ -6,6 +6,7 @@ import sys
 from ollama import Client
 from pydantic import BaseModel
 import requests
+import json
 
 logger = Logger("logs", sys.argv[2]).logger
 
@@ -47,6 +48,7 @@ class LLMAgent:
                 }
 
                 response = requests.post(url, headers=headers, json=body).text
+                response = json.loads(response)
                 content = response['choices'][0]['message']['content']
             elif (self.is_openai_model()):
                 response = self.client.beta.chat.completions.parse(

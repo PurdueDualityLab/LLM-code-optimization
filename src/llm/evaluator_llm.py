@@ -18,40 +18,34 @@ def evaluator_llm(evaluator_feedback_data, llm_assistant):
 
     #extract original
     original_source_code = evaluator_feedback_data["original"]["source_code"]
-    original_avg_energy = evaluator_feedback_data["original"]["avg_energy"]
     original_avg_runtime = evaluator_feedback_data["original"]["avg_runtime"]
 
-    lowest_soruce_code = evaluator_feedback_data["lowest_avg_energy"]["source_code"]
-    lowest_avg_energy = evaluator_feedback_data["lowest_avg_energy"]["avg_energy"]
-    lowest_avg_runtime = evaluator_feedback_data["lowest_avg_energy"]["avg_runtime"]
+    lowest_source_code = evaluator_feedback_data["max_avg_speedup"]["source_code"]
+    lowest_avg_runtime = evaluator_feedback_data["max_avg_speedup"]["avg_speedup"]
 
     current_source_code = evaluator_feedback_data["current"]["source_code"]  
-    current_avg_energy = evaluator_feedback_data["current"]["avg_energy"]
-    current_avg_runtime = evaluator_feedback_data["current"]["avg_runtime"]
+    current_avg_runtime = evaluator_feedback_data["current"]["avg_speedup"]
 
     prompt = evaluator_prompt + f"""
     Here is the original code snippet:
     ```
     {original_source_code}
     ```
-    Average energy usage: {original_avg_energy}
-    Average run time: {original_avg_runtime}
+    Average runtime in ms: {original_avg_runtime}
 
-    Here is the current code snippets with lowest energy usage:
+    Here is the previous optimized code snippets with highest speedup:
     ```
-    {lowest_soruce_code}
+    {lowest_source_code}
     ```
-    Average energy usage: {lowest_avg_energy}
-    Average run time: {lowest_avg_runtime}
+    Average speedup: {lowest_avg_runtime}
 
     Here is the code snippiets that you are tasked to optimize:
     ```
     {current_source_code}
     ```
-    Average energy usage: {current_avg_energy}
-    Average run time: {current_avg_runtime}
+    Average speedup: {current_avg_runtime}
 
-    Please respond in natural language (English) with actionable suggestions for improving the current code's performance in terms of energy usage. Provide only the best code with the lowest energy usage.
+    Please respond in natural language (English) with actionable suggestions for improving the current code's performance. Provide only the best code with the lowest runtime.
     """
 
     llm_assistant.add_to_memory("user", prompt)
@@ -60,7 +54,7 @@ def evaluator_llm(evaluator_feedback_data, llm_assistant):
 
     try:
         if llm_assistant.is_genai_studio():
-            feedback = response
+            feedback = response["content"]
         elif llm_assistant.is_openai_model():
             content_dict = json.loads(response["content"])
             feedback = content_dict["feedback"]
