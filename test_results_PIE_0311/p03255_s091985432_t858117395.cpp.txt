@@ -1,0 +1,29 @@
+{
+    "0": [
+        "#include <bits/stdc++.h>\nusing namespace std;\n\nint main(){\n    int N;\n    int64_t X, x[200001];\n    cin >> N >> X;\n    for(int i=1; i<=N; i++) cin >> x[i];\n    int64_t accum[200001] = {0};\n    for(int i=1; i<=N; i++) accum[i] = x[i] + accum[i-1];\n\n    int64_t ans = 2e15;\n    for(int k=1; k<=N; k++){\n        int64_t result = (N+k) * X;\n        for(int j=0; j<(N-1)/k+1; j++){\n            int M = N - j*k;\n            int m = max(0, M-k);\n            int c = j==0 ? 5 : 2*j+3;\n            result += c * (accum[M] - accum[m]);\n            if(result >= ans) break;\n        }\n        ans = min(ans, result);\n    }\n    cout << ans << endl;\n    return 0;\n}",
+        0.955,
+        0.006,
+        17912208.166,
+        53.219,
+        165.867,
+        26
+    ],
+    "1": [
+        "#include <iostream>\n#include <vector>\n#include <algorithm>\n\nusing namespace std;\n\nint main() {\n    int N;\n    int64_t X;\n    cin >> N >> X;\n\n    vector<int64_t> x(N + 1);\n    for (int i = 1; i <= N; ++i) cin >> x[i];\n\n    vector<int64_t> accum(N + 1, 0);\n    for (int i = 1; i <= N; ++i) accum[i] = x[i] + accum[i - 1];\n\n    int64_t ans = 2e15;\n\n    vector<int64_t> cachedResults(N + 1, 2e15); \n\n    for (int k = 1; k <= N; ++k) {\n        if (cachedResults[k] < ans) continue;  \n\n        int64_t result = (N + k) * X;\n\n        for (int j = 0; j < (N - 1) / k + 1; ++j) {\n            int M = N - j * k;\n            int m = max(0, M - k);\n            int c = (j == 0) ? 5 : (2 * j + 3);\n\n            int64_t addition = c * (accum[M] - accum[m]);\n            result += addition;\n            if (result >= ans) break;\n        }\n        ans = min(ans, result);\n\n        \n        cachedResults[k] = result;\n    }\n\n    cout << ans << endl;\n    return 0;\n}",
+        1.822,
+        1.749,
+        1.76,
+        3.538,
+        1.748,
+        44
+    ],
+    "2": [
+        "#include <iostream>\n#include <vector>\n#include <algorithm>\n#include <thread>\n#include <mutex>\n\nusing namespace std;\n\nvoid compute_cost_for_range(int start, int end, int N, int64_t X, const vector<int64_t>& accum, int64_t& ans, mutex& answer_lock) {\n    for (int k = start; k < end; ++k) {\n        int64_t result = (N + k) * X;\n        for (int j = 0; j <= (N - 1) / k; ++j) {\n            int M = N - j * k;\n            int m = max(0, M - k);\n            int c = (j == 0) ? 5 : (2 * j + 3);\n\n            int64_t addition = c * (accum[M] - accum[m]);\n            result += addition;\n            if (result >= ans) break;\n        }\n        answer_lock.lock();\n        ans = min(ans, result);\n        answer_lock.unlock();\n    }\n}\n\nint main() {\n    int N;\n    int64_t X;\n    cin >> N >> X;\n\n    vector<int64_t> x(N + 1);\n    for (int i = 1; i <= N; ++i) cin >> x[i];\n\n    vector<int64_t> accum(N + 1, 0);\n    for (int i = 1; i <= N; ++i) accum[i] = x[i] + accum[i - 1];\n\n    int64_t ans = 2e15;\n    int num_threads = 4;  \n    vector<thread> threads;\n    int chunk_size = (N / num_threads) + 1;\n    mutex answer_lock;   \n\n    for (int i = 0; i < num_threads; ++i) {\n        int start = i * chunk_size + 1;\n        int end = min((i + 1) * chunk_size + 1, N + 1);\n        threads.emplace_back(compute_cost_for_range, start, end, N, X, cref(accum), ref(ans), ref(answer_lock));\n    }\n\n    for (thread& t : threads) {\n        if (t.joinable()) {\n            t.join();\n        }\n    }\n\n    cout << ans << endl;\n    return 0;\n}\n",
+        1.704,
+        1.62,
+        1.627,
+        3.651,
+        1.619,
+        58
+    ]
+}
