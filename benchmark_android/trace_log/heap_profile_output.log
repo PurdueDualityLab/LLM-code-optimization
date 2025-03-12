@@ -1,2 +1,12 @@
 If you are experiencing problems, please see the known issues for your release: https://perfetto.dev/docs/data-sources/native-heap-profiler#known-issues-android11.
-Output directory heap_trace not empty
+Profiling active. Press Ctrl+C to terminate.
+You may disconnect your device.
+
+Waiting for profiler shutdown...
+Wrote profiles to heap_trace
+The raw-trace file can be viewed using https://ui.perfetto.dev.
+The heap_dump.* files can be viewed using pprof/ (Googlers only) or https://www.speedscope.app/.
+The two above are equivalent. The raw-trace contains the union of all the heap dumps.
+/data/misc/perfetto-traces/profile-dd740b: 1 file pulled, 0 skipped. 252.1 MB/s (832891 bytes in 0.003s)
+Loading trace 0.00 MB
+Loaded trace
