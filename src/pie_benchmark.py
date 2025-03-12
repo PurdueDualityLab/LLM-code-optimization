@@ -227,7 +227,7 @@ class PIEBenchmark(Benchmark):
             if not (line.startswith("make[") or line.startswith("./"))
         )
         logger.info(f"filtered_output: {filtered_output}")
-        return filtered_output
+        return filtered_output.split("make")[0]
     
     def _compare_outputs(self, optimized_output):
         # whitespace remove
@@ -383,12 +383,13 @@ def get_valid_pie_programs(num_programs):
     slow_fast_pairs = []
     selected_problem_ids = set()
     source_code = []
+    invalid_problem_id = ["p02587"] #timeout
 
     #Extract the first 5 unique problems from the validation set
     file = open(f"{USER_PREFIX}/benchmark_pie/val.jsonl", "r")
     for line in file:
         json_line = json.loads(line)
-        if json_line["problem_id"] not in selected_problem_ids and len(selected_problem_ids) != num_programs:
+        if json_line["problem_id"] not in selected_problem_ids and len(selected_problem_ids) != num_programs and json_line["problem_id"] not in invalid_problem_id and float(json_line["src_agg_runtime"]) >= 0.1:
             selected_problem_ids.add(json_line["problem_id"])
             slow_fast_pairs.append(json_line)
             src_code = json_line["src_code"].replace("\n\n", "\n")
