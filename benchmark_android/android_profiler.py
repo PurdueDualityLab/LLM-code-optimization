@@ -153,7 +153,7 @@ def get_heap_profile_data(trace_file):
         query_table_content(trace_file, table)
 
 def get_cpu_data(trace_file):
-    tables = ["perfetto_tables", "cpu_counter_track", "process_counter_track", "__intrinsic_cpu_freq", "__intrinsic_thread", "__intrinsic_process", "__intrinsic_counter"] 
+    tables = ["perfetto_tables", "cpu_counter_track", "process_counter_track", "sched", "cpu", "process", "thread", "counter", "slice"] 
     for table in tables:
         query_table_content(trace_file, table)
 
@@ -238,31 +238,31 @@ if __name__ == "__main__":
     app_package_name = "ws.xsoh.etar.debug"
 
 
-    emulator_proc = start_emulator()
-    time.sleep(20)  # Wait for emulator to start
+    # emulator_proc = start_emulator()
+    # time.sleep(20)  # Wait for emulator to start
     
-    # Run the profiling steps
-    remove_existing_trace_file()
-    run_record_android_trace(app_package_name)
-    run_trace_processor()
+    # # Run the profiling steps
+    # remove_existing_trace_file()
+    # run_record_android_trace(app_package_name)
+    # run_trace_processor()
 
-    extract_app_process_data(input_file, output_file, app_package_name)
+    # extract_app_process_data(input_file, output_file, app_package_name)
 
-    # run the heap profile
-    run_heap_profile(30000, app_package_name) #remember to delete the files in heap_trace
-    time.sleep(20)  # Wait for heap profiling to complete
+    # # run the heap profile
+    # run_heap_profile(30000, app_package_name) #remember to delete the files in heap_trace
+    # time.sleep(20)  # Wait for heap profiling to complete
 
-    # get the latest heap profile timestamp and run the flamegraph query
-    timestamp = get_latest_heap_profile_timestamp(HEAP_TRACE_FILE)
-    run_flamegraph_query(HEAP_TRACE_FILE, "flamegraph_output.csv", timestamp)
+    # # get the latest heap profile timestamp and run the flamegraph query
+    # timestamp = get_latest_heap_profile_timestamp(HEAP_TRACE_FILE)
+    # run_flamegraph_query(HEAP_TRACE_FILE, "flamegraph_output.csv", timestamp)
 
-    # Run the CPU profiling
-    run_cpu_profile(app_package_name)
+    # # Run the CPU profiling
+    # run_cpu_profile(app_package_name)
 
     # # Get the list of tables in the trace file
-    get_heap_profile_data(HEAP_TRACE_FILE)
+    # get_heap_profile_data(HEAP_TRACE_FILE)
     get_cpu_data(LOCAL_TRACE_PATH)
-    get_cpu_profile_data("cpu_trace/raw-trace")
+    # get_cpu_profile_data("cpu_trace/raw-trace")
 
 
     # # Terminate the emulator after profiling is completed.

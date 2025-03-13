@@ -1,2 +1,9 @@
 id,name,type,parent_id,source_arg_set_id,machine_id,unit,description,cpu
-1107,cpu-clock,perf_counter,,2094,,,,0
+0,cpuidle,cpu_idle,,,,,,2
+1,cpuidle,cpu_idle,,,,,,3
+2,cpuidle,cpu_idle,,,,,,1
+3,cpuidle,cpu_idle,,,,,,0
+4,cpufreq,cpu_frequency,,,,,,0
+5,cpufreq,cpu_frequency,,,,,,3
+6,cpufreq,cpu_frequency,,,,,,1
+7,cpufreq,cpu_frequency,,,,,,2
