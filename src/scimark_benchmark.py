@@ -164,7 +164,7 @@ class SciMarkBenchmark(Benchmark):
         cpu_change = original_data[3] / avg_cpu_cycles
         memory_change = original_data[4] / max_peak_memory
         throughput_change = throughput / original_data[5]
-        mflops_change = mflops / original_data[6]
+        mflops_change = float(mflops) / float(original_data[6])
 
         self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(energy_change, 3), round(speedup, 3), cpu_change, memory_change, throughput_change, mflops_change, len(optimized_code.splitlines()))
         
@@ -282,7 +282,7 @@ class SciMarkBenchmark(Benchmark):
         with open(f'{USER_PREFIX}/src/runtime_logs/java.csv', mode='r', newline='') as file:
             csv_reader = csv.reader(file)
             for index, row in enumerate(csv_reader):
-                if index == 10:
+                if index == 5:
                     throughput = row[1]
                 else:
                     benchmark_name = row[0]
@@ -325,13 +325,13 @@ class SciMarkBenchmark(Benchmark):
         last_value = contents[last_key]
 
         logger.info(f"key 0, avg_energy: {first_value[1]}, avg_runtime: {first_value[2]}, avg_cpu_cycles: {first_value[3]}, max_peak_memory: {first_value[4]}, throughput: {first_value[5]}, mflops: {first_value[6]}, num_of_lines: {first_value[7]}")
-        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, max_peak_memory, throughput, mflops, num_of_lines) in contents.items():
+        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, max_peak_memory, throughput, mflops, num_of_lines) in list(contents.items())[1:]:
             logger.info(f"key: {key}, avg_energy_improvement: {avg_energy}, avg_speedup: {avg_runtime}, avg_cpu_improvement: {avg_cpu_cycles}, avg_memory_improvement: {max_peak_memory}, avg_throughput_improvement: {throughput}, average_mflops_improvement: {mflops}, num_of_lines: {num_of_lines}")
 
         # Loop through the contents to find the key with the lowest avg_energy
         max_avg_speedup = float('-inf')
         max_avg_speedup_key = None
-        for key, (source_code, avg_energy, avg_speedup, avg_cpu_cycles, max_peak_memory, throughput, mflops, num_of_lines) in contents.items():
+        for key, (source_code, avg_energy, avg_speedup, avg_cpu_cycles, max_peak_memory, throughput, mflops, num_of_lines) in list(contents.items())[1:]:
             if avg_speedup > max_avg_speedup:
                 max_avg_speedup = avg_speedup
                 max_avg_speedup_key = key
@@ -376,10 +376,10 @@ class SciMarkBenchmark(Benchmark):
 
 def get_valid_scimark_programs():
     valid_programs = [
-        # "FFT",
+        "FFT",
         # "LU",
         # "MonteCarlo",
         # "SOR",
-        "SparseCompRow"
+        # "SparseCompRow"
     ]
     return valid_programs

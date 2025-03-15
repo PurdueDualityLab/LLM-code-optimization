@@ -180,6 +180,8 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                 evaluator_feedback = evaluator_llm(evaluator_feedback_data=evaluator_feedback_data, llm_assistant=evaluator)
                 logger.info("Got evaluator feedback")
 
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
     with open(f"{results_dir}/results.txt", "w+") as file:
         json.dump(results, file, indent=4)
 
