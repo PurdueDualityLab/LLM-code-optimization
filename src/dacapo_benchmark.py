@@ -260,7 +260,7 @@ class DaCapoBenchmark(Benchmark):
         
         # print all values
         logger.info(f"key 0, avg_energy: {first_value[1]}, avg_runtime: {first_value[2]}, avg_cpu_cycles: {first_value[3]}, max_peak_memory: {first_value[4]}, throughput: {first_value[5]}, num_of_lines: {first_value[6]}")
-       for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, max_peak_memory, throughput, num_of_lines) in list(contents.items())[1:]:
+        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, max_peak_memory, throughput, num_of_lines) in list(contents.items())[1:]:
             logger.info(f"key: {key}, avg_energy_improvement: {avg_energy}, avg_speedup: {avg_runtime}, avg_cpu_improvement: {avg_cpu_cycles}, avg_memory_improvement: {max_peak_memory}, avg_throughput_improvement: {throughput}, num_of_lines: {num_of_lines}")
 
        # Loop through the contents to find the key with the highest speedup
