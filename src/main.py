@@ -106,8 +106,8 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         num_success_iteration = 0
         total_output_difference = 0
 
-        # filter optimization patterns for most applicable prompts
-        optimization_prompts = filter_patterns(llm_assistant=advisor, source_code=original_code)
+        # filter optimization patterns for most applicable
+        selected_patterns = filter_patterns(llm_assistant=advisor, source_code=original_code)
 
         total_compilation_failure = 0
 
@@ -130,17 +130,15 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                     compilation_error_message = benchmark_obj.get_compilation_error()
                     last_optimized_code = handle_compilation_error(error_message=compilation_error_message, llm_assistant=generator)
                 else:
-                    #last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, optimization_prompts=optimization_prompts)
                     ast = benchmark_obj.pre_process(last_optimized_code)
-                    last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, optimization_prompts=optimization_prompts, ast=ast)
+                    last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, optimization_patterns=selected_patterns, ast=ast)
             else:
                 logger.info("re-optimizing from latest working optimization")
                 generator.clear_memory()
                 evaluator.clear_memory()
                 evaluator_feedback = ""
-                #last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, optimization_prompts=optimization_prompts)
                 ast = benchmark_obj.pre_process(last_working_optimized_code)
-                last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, optimization_prompts=optimization_prompts, ast=ast)
+                last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, optimization_patterns=selected_patterns, ast=ast)
                 reoptimize_lastly_flag = 0
             
             # code post_process

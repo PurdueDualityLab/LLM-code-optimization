@@ -11,28 +11,19 @@ USER_PREFIX = os.getenv('USER_PREFIX')
 with open(f"{USER_PREFIX}/src/llm/llm_prompts/generator_prompt.txt", "r") as file:
     generator_prompt = file.read()
 
-
-# Look at changes on main (ast)
-def llm_optimize(code, llm_assistant, evaluator_feedback, optimization_prompts, ast):
-    class Strategy(BaseModel):
-        Prompt: str
-        Pros: str
-        Cons: str
-
+def llm_optimize(code, llm_assistant, evaluator_feedback, optimization_patterns, ast):
     class OptimizationReasoning(BaseModel):
         analysis: str
-        optimization_opportunities: str
-        prompts: list[Strategy] 
-        selected_prompt: str
+        selected_pattern: str 
         final_code: str
     
-    formatted_prompts = json.dumps(optimization_prompts, indent=4)
-    logger.info(formatted_prompts)
-    
-    updated_generator_prompt = generator_prompt.replace('{optimization_prompts}', formatted_prompts)
-    # add ast to prompt
+    # adding optimization patterns to prompt
+    formatted_patterns = json.dumps(optimization_patterns, indent=4)
+    #logger.info(formatted_prompts) # testing
+    updated_generator_prompt = generator_prompt.replace('{optimization_patterns}', formatted_patterns)
+
     if evaluator_feedback == "":
-        prompt = updated_generator_prompt + f"Here is the code to optimize, follow the instruction to provide the optimized code WHILE MAINTAINING IT'S FUNCTIONAL CORRECTNESS:\n{code}"
+        prompt = updated_generator_prompt + f"Here is the code to optimize, follow the instruction to provide the optimized code WHILE MAINTAINING IT'S FUNCTIONAL EQUIVALENCE:\n{code}.\n" + f"Here is the AST of the source code: {ast}"
     else:
         prompt = f"The code you generated did not improve performance, please reoptimize WHILE MAINTAINING IT'S FUNCTIONAL CORRECTNESS. Here are some feedbacks: {evaluator_feedback}.\n Original code to optimize:\n {code}"
     

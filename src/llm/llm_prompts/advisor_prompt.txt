@@ -1,13 +1,10 @@
 Task Instructions:
-- Analyze the provided source code to identify the most suitable energy optimization patterns that can improve its efficiency.
+- Analyze the provided source code to identify the most suitable energy optimization patterns.
     - Use the pattern descriptions and examples as references when evaluating the code.
     - Justify your selection based on the code's structure, operations, and areas with potential energy inefficiencies.
 - Select the top five most relevant energy optimization patterns from the identified options.
-- For each selected pattern, generate a detailed prompt that will be used by another LLM assistant.
-    - This prompt should inlcude the name and description of the energy optimization pattern as well as how to apply it effectively.
-    - Incorporate specific details from the source code that are relevant to the pattern.
 - Output Requirements:
-    - Return only the five generated prompts, with no additional explanation or justification.
+    - For the five selected patterns, return the pattern name, description, and example.
 
 Energy Optimization Patterns (Use these as reference):
 {patterns}
