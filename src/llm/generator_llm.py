@@ -27,7 +27,7 @@ def llm_optimize(code, llm_assistant, evaluator_feedback, optimization_patterns,
     
     # adding optimization patterns to prompt
     formatted_patterns = json.dumps(optimization_patterns, indent=4)
-    #logger.info(formatted_prompts) # testing
+    #logger.info(formatted_patterns) # testing
     updated_generator_prompt = generator_prompt.replace('{optimization_patterns}', formatted_patterns)
 
     if evaluator_feedback == "":
