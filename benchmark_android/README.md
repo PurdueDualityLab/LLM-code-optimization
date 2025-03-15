@@ -1,3 +1,10 @@
+##  How to run
+- Start Android Studio and run the emulator and app
+- (comment out start_emulator() if android studio is already running the emulator)
+- run_trace_processor(), run_heap_profile(), run_cpu_profile() these function runs the profiling script
+- Need to delete both files in cpu_trace and heap_trace so run_heap_profile(), run_cpu_profile() would record new trace, if the files in cpu_trace and heap_trace is not deleted it would not collect new trace
+- (run_trace_processor(), run_heap_profile(), run_cpu_profile(), these three trace now run consecutively, I will make them run in three threads so it's proiling the same time interval)
+
 ## Current Status
 
 **android_profiler.py**
