@@ -1,5 +1,4 @@
 from dotenv import load_dotenv
-from agent import LLMAgent
 from pydantic import BaseModel
 from utils import Logger
 from scripts.read_pattern_cat import get_patterns
@@ -45,7 +44,7 @@ def filter_patterns(llm_assistant, source_code):
         if (llm_assistant.is_openai_model()):
             content_dict = json.loads(response["content"])
             patterns = "\n".join(
-                f"{entry['pattern_name']}:\nDescription:{entry['pattern_description']}\nExample{entry['pattern_example']}"
+                f"{entry['pattern_name']}:\nDescription:{entry['pattern_description']}\nExample:{entry['pattern_example']}"
                 for entry in content_dict["patterns"]
             )
         else:

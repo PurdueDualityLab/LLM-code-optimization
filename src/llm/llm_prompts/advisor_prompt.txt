@@ -1,12 +1,17 @@
+You are tasked with selecting optimization patterns that when applied are likely to improve code performance. Please follow these steps and guidelines:
+
 Task Instructions:
-- Analyze the provided source code to identify the most suitable energy optimization patterns.
-    - Use the pattern descriptions and examples as references when evaluating the code.
-    - Justify your selection based on the code's structure, operations, and areas with potential energy inefficiencies.
-- Select the top five most relevant energy optimization patterns from the identified options.
-- Output Requirements:
+    1. Analyze the provided Source Code
+        - Examing the Source Code to identify inefficiencies and areas for improvement.
+        - Look for areas of high latency, use of complex operations/instructions, inefficient memory allocations, inefficient memory accesses, and inefficient I/O operations.
+    2. Analyze the Optimization Patterns
+        - Using pattern description and example, assess how well each optimization pattern addresses the inefficiencies found in Source Code.
+        - Based on the assessment, select the five best optimization patterns.
+
+Output Requirements:
     - For the five selected patterns, return the pattern name, description, and example.
 
-Energy Optimization Patterns (Use these as reference):
+Optimization Patterns:
 {patterns}
 
 Source Code:

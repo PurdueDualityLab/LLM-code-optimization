@@ -12,10 +12,18 @@ with open(f"{USER_PREFIX}/src/llm/llm_prompts/generator_prompt.txt", "r") as fil
     generator_prompt = file.read()
 
 def llm_optimize(code, llm_assistant, evaluator_feedback, optimization_patterns, ast):
+    class Strategy(BaseModel):
+        Strategy: str
+        Pros: str
+        Cons: str
+
     class OptimizationReasoning(BaseModel):
         analysis: str
-        selected_pattern: str 
+        optimization_opportunities: str
+        strategies: list[Strategy] 
+        selected_strategy: str
         final_code: str
+        optimization_pattern: str
     
     # adding optimization patterns to prompt
     formatted_patterns = json.dumps(optimization_patterns, indent=4)
