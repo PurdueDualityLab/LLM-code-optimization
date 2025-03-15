@@ -1,4 +1,4 @@
-You are tasked with optimizing the following code to improve its energy efficiency. This involves reducing CPU cycles, minimizing memory access, and optimizing I/O operations. Please follow these steps and guidelines:
+You are tasked with optimizing the following code to improve its performance. This involves reducing latency, reducing CPU cycles, minimizing memory access, and optimizing I/O operations. Please follow these steps and guidelines:
 
 Task Instructions:
 - Analyze the code: Examine the provided C++ code in detail.
@@ -7,7 +7,7 @@ Task Instructions:
     - Reduce or eliminate nested loops to lower computational overhead.
     - Select more efficient data structures to minimize memory access and improve performance.
     - Apply dynamic programming or memoization to avoid redundant calculations and reduce CPU usage where applicable.
-    - Implement specialized algorithms if they can significantly improve performance and reduce energy consumption.
+    - Implement specialized algorithms if they can significantly improve performance.
     - Optimize I/O operations to reduce their impact on overall performance.
 - Choose the most effective optimization prompt:
     - After analyzing each energy optimization prompt, select the prompt that yields the best balance of energy efficiency, performance, readability, and maintainability.

@@ -1,16 +1,5 @@
-# Code Release for 2025 ICSE-NIER Submission: Large Language Models for Energy-Efficient Code: Emerging Results and Future Directions
+# LLM for software optimization
 ## About
-This repository contains all the artifacts of the project “Large Language Models for Energy-Efficient Code: Emerging Results and Future Directions.” It includes scripts, implementation details, and instructions necessary to reproduce the results and experiments discussed in our submission.
-
-Our artifact includes the following
-Item | Corresponding content in the paper | Relevant Directory | Relevant Scripts
---- | --- | --- | --- |
-Energy Aware Prompting (EAP) | Section III.B, especially Figure 1 and 2 | llm/src | llm/src/new_llm_optimize.py
-Energy Optimization Evaluation (EOE) | Section III.B, especially Figure 2 | energy/src | llm/src/regression_test.py, energy/src/evaluator.py
-Software Benchmark | Section III.C | /benchmarks | energy/src/benchmark.py
-Power Consumption Measurement | Section III.C | /RAPL | energy/src/measure_energy.py
-Comparison of Results with GCC –O3 | Section IV.D | /test_results | 
-
 ## Table of Contents
 - [Environment Requirement](#environment-requirement)
 - [Reproduce Results](#reproduce-results)
@@ -50,9 +39,9 @@ To set up the pipeline for energy-efficient code optimization, follow these step
     API_KEY=your_openai_api_key_here
     USER_PREFIX=/path/to/E2COOL
 4. **Update RAPL/main.c write path**
-    Change line 31 to match your absolute path
+    Change the path to language .csv file to match your absolute path
     ```bash
-    strcpy(path, “ABSOLUTE_PATH/E2COOL/energy/src/");
+    strcpy(path, “ABSOLUTE_PATH/E2COOL/src/runtime_logs/");
     ```
     Then run make in RAPL directory
     ```bash
@@ -60,34 +49,9 @@ To set up the pipeline for energy-efficient code optimization, follow these step
 ## Running the pipeline
 5. **Run the main script in the home directory (/E2COOL)**
     ```bash
-    make run (benchmark name) (model name)
+    make run ARGS="--benchmark PIE --llm gpt-4o --self_optimization_step 2 --num_programs 2"
     ```
-    For example, to run the Binary Trees benchmark using `llama3.1:latest`,
-   ```bash
-   make run binarytrees.gpp-9.c++ llama3.1:latest
-   ```
-   Available models: use `openai` as model name for `gpt-4o-2024-08-06`. Open-souce LLMs are supported via ollama.
-    
-
-## Analysis and evaluation
-
-The results of the optimizations are stored in "/llm/benchmarks_out/(benchmark name)/"
-In 'results_file.txt', information about every optimization iteration is stored in the format:
-```
-(Iteration #): [
-   optimized code,
-   energy consumed,
-   runtime
-]
-```
-
-A summary of the LLM's optimizations on selected benchmarks can be found [here](https://docs.google.com/spreadsheets/d/16SBxRT3qgIaE904srtmaVqg7Rs7w_iRlNxEvjYius0w/edit?usp=sharing).
-
-## Code Dependencies
-Software we relied on (included in [requirements.txt](https://github.com/ArjunGupte44/E2COOL/blob/main/requirements.txt)):
-```
-openai==1.50.1
-pydantic==2.9.2
-pydantic_core==2.23.4
-python-dotenv==1.0.1
-```
+    To use GenAI studio to inference open-source models
+    ```bash
+    make run ARGS="--benchmark PIE --llm llama3.3:70b-instruct-q4_K_M --self_optimization_step 2 --num_programs 2 --genai_studio True"
+    ```

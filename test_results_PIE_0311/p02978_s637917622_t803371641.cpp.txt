@@ -1,0 +1,29 @@
+{
+    "0": [
+        "#include <bits/stdc++.h>\n#define ll long long\nusing namespace std;\nll f[20][20][20][20];\nll a[20];\nll dfs(int l,int r,int x,int y) {\n\tif(l+1>=r) return 0;\n\tll ans=1e18;\n\tfor(int i=l+1;i<r;i++) {\n\t\tans=min(ans,dfs(l,i,x,x+y)+dfs(i,r,x+y,y)+a[i]*(x+y));\n\t}\n\treturn f[l][r][x][y]=ans;\n}\nint main() {\n\tint n;\n\tscanf(\"%d\",&n);\n\tfor(int i=1;i<=n;i++) scanf(\"%lld\",&a[i]);\n\tmemset(f,-1,sizeof f);\n\tprintf(\"%lld\\n\",a[1]+a[n]+dfs(1,n,1,1));\n\treturn 0;\n}",
+        0.718,
+        0.005,
+        13655600.002,
+        51.615,
+        216.929,
+        21
+    ],
+    "1": [
+        "#include <iostream>\n#include <cstring>\n#include <algorithm>\n#include <climits> \n\nusing namespace std;\nusing ll = long long;\n\nconst int MAXN = 20;\nll f[MAXN][MAXN][MAXN][MAXN];\nll a[MAXN];\n\nll dfs(int l, int r, int x, int y) {\n    if (l + 1 >= r) return 0;\n    if (f[l][r][x][y] != -1) return f[l][r][x][y]; \n    ll ans = LLONG_MAX; \n    for (int i = l + 1; i < r; i++) {\n        ans = min(ans, dfs(l, i, x, x + y) + dfs(i, r, x + y, y) + a[i] * (x + y));\n    }\n    return f[l][r][x][y] = ans;\n}\n\nint main() {\n    int n;\n    scanf(\"%d\", &n);\n    for (int i = 1; i <= n; i++) scanf(\"%lld\", &a[i]);\n    memset(f, -1, sizeof(f));\n    printf(\"%lld\\n\", a[1] + a[n] + dfs(1, n, 1, 1));\n    return 0;\n}",
+        0.995,
+        1.004,
+        1.004,
+        2.929,
+        1.004,
+        30
+    ],
+    "2": [
+        "#include <iostream>\n#include <cstring>\n#include <algorithm>\n#include <climits> \n\nusing namespace std;\nusing ll = long long;\n\nconst int MAXN = 20;\nll f[MAXN][MAXN][MAXN][MAXN];\nll a[MAXN];\n\nll dfs(int l, int r, int x, int y) {\n    if (l + 1 >= r) return 0;\n    if (f[l][r][x][y] != -1) return f[l][r][x][y]; \n    ll ans = LLONG_MAX; \n    for (int i = l + 1; i < r; i++) {\n        ans = min(ans, dfs(l, i, x, x + y) + dfs(i, r, x + y, y) + a[i] * (x + y));\n    }\n    return f[l][r][x][y] = ans;\n}\n\nint main() {\n    int n;\n    scanf(\"%d\", &n);\n    for (int i = 1; i <= n; i++) scanf(\"%lld\", &a[i]);\n\n    \n    memset(f, -1, sizeof(f));\n    \n    ll total_cost = a[1] + a[n] + dfs(1, n, 1, 1);\n    printf(\"%lld\\n\", total_cost);\n    \n    return 0;\n}",
+        1.0,
+        1.0,
+        1.0,
+        4.318,
+        1.0,
+        35
+    ]
+}

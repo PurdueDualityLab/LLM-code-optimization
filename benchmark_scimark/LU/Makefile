@@ -13,7 +13,7 @@ SRCS = *.java
 RANDOM_SRC = ../Random.java
 MAIN_CLASS = jnt/scimark2/LU
 OPTIMIZED_CLASS = jnt.scimark2.LUOptimized
-LUBENCHMARK_CLASS = jnt/scimark2/LUBenchmark
+BENCHMARK_CLASS = jnt/scimark2/LUBenchmark
 
 compile:
 	$(JAVAC) $(JFLAGS) $(SRCS) $(RANDOM_SRC)
@@ -35,10 +35,10 @@ measure_optimized:
 	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
 
 measure_mflops:
-	@$(JAVA) $(LUBENCHMARK_CLASS) false
+	@$(JAVA) $(BENCHMARK_CLASS) false
 
 measure_mflops_optimized:
-	@$(JAVA) $(LUBENCHMARK_CLASS) true
+	@$(JAVA) $(BENCHMARK_CLASS) true
 
 clean:
 	rm -rf *.class

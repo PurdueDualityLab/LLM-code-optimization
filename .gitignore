@@ -6,3 +6,4 @@ src/abstract_syntax_trees/__pycache__/
 benchmark_pie/merged_test_cases
 benchmark_pie/p*
 src/runtime_logs
+benchmark_android/__pycache__

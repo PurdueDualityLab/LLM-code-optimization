@@ -32,7 +32,7 @@ public class LU {
         double[] x = new_copy(b);
 
         solve(lu, pivot, x);
-        System.out.println(normabs(b, matvec(A, x)) / 1024);
+        System.out.println(normabs(b, matvec(A, x)));
     }
     /**
      * Initalize LU factorization from matrix.

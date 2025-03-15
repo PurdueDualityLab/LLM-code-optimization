@@ -8,7 +8,7 @@
 #include <sys/resource.h>  // For getrusage
 
 #define RUNTIME 1
-#define WARMUP_RUNS 3  // Number of warm-up iterations
+#define WARMUP_RUNS 1  // Number of warm-up iterations
 
 // Function to read the time-stamp counter (CPU cycles)
 static inline uint64_t read_tsc() {
@@ -38,14 +38,14 @@ void get_peak_memory_usage(long *mem) {
 
 int main (int argc, char **argv) {
     char command[500]="", language[500]="", test[500]="", path[500]="";
-    int ntimes = 10;
+    int ntimes = 5;
     int core = 0;
     int i=0;
 
 #ifdef RUNTIME
-    double time_spent;
-    struct timeval tvb, tva;
-    struct timeval total_start_time, total_end_time; // For measuring total runtime
+    struct timespec start, end;  // Change timeval to timespec
+    struct timespec total_start_time, total_end_time;
+    double elapsed_time;
 #endif
 
     FILE * fp;
@@ -71,14 +71,14 @@ int main (int argc, char **argv) {
     }
 
     // Start total time measurement for throughput calculation
-    gettimeofday(&total_start_time, 0);
+    clock_gettime(CLOCK_MONOTONIC, &total_start_time); 
 
     for (i = 0; i < ntimes; i++) {
         fprintf(fp, "%s, ", test);
 
 #ifdef RUNTIME
         // Get the start time using gettimeofday
-        gettimeofday(&tvb, 0);
+        clock_gettime(CLOCK_MONOTONIC, &start);
 #endif
         // Measure the CPU cycles before execution
         uint64_t start_cycles = read_tsc();
@@ -102,9 +102,8 @@ int main (int argc, char **argv) {
 
 #ifdef RUNTIME
         // Get the end time using gettimeofday
-        gettimeofday(&tva, 0);
-        time_spent = (tva.tv_sec - tvb.tv_sec) * 1000000 + tva.tv_usec - tvb.tv_usec;
-        time_spent = time_spent / 1000;  // Convert to milliseconds
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        double elapsed_time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1.0e9;
 #endif
 
         // Calculate CPU cycles used during the command execution
@@ -114,7 +113,7 @@ int main (int argc, char **argv) {
         long peak_mem_usage = peak_mem_after - peak_mem_before;
 
 #ifdef RUNTIME
-        fprintf(fp, "%G, ", time_spent);  // Log runtime in milliseconds
+        fprintf(fp, "%G, ", elapsed_time);  // Log runtime in milliseconds
 #endif
 
         // Log CPU cycles and peak memory usage
@@ -123,11 +122,11 @@ int main (int argc, char **argv) {
     }
 
     // End total time measurement
-    gettimeofday(&total_end_time, 0);
+    clock_gettime(CLOCK_MONOTONIC, &total_end_time); 
 
     // Calculate total time in seconds
-    double total_time = (total_end_time.tv_sec - total_start_time.tv_sec) + 
-                        (total_end_time.tv_usec - total_start_time.tv_usec) / 1000000.0;
+     double total_time = (total_end_time.tv_sec - total_start_time.tv_sec) + 
+                        (total_end_time.tv_nsec - total_start_time.tv_nsec) / 1.0e9;
 
     // Calculate throughput (executions per second)
     double throughput = ntimes / total_time;

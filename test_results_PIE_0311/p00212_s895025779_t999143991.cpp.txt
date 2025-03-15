@@ -1,0 +1,29 @@
+{
+    "0": [
+        "//Solution for aoj:0212 Highway Express Bus\n#include<iostream>\n#include<algorithm>\n#include<vector>\n#include<queue>\n#include<functional>\nusing namespace std;\ntypedef pair<int, int>P;\ntypedef pair < P, int > PP;\n#define f first\n#define s second\n\n//struct S {\n//\tint cost, to, num;\n//\tS(int c, int t, int n) : cost(c), to(t), num(n){}\n//\tbool operator>(const S &s) const {\n//\t\treturn cost > s.cost;\n//\t}\n//};\n\nconst int INF = 1 << 29;\nint c, n, m, s, d, ans;\nint tocost[1000][100];\nvector<P> town[1000];\n\n\nvoid dijkstra(){\n\tpriority_queue<PP, vector<PP>, greater<PP> > pq;\n\tpq.push({ { 0, s }, c });\n\twhile (!pq.empty()){\n\t\tPP a = pq.top();\n\t\tpq.pop();\n\t\tfor (int i = 0; i < town[a.f.s].size(); i++){\n\t\t\tint tt = town[a.f.s][i].f, cc = town[a.f.s][i].s;\n\t\t\tif (tocost[tt][a.s] > cc + a.f.f){\n\t\t\t\ttocost[tt][a.s] = cc + a.f.f;\n\t\t\t\tpq.push({ { cc + a.f.f, tt }, a.s });\n\t\t\t}\n\t\t\tif (a.s&&tocost[tt][a.s-1] > cc/2 + a.f.f){\n\t\t\t\ttocost[tt][a.s-1] = cc/2 + a.f.f;\n\t\t\t\tpq.push({ { cc / 2 + a.f.f, tt }, a.s - 1 });\n\t\t\t}\n\t\t}\n\t}\n}\n\tint main(){\n\t\twhile (cin >> c >> n >> m >> s >> d&&c&&n&&m&&s){\n\t\t\tfor (int i = 0; i < 1000; i++)\n\t\t\t\tfill(tocost[i], tocost[i] + 100, INF);\n\t\t\ttocost[s][c] = 0;\n\t\t\tans = INF;\n\t\t\tfor (int i = 0; i < 1000; i++)\n\t\t\t\ttown[i].clear();\n\t\t\tfor (int i = 0; i < m; i++){\n\t\t\t\tint a, b, c;\n\t\t\t\tcin >> a >> b >> c;\n\t\t\t\ttown[a].push_back({ b, c });\n\t\t\t\ttown[b].push_back({ a, c });\n\t\t\t}\n\t\t\tdijkstra();\n\t\t\tfor (int i = 0; i <= c; i++)\n\t\t\t\tans = min(ans, tocost[d][i]);\n\t\t\tcout << ans << endl;\n\t\t}\n\t\treturn 0;\n\t}",
+        0.985,
+        0.006,
+        18666102.843,
+        53.804,
+        159.305,
+        66
+    ],
+    "1": [
+        "#include <iostream>\n#include <algorithm>\n#include <vector>\n#include <queue>\n#include <functional>\n#include <cstdio>\nusing namespace std;\ntypedef pair<int, int> P;\ntypedef pair<P, int> PP;\n#define f first\n#define s second\n\nconst int INF = 1 << 29;\nint c, n, m, s, d, ans;\nint tocost[1000][100];\nvector<P> town[1000];\n\nvoid dijkstra() {\n    priority_queue<PP, vector<PP>, greater<PP>> pq;\n    pq.push({ {0, s}, c });\n    while (!pq.empty()) {\n        PP a = pq.top();\n        pq.pop();\n        for (auto &edge : town[a.f.s]) {\n            int tt = edge.f, cc = edge.s;\n            if (tocost[tt][a.s] > cc + a.f.f) {\n                tocost[tt][a.s] = cc + a.f.f;\n                pq.push({ {cc + a.f.f, tt}, a.s });\n            }\n            if (a.s > 0 && tocost[tt][a.s - 1] > cc / 2 + a.f.f) {\n                tocost[tt][a.s - 1] = cc / 2 + a.f.f;\n                pq.push({ {cc / 2 + a.f.f, tt}, a.s - 1 });\n            }\n        }\n    }\n}\n\nint main() {\n    while (scanf(\"%d %d %d %d %d\", &c, &n, &m, &s, &d), c && n && m && s) {\n        fill(&tocost[0][0], &tocost[0][0] + sizeof(tocost) / sizeof(tocost[0][0]), INF);\n        tocost[s][c] = 0;\n        ans = INF;\n        for (int i = 0; i < 1000; i++)\n            town[i].clear();\n        for (int i = 0; i < m; i++) {\n            int a, b, c;\n            scanf(\"%d %d %d\", &a, &b, &c);\n            town[a].emplace_back(b, c);\n            town[b].emplace_back(a, c);\n        }\n        dijkstra();\n        for (int i = 0; i <= c; i++)\n            ans = min(ans, tocost[d][i]);\n        printf(\"%d\\n\", ans);\n    }\n    return 0;\n}",
+        1.016,
+        1.023,
+        1.023,
+        3.847,
+        1.023,
+        57
+    ],
+    "2": [
+        "#include <iostream>\n#include <vector>\n#include <queue>\n#include <functional>\n#include <unordered_map>\n#include <cstring>\n\nusing namespace std;\n\ntypedef pair<int, int> P;\ntypedef pair<P, int> PP;\n#define f first\n#define s second\n\nconst int INF = 1 << 29;\nint c, n, m, s, d, ans;\nvector<vector<int>> tocost(1000, vector<int>(100, INF));\nvector<P> town[1000];\n\nvoid dijkstra() {\n    priority_queue<PP, vector<PP>, greater<PP>> pq;\n    pq.push({{0, s}, c});\n    while (!pq.empty()) {\n        PP a = pq.top();\n        pq.pop();\n        if (tocost[a.f.s][a.s] < a.f.f) continue; \n        for (auto &edge : town[a.f.s]) {\n            int tt = edge.f, cc = edge.s;\n            int new_cost = cc + a.f.f;\n            if (tocost[tt][a.s] > new_cost) {\n                tocost[tt][a.s] = new_cost;\n                pq.push({{new_cost, tt}, a.s});\n            }\n            if (a.s > 0) {\n                int half_cost = cc / 2 + a.f.f;\n                if (tocost[tt][a.s - 1] > half_cost) {\n                    tocost[tt][a.s - 1] = half_cost;\n                    pq.push({{half_cost, tt}, a.s - 1});\n                }\n            }\n        }\n    }\n}\n\nint main() {\n    char buffer[1024];\n    while (fgets(buffer, sizeof(buffer), stdin) && sscanf(buffer, \"%d %d %d %d %d\", &c, &n, &m, &s, &d) == 5 && c && n && m && s) {\n        fill(tocost.begin(), tocost.end(), vector<int>(100, INF));\n        tocost[s][c] = 0;\n        ans = INF;\n        for (int i = 0; i < 1000; i++)\n            town[i].clear();\n        for (int i = 0; i < m; i++) {\n            fgets(buffer, sizeof(buffer), stdin);\n            int a, b, cost;\n            sscanf(buffer, \"%d %d %d\", &a, &b, &cost);\n            town[a].emplace_back(b, cost);\n            town[b].emplace_back(a, cost);\n        }\n        dijkstra();\n        for (int i = 0; i <= c; i++)\n            ans = min(ans, tocost[d][i]);\n        printf(\"%d\\n\", ans);\n    }\n    return 0;\n}",
+        1.282,
+        1.252,
+        1.255,
+        3.819,
+        1.252,
+        66
+    ]
+}

@@ -1,27 +1,43 @@
 --------- beginning of main
-I/perfetto(21214): probes_producer.cc:230  Ftrace setup (target_buf=243)
-I/perfetto(21214): ftrace_procfs.cc:176    enabled ftrace
-I/perfetto(  397): ing_service_impl.cc:758 Configured tracing session 233, #sources:1, duration:5000 ms, #buffers:1, total buffer size:4096 KB, total sessions:2, uid:1071 session name: ""
-I/perfetto(21214): probes_producer.cc:230  Ftrace setup (target_buf=244)
-I/perfetto(  397): ing_service_impl.cc:758 Configured tracing session 234, #sources:1, duration:5000 ms, #buffers:1, total buffer size:4096 KB, total sessions:3, uid:1071 session name: ""
-I/perfetto(21214): probes_producer.cc:230  Ftrace setup (target_buf=245)
-I/perfetto(21214): probes_producer.cc:329  Producer stop (id=371)
-I/perfetto(  397): ng_service_impl.cc:1948 Tracing session 233 ended, total sessions:2
-I/perfetto(  397): ing_service_impl.cc:758 Configured tracing session 235, #sources:1, duration:5000 ms, #buffers:1, total buffer size:4096 KB, total sessions:3, uid:1071 session name: ""
-I/perfetto(21214): probes_producer.cc:230  Ftrace setup (target_buf=246)
-I/perfetto(21214): probes_producer.cc:329  Producer stop (id=372)
-I/perfetto(  397): ng_service_impl.cc:1948 Tracing session 234 ended, total sessions:2
-I/perfetto(21214): probes_producer.cc:329  Producer stop (id=373)
-I/perfetto(  397): ng_service_impl.cc:1948 Tracing session 235 ended, total sessions:1
-I/perfetto(21214): probes_producer.cc:329  Producer stop (id=368)
-I/perfetto(21214): ftrace_procfs.cc:183    disabled ftrace
-I/perfetto(21214): probes_producer.cc:329  Producer stop (id=369)
-I/perfetto(21214): probes_producer.cc:329  Producer stop (id=370)
-I/perfetto(31014):    perfetto_cmd.cc:1210 Wrote 9687785 bytes into /data/misc/perfetto-traces/2025-02-25_11-59-6dbdd7.pftrace
-I/perfetto(  397): ng_service_impl.cc:1948 Tracing session 232 ended, total sessions:0
-Running perfetto --background --txt -o /data/misc/perfetto-traces/2025-02-25_11-59-6dbdd7.pftrace -t 20s -b 64mb --app 'ws.xsoh.etar.debug' sched freq idle am wm gfx memory
+I/perfetto(  391): probes_producer.cc:230  Ftrace setup (target_buf=16)
+I/perfetto(  391): ftrace_procfs.cc:176    enabled ftrace
+I/perfetto(  393): ing_service_impl.cc:758 Configured tracing session 17, #sources:1, duration:5000 ms, #buffers:1, total buffer size:4096 KB, total sessions:2, uid:1071 session name: ""
+I/perfetto(  391): probes_producer.cc:230  Ftrace setup (target_buf=17)
+I/perfetto(  393): ing_service_impl.cc:758 Configured tracing session 18, #sources:1, duration:5000 ms, #buffers:1, total buffer size:4096 KB, total sessions:3, uid:1071 session name: ""
+I/perfetto(  391): probes_producer.cc:230  Ftrace setup (target_buf=18)
+I/perfetto(  391): probes_producer.cc:329  Producer stop (id=23)
+I/perfetto(  393): ng_service_impl.cc:1948 Tracing session 17 ended, total sessions:2
+I/perfetto(  393): ing_service_impl.cc:758 Configured tracing session 19, #sources:1, duration:5000 ms, #buffers:1, total buffer size:4096 KB, total sessions:3, uid:1071 session name: ""
+I/perfetto(  391): probes_producer.cc:230  Ftrace setup (target_buf=19)
+I/perfetto(  391): probes_producer.cc:329  Producer stop (id=24)
+I/perfetto(  393): ng_service_impl.cc:1948 Tracing session 18 ended, total sessions:2
+I/perfetto(  393): ing_service_impl.cc:758 Configured tracing session 20, #sources:1, duration:5000 ms, #buffers:1, total buffer size:4096 KB, total sessions:3, uid:1071 session name: ""
+I/perfetto(  391): probes_producer.cc:230  Ftrace setup (target_buf=20)
+I/perfetto(  391): probes_producer.cc:329  Producer stop (id=25)
+I/perfetto(  393): ng_service_impl.cc:1948 Tracing session 19 ended, total sessions:2
+I/perfetto(  393): ing_service_impl.cc:758 Configured tracing session 21, #sources:1, duration:5000 ms, #buffers:1, total buffer size:4096 KB, total sessions:3, uid:1071 session name: ""
+I/perfetto(  391): probes_producer.cc:230  Ftrace setup (target_buf=21)
+I/perfetto(  393): ing_service_impl.cc:758 Configured tracing session 22, #sources:1, duration:5000 ms, #buffers:1, total buffer size:4096 KB, total sessions:4, uid:1071 session name: ""
+I/perfetto(  391): probes_producer.cc:230  Ftrace setup (target_buf=22)
+I/perfetto(  391): probes_producer.cc:329  Producer stop (id=26)
+I/perfetto(  393): ng_service_impl.cc:1948 Tracing session 20 ended, total sessions:3
+I/perfetto(  393): ing_service_impl.cc:758 Configured tracing session 23, #sources:1, duration:5000 ms, #buffers:1, total buffer size:4096 KB, total sessions:4, uid:1071 session name: ""
+I/perfetto(  391): probes_producer.cc:230  Ftrace setup (target_buf=23)
+I/perfetto(  391): probes_producer.cc:329  Producer stop (id=27)
+I/perfetto(  393): ng_service_impl.cc:1948 Tracing session 21 ended, total sessions:3
+I/perfetto(  391): probes_producer.cc:329  Producer stop (id=28)
+I/perfetto(  393): ng_service_impl.cc:1948 Tracing session 22 ended, total sessions:2
+I/perfetto(  391): probes_producer.cc:329  Producer stop (id=29)
+I/perfetto(  393): ng_service_impl.cc:1948 Tracing session 23 ended, total sessions:1
+I/perfetto(  391): probes_producer.cc:329  Producer stop (id=20)
+I/perfetto(  391): ftrace_procfs.cc:183    disabled ftrace
+I/perfetto(  391): probes_producer.cc:329  Producer stop (id=21)
+I/perfetto(  391): probes_producer.cc:329  Producer stop (id=22)
+I/perfetto( 5348):    perfetto_cmd.cc:1210 Wrote 21729057 bytes into /data/misc/perfetto-traces/2025-03-11_18-35-ca4a2d.pftrace
+I/perfetto(  393): ng_service_impl.cc:1948 Tracing session 16 ended, total sessions:0
+Running perfetto --background --txt -o /data/misc/perfetto-traces/2025-03-11_18-35-ca4a2d.pftrace -t 30s -b 64mb --app 'ws.xsoh.etar.debug' sched freq idle am wm gfx memory
 [30m[44mTrace started. Press CTRL+C to stop[0m
 [0m
 [0m
 [1mPulling into ./trace_file.perfetto-trace[0m
-/data/misc/perfetto-traces/2025-02-25_11-59-6dbdd7.pftrace: 1 file pulled, 0 skipped. 675.9 MB/s (9687785 bytes in 0.014s)
+/data/misc/perfetto-traces/2025-03-11_18-35-ca4a2d.pftrace: 1 file pulled, 0 skipped. 674.7 MB/s (21729057 bytes in 0.031s)

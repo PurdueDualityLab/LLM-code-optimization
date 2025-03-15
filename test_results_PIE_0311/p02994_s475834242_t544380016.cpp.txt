@@ -1,0 +1,29 @@
+{
+    "0": [
+        "#include <bits/stdc++.h>\n#define repd(i,a,b) for (int i=(a);i<(b);i++)\n#define rep(i,n) repd(i,0,n)\n#define int long long\ntypedef long long ll;\nusing namespace std;\nconst int MOD = 1000000007;\nconst int INF = 1010000000;\nconst double EPS = 1e-10;\nconst pair<int,int> fd[] = {make_pair(1,0),make_pair(-1,0),make_pair(0,1),make_pair(0,-1)}; \n\nvector<int> init(int size){\n  vector<int> par(size,-1);\n  return par;\n}\n\nint root(int x, vector<int>& par){\n  if(par[x] < 0){\n    return x;\n  }else{\n    return par[x] = root(par[x],par);\n  }\n}\n\nbool same(int x, int y, vector<int>& par){\n  return root(x, par) == root(y, par);\n}\n\nvoid unite(int x, int y, vector<int>& par){\n  x = root(x, par), y = root(y, par);\n  if(same(x,y, par))return;\n  par[x] += par[y];\n  par[y] = x;\n}\n\nint size(int x, vector<int>& par){\n  return -par[root(x, par)];\n}\n\nint pow(int x, int n){\n  if(n == 0)return 1;\n  if(n % 2 == 0)return pow(x * x % MOD, n/2);\n  else return x * pow(x, n-1) % MOD;\n}\n\nint n;vector<int> v[110000];int c[110000],ans[110000];pair<int,int> dig[110000];\nint cind,ansM;\n\nvoid f(int ver){\n  //cout << \"ver : \" << ver << endl;\n  vector<int> next;\n  for(int nver : v[ver]){\n    if(ans[nver] != -1)continue;\n  //cout << \"nver : \" << nver << \" \" << cind << endl;\n    next.push_back(nver);\n    ans[nver] = c[cind];\n    ansM += c[cind];\n    cind++;\n  }\n  for(int nver : next){\n    f(nver);\n  }\n}\n\nsigned main(){  \n  int n,l;cin>>n>>l;\n  int sum = 0, ans, diff = INF;\n  rep(i,n){\n    sum += l+i;\n  }\n  rep(i,n){\n    if(diff > abs(sum-l-i-sum)){\n      diff = abs(sum-l-i-sum);ans = sum-l-i;\n    }\n  }\n  cout << ans << endl;\n}\n",
+        2.002,
+        0.012,
+        36171228.106,
+        52.154,
+        82.742,
+        77
+    ],
+    "1": [
+        "#include <bits/stdc++.h>\nusing namespace std;\n\nconst int INF = 1010000000; \n\nint main(){  \n    int n, l;\n    cin >> n >> l;\n\n    \n    int total_sum = (2 * l + n - 1) * n / 2;\n    int smallest_diff = INF;\n    int optimal_value = 0;\n\n    \n    for (int i = 0; i < n; ++i) {\n        int candidate_value = total_sum - (l + i);\n        int current_diff = abs(total_sum - candidate_value);\n\n        \n        if (current_diff < smallest_diff) {\n            smallest_diff = current_diff;\n            optimal_value = candidate_value;\n        }\n    }\n\n    \n    cout << optimal_value << endl;\n    return 0;\n}",
+        3.915,
+        3.572,
+        3.61,
+        3.593,
+        3.566,
+        30
+    ],
+    "2": [
+        "#include <iostream>\n#include <cmath>\n\nusing namespace std;\n\nint main() {  \n    int n, l;\n    cin >> n >> l;\n\n    int total_sum = (2 * l + n - 1) * n / 2;\n    int smallest_diff = abs(total_sum - (total_sum - l));\n    int optimal_value = total_sum - l;\n\n    \n    for (int i = 1; i < n; ++i) {\n        int candidate_value = total_sum - (l + i);\n        int current_diff = abs(total_sum - candidate_value);\n\n        if (current_diff < smallest_diff) {\n            smallest_diff = current_diff;\n            optimal_value = candidate_value;\n        }\n    }\n\n    cout << optimal_value << endl;\n    return 0;\n}",
+        3.877,
+        3.573,
+        3.612,
+        3.727,
+        3.568,
+        27
+    ]
+}

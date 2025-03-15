@@ -3,6 +3,7 @@ import time
 import os
 from perfetto.trace_processor import TraceProcessor
 import json
+import csv
 
 from emulator import start_emulator, push_config_file, remove_existing_trace_file, run_perfetto, pull_trace_file, terminate_emulator
 # Paths & Configurations
@@ -20,7 +21,7 @@ def run_record_android_trace(app_package_name):
     cmd = [
         "./perfetto_executable/record_android_trace",
         "-o", "trace_file.perfetto-trace",
-        "-t", "20s",
+        "-t", "30s",
         "-b", "64mb",
         "sched", "freq", "idle", "am", "wm", "gfx", "memory",   # Data souces for tracing (CPU Scheduling, CPU Frequency, CPU Idle, Memory)
         "-a", app_package_name,
@@ -44,6 +45,7 @@ def run_record_android_trace(app_package_name):
         process.wait()  # Wait for the process to complete
 
 def run_heap_profile(duration, process_name):
+    print("Running 'heap_profile' command to start heap profiling...")
     """Runs the 'heap_profile' command with the specified duration, process name, and output directory."""
     cmd = [
         "./perfetto_executable/heap_profile",
@@ -135,7 +137,7 @@ def query_table_content(trace_file, table_name):
     """Queries the content of a specific table in the trace file."""
     print(f"Querying content of table: {table_name}")
     tp = TraceProcessor(trace=trace_file)
-    qr_it = tp.query(f"SELECT * FROM {table_name};")  # Limit to 10 rows for brevity
+    qr_it = tp.query(f"SELECT * FROM {table_name};")
     qr_df = qr_it.as_pandas_dataframe()
     # print(qr_df.to_string())
 
@@ -146,14 +148,88 @@ def query_table_content(trace_file, table_name):
     
 
 def get_heap_profile_data(trace_file):
-    tables = ["stack_profile_callsite", "stack_profile_mapping", "stack_profile_frame"]
+    tables = ["perfetto_tables", "stack_profile_callsite", "stack_profile_mapping", "stack_profile_frame", "heap_profile_allocation", "heap_graph_object"]
     for table in tables:
         query_table_content(trace_file, table)
 
 def get_cpu_data(trace_file):
-    tables = ["perfetto_tables", "cpu_counter_track", "process_counter_track", "__intrinsic_cpu_freq", "__intrinsic_thread", "__intrinsic_process", "__intrinsic_counter"] 
+    tables = ["perfetto_tables", "cpu_counter_track", "process_counter_track", "sched", "cpu", "process", "thread", "counter", "slice"] 
     for table in tables:
         query_table_content(trace_file, table)
+
+def get_cpu_profile_data(trace_file):
+    tables = ["perfetto_tables", "stack_profile_callsite", "stack_profile_mapping", "stack_profile_frame", "heap_graph_object", "heap_graph_reference", "heap_graph_class"] 
+    for table in tables:
+        query_table_content(trace_file, table)
+
+def get_latest_heap_profile_timestamp(trace_file):
+    """Gets the latest timestamp from the heap_profile_allocation table."""
+    print("Getting the latest heap profile timestamp...")
+    tp = TraceProcessor(trace=trace_file)
+    query = """
+    SELECT ts FROM heap_profile_allocation ORDER BY ts;
+    """
+    qr_it = tp.query(query)
+    qr_df = qr_it.as_pandas_dataframe()
+    latest_timestamp = qr_df['ts'].iloc[0]
+    print(qr_df)
+    print(f"Latest heap profile timestamp: {latest_timestamp}")
+    return latest_timestamp
+
+def run_flamegraph_query(trace_file, output_file, timestamp):
+    """Runs the flamegraph query and outputs the result to a file."""
+    print("Running flamegraph query...")
+    tp = TraceProcessor(trace=trace_file)
+    query = f"""
+    select
+      name,
+      map_name,
+      cumulative_size
+    from experimental_flamegraph(
+      'native',
+      {timestamp},
+      NULL,
+      1,
+      NULL,
+      NULL
+    )
+    order by abs(cumulative_size) desc;
+    """
+    qr_it = tp.query(query)
+    qr_df = qr_it.as_pandas_dataframe()
+    qr_df.to_csv(output_file, index=False)
+    print(f"Flamegraph query result saved to: {output_file}\n")
+
+def run_cpu_profile(process_name, frequency=100, duration=10000, output_dir="cpu_trace"):
+    """
+    Runs the cpu_profile script with the specified process name, frequency, duration, and output directory.
+    """
+    print(f"Running 'cpu_profile' command to start CPU profiling for process: {process_name}...")
+    cmd = [
+        "./perfetto_executable/cpu_profile",
+        "-n", process_name,
+        "-f", str(frequency),
+        "-d", str(duration),
+        "-o", output_dir
+    ]
+
+    # Open a file to write the output
+    with open("trace_log/cpu_profile_output.log", "w") as log_file:
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+        # Read the output line by line and write to both the terminal and the file
+        for line in process.stdout:
+            print(line, end='') 
+            log_file.write(line)
+
+        # Read the error output line by line and write to both the terminal and the file
+        for line in process.stderr:
+            print(line, end='') 
+            log_file.write(line)  
+
+        process.wait() 
+
+    print(f"CPU profiling completed successfully. Trace saved to: {output_dir}")
 
 if __name__ == "__main__":
     print("Starting Android Profiler...")
@@ -161,25 +237,36 @@ if __name__ == "__main__":
     output_file = 'android_metrics/filtered_metrics_output.json'
     app_package_name = "ws.xsoh.etar.debug"
 
-    emulator_proc = start_emulator()
-    time.sleep(20)  # Wait for emulator to start
+
+    # emulator_proc = start_emulator()
+    # time.sleep(20)  # Wait for emulator to start
     
-    # Run the profiling steps
-    remove_existing_trace_file()
-    run_record_android_trace(app_package_name)
-    run_trace_processor()
+    # # Run the profiling steps
+    # remove_existing_trace_file()
+    # run_record_android_trace(app_package_name)
+    # run_trace_processor()
 
-    extract_app_process_data(input_file, output_file, app_package_name)
+    # extract_app_process_data(input_file, output_file, app_package_name)
 
-    # run the heap profile
-    run_heap_profile(20000, app_package_name) #remember to delete the files in heap_trace
+    # # run the heap profile
+    # run_heap_profile(30000, app_package_name) #remember to delete the files in heap_trace
     # time.sleep(20)  # Wait for heap profiling to complete
 
-    # Get the list of tables in the trace file
-    get_heap_profile_data(HEAP_TRACE_FILE)
+    # # get the latest heap profile timestamp and run the flamegraph query
+    # timestamp = get_latest_heap_profile_timestamp(HEAP_TRACE_FILE)
+    # run_flamegraph_query(HEAP_TRACE_FILE, "flamegraph_output.csv", timestamp)
+
+    # # Run the CPU profiling
+    # run_cpu_profile(app_package_name)
+
+    # # Get the list of tables in the trace file
+    # get_heap_profile_data(HEAP_TRACE_FILE)
     get_cpu_data(LOCAL_TRACE_PATH)
-    
-    # Terminate the emulator after profiling is completed.
-    terminate_emulator()
+    # get_cpu_profile_data("cpu_trace/raw-trace")
+
+
+    # # Terminate the emulator after profiling is completed.
+    # terminate_emulator()
     
     print("Profiling completed successfully!")
+
