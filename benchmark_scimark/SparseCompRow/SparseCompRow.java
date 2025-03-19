@@ -39,14 +39,6 @@ public class SparseCompRow {
         return sum;
     }
 
-    public static double num_flops(int N, int nz, long num_iterations) {
-		/* Note that if nz does not divide N evenly, then the
-		   actual number of nonzeros used is adjusted slightly.
-		*/
-        int actual_nz = (nz / N) * N;
-        return ((double) actual_nz) * 2.0 * ((double) num_iterations);
-    }
-
     public static void main(String[] args) {
         // Parameters for the test.
         int N = 1000;              // Size of the vector / number of rows.

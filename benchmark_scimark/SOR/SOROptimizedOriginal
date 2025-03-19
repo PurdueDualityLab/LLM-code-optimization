@@ -3,12 +3,6 @@ package jnt.scimark2;
 import java.util.Random;
 
 public class SOROptimized {
-
-    // Returns the number of floating point operations for given matrix dimensions and iterations.
-    public static double num_flops(int M, int N, long num_iterations) {
-        return ((double) M - 1) * ((double) N - 1) * (double) num_iterations * 6.0;
-    }
-
     // Executes the Successive Over-Relaxation (SOR) algorithm.
     public static void execute(double omega, double[][] G, long num_iterations) {
         int M = G.length;
@@ -56,7 +50,9 @@ public class SOROptimized {
         return sum;
     }
 
-    // Main method to run the SOR computation.
+    /**
+    * Main method, do not change.
+    */
     public static void main(String[] args) {
         final int SOR_SIZE = 100;      
         final long cycles = 65536;      // Fixed number of iterations.

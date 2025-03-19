@@ -3,12 +3,6 @@ package jnt.scimark2;
 import java.util.Random;
 
 public class SOROptimized {
-
-    
-    public static double num_flops(int M, int N, long num_iterations) {
-        return ((double) M - 1) * ((double) N - 1) * (double) num_iterations * 6.0;
-    }
-
     
     public static void execute(double omega, double[][] G, long num_iterations) {
         int M = G.length;
@@ -18,16 +12,17 @@ public class SOROptimized {
         double one_minus_omega = 1.0 - omega;
 
         
+        int Mm1 = M - 1;
         int Nm1 = N - 1;
 
         for (long p = 0; p < num_iterations; p++) {
-            for (int i = 1, Mm1 = M - 1; i < Mm1; i++) {
+            for (int i = 1; i < Mm1; i++) {
                 double[] Gi = G[i];
                 double[] Gim1 = G[i - 1];
                 double[] Gip1 = G[i + 1];
                 for (int j = 1; j < Nm1; j++) {
-                    Gi[j] = omega_over_four * (Gim1[j] + Gip1[j] + Gi[j - 1] + Gi[j + 1])
-                            + one_minus_omega * Gi[j];
+                    double temp = Gim1[j] + Gip1[j] + Gi[j - 1] + Gi[j + 1];
+                    Gi[j] = (omega_over_four * temp) + (one_minus_omega * Gi[j]);
                 }
             }
         }
@@ -37,6 +32,8 @@ public class SOROptimized {
     private static double[][] randomMatrix(int M, int N) {
         double[][] A = new double[M][N];
         Random R = new Random(101010);
+
+        
         for (int i = 0; i < M; i++) {
             for (int j = 0; j < N; j++) {
                 A[i][j] = R.nextDouble();

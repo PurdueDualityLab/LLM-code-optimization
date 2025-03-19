@@ -1,21 +1,40 @@
 package jnt.scimark2;
 
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveAction;
 
 public class SparseCompRowOptimized {
-    
-    private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
+    private static final ForkJoinPool forkJoinPool = new ForkJoinPool();
 
-    public static void matmult(double[] y, double[] val, int[] row,
-                               int[] col, double[] x, long NUM_ITERATIONS) {
+    
+    public static void matmultParallel(double[] y, double[] val, int[] row,
+                                       int[] col, double[] x, long NUM_ITERATIONS) {
         int M = row.length - 1;
-        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
         for (long reps = 0; reps < NUM_ITERATIONS; reps++) {
-            executor.submit(() -> {
-                for (int r = 0; r < M; r++) {
+            forkJoinPool.invoke(new ParallelMatMultTask(y, val, row, col, x, 0, M));
+        }
+    }
+
+    private static class SparseCompRowOptimized extends RecursiveAction {
+        private final double[] y, val, x;
+        private final int[] row, col;
+        private final int start, end;
+
+        ParallelMatMultTask(double[] y, double[] val, int[] row, int[] col, double[] x, int start, int end) {
+            this.y = y;
+            this.val = val;
+            this.row = row;
+            this.col = col;
+            this.x = x;
+            this.start = start;
+            this.end = end;
+        }
+
+        @Override
+        protected void compute() {
+            if (end - start <= 10) { 
+                for (int r = start; r < end; r++) {
                     double sum = 0.0;
                     int rowStart = row[r];
                     int rowEnd = row[r + 1];
@@ -24,16 +43,15 @@ public class SparseCompRowOptimized {
                     }
                     y[r] = sum;
                 }
-            });
-        }
-        executor.shutdown();
-        try {
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            } else {
+                int mid = start + (end - start) / 2;
+                invokeAll(new ParallelMatMultTask(y, val, row, col, x, start, mid),
+                          new ParallelMatMultTask(y, val, row, col, x, mid, end));
+            }
         }
     }
 
+    
     private static double[] randomVector(int N, Random R) {
         double[] A = new double[N];
         for (int i = 0; i < N; i++) {
@@ -42,6 +60,7 @@ public class SparseCompRowOptimized {
         return A;
     }
 
+    
     private static double normabs(double[] a, double[] b) {
         double sum = 0.0;
         for (int i = 0; i < a.length; i++) {
@@ -71,8 +90,7 @@ public class SparseCompRowOptimized {
         for (int r = 0; r < N; r++) {
             int rowr = row[r];
             row[r + 1] = rowr + nr;
-            int step = r / nr;
-            if (step < 1) step = 1;
+            int step = Math.max(r / nr, 1);
             for (int i = 0; i < nr; i++) {
                 col[rowr + i] = i * step;
             }
@@ -81,10 +99,11 @@ public class SparseCompRowOptimized {
         double[] yTest = new double[N];
         double[] yRef = new double[N];
 
-        matmult(yTest, val, row, col, x, cycles);
-        matmult(yRef, val, row, col, x, 1);
+        matmultParallel(yTest, val, row, col, x, cycles);
+        matmultParallel(yRef, val, row, col, x, 1);
 
         double difference = normabs(yTest, yRef);
+
         System.out.println(difference);
     }
 }

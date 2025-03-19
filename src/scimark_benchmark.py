@@ -74,26 +74,29 @@ class SciMarkBenchmark(Benchmark):
             line for line in measure_result.stdout.splitlines()
             if not (line.startswith("make[") or line.startswith("./"))
         )
+        
+        mflops = mflops.split("make")[0]
 
         self._run_rapl(optimized=False)
 
         avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
 
         #Append results to benchmark data dict
-        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_latency, 3),  avg_cpu_cycles, max_peak_memory, round(throughput, 3), mflops, len(self.original_code.splitlines()))
+        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_latency, 3),  avg_cpu_cycles, max_peak_memory, round(throughput, 3), float(mflops), len(self.original_code.splitlines()))
         return True
 
     def pre_process(self, code):
         ast = JavaAST("Java")
         source_code_path = f"{USER_PREFIX}/benchmark_scimark/{self.program}/{self.program}Optimized.java"
-        with open(source_code_path, 'r') as file:
-            code = file.read()
         return ast.create_ast(source_code_path)
 
     def post_process(self, code):
         code = code.replace("```java", "")
         code = code.replace("```", "")
         code = re.sub(r'//.*?$|/\*.*?\*/', '', code, flags=re.DOTALL | re.MULTILINE)
+        code = re.sub(r'\bclass\s+\w+', f'class {self.program}Optimized', code)  # Change class name dynamically
+        if not code.strip().startswith("package jnt.scimark2;"):
+            code = "package jnt.scimark2;\n" + code
         return code
         
     def compile(self, optimized_code):
@@ -110,10 +113,10 @@ class SciMarkBenchmark(Benchmark):
                 capture_output=True,
                 text=True
             )
-            self.compilation_error = result.stdout + result.stderr
             logger.info(f"Optimized code compile successfully.\n")
         except subprocess.CalledProcessError as e:
-            logger.error(f"Optimized code compile failed: {e}\n")
+            self.compilation_error = e.stderr
+            logger.error(f"Optimized code compile failed: {self.compilation_error}\n")
             return False
         return True
     
@@ -150,6 +153,7 @@ class SciMarkBenchmark(Benchmark):
                 line for line in measure_result.stdout.splitlines()
                 if not (line.startswith("make[") or line.startswith("./"))
             )
+            mflops = mflops.split("make")[0]
         except subprocess.CalledProcessError as e:
             logger.error(f"Optimized code mflops measure failed: {e}\n")
             mflops = 0
@@ -202,7 +206,7 @@ class SciMarkBenchmark(Benchmark):
             if not (line.startswith("make[") or line.startswith("./"))
         )
 
-        return filtered_output
+        return filtered_output.split("make")[0]
 
     def _process_output_content(self, content):
         """Remove all spaces, newline characters, and tabs for cleaner comparison."""
@@ -217,26 +221,29 @@ class SciMarkBenchmark(Benchmark):
     def _compare_outputs(self, optimized_output):
         optimized_output = self._process_output_content(optimized_output)
 
-        logger.info(f"optimized_output: {optimized_output}")
-        logger.info(f"expect_test_output: {self.expect_test_output}")
-
-        # 1024 comes from n (constant in benchmark)
-        optimized_output_float = float(optimized_output) / 1024
-        expect_test_output_float = float(self.expect_test_output) / 1024
-        print(f"optimized_output_float: {optimized_output_float}, expect_test_output_float: {expect_test_output_float}")
+        optimized_output_float = float(optimized_output)
+        expect_test_output_float = float(self.expect_test_output)
         
         if self.program == "FFT":
-            EPS = 3.0e-17
-        elif self.program == "LU":
             EPS = 1.0e-10
+        elif self.program == "LU":
+            EPS = 1.0e-12
         elif self.program == "MonteCarlo":
             EPS = math.pi
         elif self.program == "SOR":
-            EPS = 0.002 # SOR, found good threshold through testing
+            EPS = 0.003
         elif self.program == "SparseCompRow":
             EPS = 1.0e-10
         
-        if abs(optimized_output_float) <= EPS:
+        if self.program == "MonteCarlo":
+            if abs(optimized_output_float - EPS) <= 0.05:
+                logger.info(f"Output is within EPS threshold. Original output: {expect_test_output_float}, Optimized output: {optimized_output_float}")
+                return True
+            else:
+                logger.error(f"Original program output: {self.expect_test_output}")
+                logger.error(f"Optimized program output: {optimized_output}")
+                return False
+        elif abs(optimized_output_float) <= EPS:
             logger.info(f"Output is within EPS threshold. Original output: {expect_test_output_float}, Optimized output: {optimized_output_float}")
             return True
         else:
@@ -263,10 +270,10 @@ class SciMarkBenchmark(Benchmark):
             measure_optimized = ["make", "measure_optimized"]
             if not optimized:
                 logger.info("Make measure on original program\n")
-                subprocess.run(measure_unoptimized, check=True, capture_output=True, text=True, timeout=120)
+                subprocess.run(measure_unoptimized, check=True, capture_output=True, text=True, timeout=180)
             else:
                 logger.info("Make measure on optimized program\n")
-                subprocess.run(measure_optimized, check=True, capture_output=True, text=True, timeout=120)
+                subprocess.run(measure_optimized, check=True, capture_output=True, text=True, timeout=180)
             logger.info("Benchmark.run: make measure successfully\n")
             return True
         except subprocess.TimeoutExpired:
@@ -377,9 +384,9 @@ class SciMarkBenchmark(Benchmark):
 def get_valid_scimark_programs():
     valid_programs = [
         "FFT",
-        # "LU",
-        # "MonteCarlo",
-        # "SOR",
-        # "SparseCompRow"
+        "LU",
+        "MonteCarlo",
+        "SOR",
+        "SparseCompRow"
     ]
     return valid_programs

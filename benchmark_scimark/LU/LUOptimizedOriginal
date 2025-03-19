@@ -1,20 +1,12 @@
 package jnt.scimark2;
 
-/**
- * LU matrix factorization. (Based on TNT implementation.)
- * Decomposes a matrix A  into a triangular lower triangular
- * factor (L) and an upper triangular factor (U) such that
- * A = L*U.  By convnetion, the main diagonal of L consists
- * of 1's so that L and U can be stored compactly in
- * a NxN matrix.
- */
 public class LUOptimized {
     private final double[][] LU_;
     private final int[] pivot_;
 
     public static void main(String[] args) {
-        Random R = new Random(101010); // Given constant
-        int N = 100; // Given constant
+        Random R = new Random(101010);
+        int N = 1000;
         
         double[][] A = RandomMatrix(N, N, R);
         double[][] lu = new double[N][N];
@@ -29,43 +21,24 @@ public class LUOptimized {
         }
         
         double[] b = RandomVector(N, R);
-        double[] x = new_copy(b);
+        double[] x = NewVectorCopy(b);
 
         solve(lu, pivot, x);
-        System.out.println(normabs(b, matvec(A, x)));
+        System.out.println(normabs(b, matvec(A, x)) / N);
     }
-    /**
-     * Initalize LU factorization from matrix.
-     *
-     * @param A (in) the matrix to associate with this
-     *          factorization.
-     */
 
     public LUOptimized(double[][] A) {
         int M = A.length;
         int N = A[0].length;
 
-        //if ( LU_ == null || LU_.length != M || LU_[0].length != N)
         LU_ = new double[M][N];
 
         insert_copy(LU_, A);
 
-        //if (pivot_.length != M)
         pivot_ = new int[M];
 
         factor(LU_, pivot_);
     }
-
-    /**
-     * Returns a <em>copy</em> of the compact LU factorization.
-     * (useful mainly for debugging.)
-     *
-     * @return the compact LU factorization.  The U factor
-     * is stored in the upper triangular portion, and the L
-     * factor is stored in the lower triangular portion.
-     * The main diagonal of L consists (by convention) of
-     * ones, and is not explicitly stored.
-     */
 
     private static double[] NewVectorCopy(double[] x) {
         int N = x.length;
@@ -145,12 +118,6 @@ public class LUOptimized {
         }
     }
 
-    public static double num_flops(int N) {
-        // rougly 2/3*N^3
-
-        return (2.0 * (double) N * (double) N * (double) N / 3.0);
-    }
-
     protected static double[] new_copy(double[] x) {
         int N = x.length;
         double[] T = new double[N];
@@ -197,7 +164,6 @@ public class LUOptimized {
                 Bi[j + 3] = Ai[j + 3];
             }
         }
-
     }
 
     /**
@@ -320,17 +286,6 @@ public class LUOptimized {
 
     public double[][] getLU() {
         return new_copy(LU_);
-    }
-
-    /**
-     * Returns a <em>copy</em> of the pivot vector.
-     *
-     * @return the pivot vector used in obtaining the
-     * LU factorzation.  Subsequent solutions must
-     * permute the right-hand side by this vector.
-     */
-    public int[] getPivot() {
-        return new_copy(pivot_);
     }
 
     /**

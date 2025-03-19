@@ -14,7 +14,7 @@ public class LU {
 
     public static void main(String[] args) {
         Random R = new Random(101010); // Given constant
-        int N = 100; // Given constant
+        int N = 1000; // Given constant
         
         double[][] A = RandomMatrix(N, N, R);
         double[][] lu = new double[N][N];
@@ -29,10 +29,10 @@ public class LU {
         }
         
         double[] b = RandomVector(N, R);
-        double[] x = new_copy(b);
+        double[] x = NewVectorCopy(b);
 
         solve(lu, pivot, x);
-        System.out.println(normabs(b, matvec(A, x)));
+        System.out.println(normabs(b, matvec(A, x)) / N);
     }
     /**
      * Initalize LU factorization from matrix.
@@ -66,7 +66,6 @@ public class LU {
      * The main diagonal of L consists (by convention) of
      * ones, and is not explicitly stored.
      */
-
     private static double[] NewVectorCopy(double[] x) {
         int N = x.length;
 
@@ -145,12 +144,6 @@ public class LU {
         }
     }
 
-    public static double num_flops(int N) {
-        // rougly 2/3*N^3
-
-        return (2.0 * (double) N * (double) N * (double) N / 3.0);
-    }
-
     protected static double[] new_copy(double[] x) {
         int N = x.length;
         double[] T = new double[N];
@@ -197,7 +190,6 @@ public class LU {
                 Bi[j + 3] = Ai[j + 3];
             }
         }
-
     }
 
     /**

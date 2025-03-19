@@ -15,14 +15,6 @@ package jnt.scimark2;
  */
 
 public class FFT {
-
-    public static double num_flops(int N) {
-        double logN = log2(N);
-
-        return (5.0 * (double) N - 2) * logN + 2 * ((double) N + 1);
-    }
-
-
     /**
      * Compute Fast Fourier Transform of (complex) data, in place.
      */
@@ -76,16 +68,16 @@ public class FFT {
     }
 
     /**
-     * Simple Test routine.
+     * Main method, do not change.
      */
     public static void main(String[] args) {
         if (args.length == 0) {
-            int n = 1024;
-            System.out.println(test(makeRandom(n)));
+            int n = 1048576;
+            System.out.println(test(makeRandom(n)) / 1048576);
         }
         for (int i = 0; i < args.length; i++) {
             int n = Integer.parseInt(args[i]);
-            System.out.println(test(makeRandom(n)));
+            System.out.println(test(makeRandom(n)) / 1048576);
         }
     }
     /* ______________________________________________________________________ */

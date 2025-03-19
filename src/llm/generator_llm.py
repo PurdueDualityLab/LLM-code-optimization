@@ -32,7 +32,7 @@ def llm_optimize(code, llm_assistant, evaluator_feedback, ast):
     logger.info(f"llm_optimize: Generator LLM Optimizing ....")
     
     if llm_assistant.is_genai_studio():
-        prompt = prompt + "\n Strictly only output final code only."
+        prompt = prompt + "\n Strictly only output final code."
 
     llm_assistant.add_to_memory("user", prompt)
     llm_assistant.generate_response(OptimizationReasoning)

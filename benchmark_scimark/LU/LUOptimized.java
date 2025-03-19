@@ -1,21 +1,13 @@
 package jnt.scimark2;
 
-/**
- * LU matrix factorization. (Based on TNT implementation.)
- * Decomposes a matrix A  into a triangular lower triangular
- * factor (L) and an upper triangular factor (U) such that
- * A = L*U.  By convnetion, the main diagonal of L consists
- * of 1's so that L and U can be stored compactly in
- * a NxN matrix.
- */
+import java.util.Random;
+
 public class LUOptimized {
-    private final double[][] LU_;
-    private final int[] pivot_;
 
     public static void main(String[] args) {
-        Random R = new Random(101010); // Given constant
-        int N = 100; // Given constant
-        
+        Random R = new Random(101010);
+        int N = 1000;
+
         double[][] A = RandomMatrix(N, N, R);
         double[][] lu = new double[N][N];
         int[] pivot = new int[N];
@@ -27,45 +19,26 @@ public class LUOptimized {
             System.err.println("LU factorization failed due to singular matrix.");
             return;
         }
-        
+
         double[] b = RandomVector(N, R);
-        double[] x = new_copy(b);
+        double[] x = NewVectorCopy(b);
 
         solve(lu, pivot, x);
-        System.out.println(normabs(b, matvec(A, x)) / 1024);
+        System.out.println(normabs(b, matvec(A, x)) / N);
     }
-    /**
-     * Initalize LU factorization from matrix.
-     *
-     * @param A (in) the matrix to associate with this
-     *          factorization.
-     */
 
     public LUOptimized(double[][] A) {
         int M = A.length;
         int N = A[0].length;
 
-        //if ( LU_ == null || LU_.length != M || LU_[0].length != N)
         LU_ = new double[M][N];
 
         insert_copy(LU_, A);
 
-        //if (pivot_.length != M)
         pivot_ = new int[M];
 
         factor(LU_, pivot_);
     }
-
-    /**
-     * Returns a <em>copy</em> of the compact LU factorization.
-     * (useful mainly for debugging.)
-     *
-     * @return the compact LU factorization.  The U factor
-     * is stored in the upper triangular portion, and the L
-     * factor is stored in the lower triangular portion.
-     * The main diagonal of L consists (by convention) of
-     * ones, and is not explicitly stored.
-     */
 
     private static double[] NewVectorCopy(double[] x) {
         int N = x.length;
@@ -79,17 +52,20 @@ public class LUOptimized {
     private static double[][] RandomMatrix(int M, int N, Random R) {
         double[][] A = new double[M][N];
 
-        for (int i = 0; i < N; i++)
-            for (int j = 0; j < N; j++)
+        for (int i = 0; i < M; i++) {
+            for (int j = 0; j < N; j++) {
                 A[i][j] = R.nextDouble();
+            }
+        }
         return A;
     }
 
     private static double[] RandomVector(int N, Random R) {
         double[] A = new double[N];
 
-        for (int i = 0; i < N; i++)
+        for (int i = 0; i < N; i++) {
             A[i] = R.nextDouble();
+        }
         return A;
     }
 
@@ -130,7 +106,7 @@ public class LUOptimized {
         int M = A.length;
         int N = A[0].length;
 
-        int remainder = N & 3;         // N mod 4;
+        int remainder = N & 3;         
 
         for (int i = 0; i < M; i++) {
             double[] Bi = B[i];
@@ -143,12 +119,6 @@ public class LUOptimized {
                 Bi[j + 3] = Ai[j + 3];
             }
         }
-    }
-
-    public static double num_flops(int N) {
-        // rougly 2/3*N^3
-
-        return (2.0 * (double) N * (double) N * (double) N / 3.0);
     }
 
     protected static double[] new_copy(double[] x) {
@@ -184,7 +154,7 @@ public class LUOptimized {
         int M = A.length;
         int N = A[0].length;
 
-        int remainder = N & 3;         // N mod 4;
+        int remainder = N & 3;         
 
         for (int i = 0; i < M; i++) {
             double[] Bi = B[i];
@@ -197,28 +167,17 @@ public class LUOptimized {
                 Bi[j + 3] = Ai[j + 3];
             }
         }
-
     }
 
-    /**
-     * LU factorization (in place).
-     *
-     * @param A     (in/out) On input, the matrix to be factored.
-     *              On output, the compact LU factorization.
-     * @param pivot (out) The pivot vector records the
-     *              reordering of the rows of A during factorization.
-     * @return 0, if OK, nozero value, othewise.
-     */
+    
     public static int factor(double[][] A, int[] pivot) {
-
-
         int N = A.length;
         int M = A[0].length;
 
         int minMN = Math.min(M, N);
 
         for (int j = 0; j < minMN; j++) {
-            // find pivot in column j and  test for singularity.
+            
 
             int jp = j;
 
@@ -233,39 +192,36 @@ public class LUOptimized {
 
             pivot[j] = jp;
 
-            // jp now has the index of maximum element
-            // of column j, below the diagonal
+            
+            
 
             if (A[jp][j] == 0)
-                return 1;       // factorization failed because of zero pivot
-
+                return 1;       
 
             if (jp != j) {
-                // swap rows j and jp
+                
                 double[] tA = A[j];
                 A[j] = A[jp];
                 A[jp] = tA;
             }
 
-            if (j < M - 1)                // compute elements j+1:M of jth column
+            if (j < M - 1)                
             {
-                // note A(j,j), was A(jp,p) previously which was
-                // guarranteed not to be zero (Label #1)
-                //
+                
+                
+                
                 double recp = 1.0 / A[j][j];
 
                 for (int k = j + 1; k < M; k++)
                     A[k][j] *= recp;
             }
 
-
             if (j < minMN - 1) {
-                // rank-1 update to trailing submatrix:   E = E - x*y;
-                //
-                // E is the region A(j+1:M, j+1:N)
-                // x is the column vector A(j+1:M,j)
-                // y is row vector A(j,j+1:N)
-
+                
+                
+                
+                
+                
 
                 for (int ii = j + 1; ii < M; ii++) {
                     double[] Aii = A[ii];
@@ -273,7 +229,6 @@ public class LUOptimized {
                     double AiiJ = Aii[j];
                     for (int jj = j + 1; jj < N; jj++)
                         Aii[jj] -= AiiJ * Aj[jj];
-
                 }
             }
         }
@@ -281,17 +236,7 @@ public class LUOptimized {
         return 0;
     }
 
-    /**
-     * Solve a linear system, using a prefactored matrix
-     * in LU form.
-     *
-     * @param LU  (in) the factored matrix in LU form.
-     * @param pvt (in) the pivot vector which lists
-     *            the reordering used during the factorization
-     *            stage.
-     * @param b   (in/out) On input, the right-hand side.
-     *            On output, the solution vector.
-     */
+    
     public static void solve(double[][] LU, int[] pvt, double[] b) {
         int M = LU.length;
         int N = LU[0].length;
@@ -322,27 +267,14 @@ public class LUOptimized {
         return new_copy(LU_);
     }
 
-    /**
-     * Returns a <em>copy</em> of the pivot vector.
-     *
-     * @return the pivot vector used in obtaining the
-     * LU factorzation.  Subsequent solutions must
-     * permute the right-hand side by this vector.
-     */
-    public int[] getPivot() {
-        return new_copy(pivot_);
-    }
-
-    /**
-     * Solve a linear system, with pre-computed factorization.
-     *
-     * @param b (in) the right-hand side.
-     * @return solution vector.
-     */
+    
     public double[] solve(double[] b) {
         double[] x = new_copy(b);
 
         solve(LU_, pivot_, x);
         return x;
     }
+
+    private final double[][] LU_;
+    private final int[] pivot_;
 }

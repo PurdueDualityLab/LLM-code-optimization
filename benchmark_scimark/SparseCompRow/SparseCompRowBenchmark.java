@@ -6,8 +6,8 @@ public class SparseCompRowBenchmark {
         int nz = 5000; // Givent constant
         double mintime = 2.0; // Given constant
         Random R = new Random(101010);
-
-        double result = Kernel.measureSparseMatmult(N, nz, mintime, R);
-        System.out.format("Sparse CompRow Benchmark Result: %.2f Mflops%n", result);
+        Boolean optimized = args.length > 0 && Boolean.parseBoolean(args[0]);
+        double result = Kernel.measureSparseMatmult(N, nz, mintime, R, optimized);
+        System.out.printf("%.2f%n", result);
     }
 }
