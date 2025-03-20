@@ -87,8 +87,7 @@ class SciMarkBenchmark(Benchmark):
 
     def pre_process(self, code):
         ast = JavaAST("Java")
-        source_code_path = f"{USER_PREFIX}/benchmark_scimark/{self.program}/{self.program}Optimized.java"
-        return ast.create_ast(source_code_path)
+        return ast.create_ast(code)
 
     def post_process(self, code):
         code = code.replace("```java", "")
