@@ -61,9 +61,9 @@ class DaCapoBenchmark(Benchmark):
             return False
 
         #compute avg energy and avg runtime
-        avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
+        avg_energy, avg_latency, avg_cpu_cycles, avg_memory, throughput = self._compute_avg()
 
-        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_latency, 3),  avg_cpu_cycles, max_peak_memory, round(throughput, 3), len(self.original_code.splitlines()))        
+        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_latency, 3),  avg_cpu_cycles, avg_memory, round(throughput, 3), len(self.original_code.splitlines()))        
         return True
     
     def pre_process(self, code):
@@ -149,12 +149,12 @@ class DaCapoBenchmark(Benchmark):
         logger.info(f"Iteration {self.optimization_iteration + 1}, run benchmark on the optimized code")
         self._run_rapl()
 
-        avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
+        avg_energy, avg_latency, avg_cpu_cycles, avg_memory, throughput = self._compute_avg()
         original_data = self.energy_data[0]
         energy_change = original_data[1] / avg_energy
         speedup = original_data[2] / avg_latency
         cpu_change = original_data[3] / avg_cpu_cycles
-        memory_change = original_data[4] / max_peak_memory
+        memory_change = original_data[4] / avg_memory
         throughput_change = throughput / original_data[5]
 
         self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(energy_change, 3), round(speedup, 3), cpu_change, memory_change, throughput_change, len(optimized_code.splitlines()))
@@ -207,7 +207,7 @@ class DaCapoBenchmark(Benchmark):
         avg_energy = 0
         avg_latency = 0
         avg_cpu_cycles = 0
-        max_peak_memory = 0
+        avg_memory = 0
         for data in benchmark_data:
             energy = float(data[1])
             if energy < 0:
@@ -216,13 +216,14 @@ class DaCapoBenchmark(Benchmark):
                 avg_energy += energy
                 avg_latency += float(data[2])
                 avg_cpu_cycles += float(data[3])
-                max_peak_memory = max(max_peak_memory, float(data[4]))
+                avg_memory += float(data[4])
 
         avg_energy /= len(benchmark_data)
         avg_latency /= len(benchmark_data)
         avg_cpu_cycles /= len(benchmark_data)
+        avg_memory /= len(benchmark_data)
 
-        return avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, float(throughput)
+        return avg_energy, avg_latency, avg_cpu_cycles, avg_memory, float(throughput)
         
     def get_evaluator_feedback_data(self):
         return super().get_evaluator_feedback_data()
@@ -259,14 +260,14 @@ class DaCapoBenchmark(Benchmark):
         last_value = contents[last_key]
         
         # print all values
-        logger.info(f"key 0, avg_energy: {first_value[1]}, avg_runtime: {first_value[2]}, avg_cpu_cycles: {first_value[3]}, max_peak_memory: {first_value[4]}, throughput: {first_value[5]}, num_of_lines: {first_value[6]}")
-        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, max_peak_memory, throughput, num_of_lines) in list(contents.items())[1:]:
-            logger.info(f"key: {key}, avg_energy_improvement: {avg_energy}, avg_speedup: {avg_runtime}, avg_cpu_improvement: {avg_cpu_cycles}, avg_memory_improvement: {max_peak_memory}, avg_throughput_improvement: {throughput}, num_of_lines: {num_of_lines}")
+        logger.info(f"key 0, avg_energy: {first_value[1]}, avg_runtime: {first_value[2]}, avg_cpu_cycles: {first_value[3]}, avg_memory: {first_value[4]}, throughput: {first_value[5]}, num_of_lines: {first_value[6]}")
+        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, avg_memory, throughput, num_of_lines) in list(contents.items())[1:]:
+            logger.info(f"key: {key}, avg_energy_improvement: {avg_energy}, avg_speedup: {avg_runtime}, avg_cpu_improvement: {avg_cpu_cycles}, avg_memory_improvement: {avg_memory}, avg_throughput_improvement: {throughput}, num_of_lines: {num_of_lines}")
 
        # Loop through the contents to find the key with the highest speedup
         max_avg_speedup = float('-inf')
         max_avg_speedup_key = None
-        for key, (source_code, avg_energy, avg_speedup, avg_cpu_cycles, max_peak_memory, throughput, num_of_lines) in list(contents.items())[1:]:
+        for key, (source_code, avg_energy, avg_speedup, avg_cpu_cycles, avg_memory, throughput, num_of_lines) in list(contents.items())[1:]:
             if avg_speedup > max_avg_speedup:
                 max_avg_speedup = avg_speedup
                 max_avg_speedup_key = key
@@ -280,7 +281,7 @@ class DaCapoBenchmark(Benchmark):
                 "avg_energy": first_value[1],
                 "avg_runtime": first_value[2],
                 "avg_cpu_cycles": first_value[3],
-                "max_peak_memory": first_value[4],
+                "avg_memory": first_value[4],
                 "throughput": first_value[5],
                 "num_of_lines": first_value[6]
             },

@@ -303,7 +303,7 @@ class PIEBenchmark(Benchmark):
         avg_energy = 0
         avg_latency = 0
         avg_cpu_cycles = 0
-        max_peak_memory = 0
+        avg_memory = 0
         for data in benchmark_data:
             energy = float(data[1])
             if energy < 0:
@@ -312,13 +312,14 @@ class PIEBenchmark(Benchmark):
                 avg_energy += energy
                 avg_latency += float(data[2])
                 avg_cpu_cycles += float(data[3])
-                max_peak_memory = max(max_peak_memory, float(data[4]))
+                avg_memory += float(data[4])
 
         avg_energy /= len(benchmark_data)
         avg_latency /= len(benchmark_data)
         avg_cpu_cycles /= len(benchmark_data)
+        avg_memory /= len(benchmark_data)
 
-        return avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, float(throughput)
+        return avg_energy, avg_latency, avg_cpu_cycles, avg_memory, float(throughput)
     
     def _extract_content(self, contents):
         # Convert keys to a sorted list to access the first and last elements
@@ -332,14 +333,14 @@ class PIEBenchmark(Benchmark):
         last_value = contents[last_key]
 
         # print all values
-        logger.info(f"key 0, avg_energy: {first_value[1]}, avg_runtime: {first_value[2]}, avg_cpu_cycles: {first_value[3]}, max_peak_memory: {first_value[4]}, throughput: {first_value[5]}, num_of_lines: {first_value[6]}")
-        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, max_peak_memory, throughput, num_of_lines) in list(contents.items())[1:]:
-            logger.info(f"key: {key}, avg_energy_improvement: {avg_energy}, avg_speedup: {avg_runtime}, avg_cpu_improvement: {avg_cpu_cycles}, avg_memory_improvement: {max_peak_memory}, avg_throughput_improvement: {throughput}, num_of_lines: {num_of_lines}")
+        logger.info(f"key 0, avg_energy: {first_value[1]}, avg_runtime: {first_value[2]}, avg_cpu_cycles: {first_value[3]}, avg_memory: {first_value[4]}, throughput: {first_value[5]}, num_of_lines: {first_value[6]}")
+        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, avg_memory, throughput, num_of_lines) in list(contents.items())[1:]:
+            logger.info(f"key: {key}, avg_energy_improvement: {avg_energy}, avg_speedup: {avg_runtime}, avg_cpu_improvement: {avg_cpu_cycles}, avg_memory_improvement: {avg_memory}, avg_throughput_improvement: {throughput}, num_of_lines: {num_of_lines}")
 
         # Loop through the contents to find the key with the highest speedup
         max_avg_speedup = float('-inf')
         max_avg_speedup_key = None
-        for key, (source_code, avg_energy, avg_speedup, avg_cpu_cycles, max_peak_memory, throughput, num_of_lines) in list(contents.items())[1:]:
+        for key, (source_code, avg_energy, avg_speedup, avg_cpu_cycles, avg_memory, throughput, num_of_lines) in list(contents.items())[1:]:
             if avg_speedup > max_avg_speedup:
                 max_avg_speedup = avg_speedup
                 max_avg_speedup_key = key
@@ -353,7 +354,7 @@ class PIEBenchmark(Benchmark):
                 "avg_energy": first_value[1],
                 "avg_runtime": first_value[2],
                 "avg_cpu_cycles": first_value[3],
-                "max_peak_memory": first_value[4],
+                "avg_memory": first_value[4],
                 "throughput": first_value[5],
                 "num_of_lines": first_value[6]
             },

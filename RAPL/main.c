@@ -4,51 +4,28 @@
 #include <string.h>
 #include "rapl.h"
 #include <sys/time.h>
-#include <stdint.h>  // For uint64_t type
-#include <sys/resource.h>  // For getrusage
+#include <stdint.h>
+#include <sys/resource.h>
 
-#define RUNTIME 1
-#define WARMUP_RUNS 1  // Number of warm-up iterations
+#define WARMUP_RUNS 2
 
-// Function to read the time-stamp counter (CPU cycles)
 static inline uint64_t read_tsc() {
     unsigned int lo, hi;
     __asm__ volatile("rdtsc" : "=a"(lo), "=d"(hi));
     return ((uint64_t)hi << 32) | lo;
 }
 
-// Function to get peak memory usage
-void get_peak_memory_usage(long *mem) {
-    FILE *file = fopen("/proc/self/status", "r");
-    if (!file) return -1;
-
-    char line[256];
-    long peak_mem = -1;
-
-    while (fgets(line, sizeof(line), file)) {
-        if (strncmp(line, "VmHWM:", 6) == 0) {  
-            sscanf(line, "VmHWM: %ld kB", &peak_mem);
-            break;
-        }
-    }
-
-    fclose(file);
-    *mem = peak_mem;
-}
-
-int main (int argc, char **argv) {
-    char command[500]="", language[500]="", test[500]="", path[500]="";
+int main(int argc, char **argv) {
+    char command[500] = "", language[500] = "", test[500] = "", path[500] = "";
     int ntimes = 5;
     int core = 0;
-    int i=0;
+    int i = 0;
 
-#ifdef RUNTIME
-    struct timespec start, end;  // Change timeval to timespec
+    struct timespec start, end;
     struct timespec total_start_time, total_end_time;
     double elapsed_time;
-#endif
 
-    FILE * fp;
+    FILE *fp;
 
     // Run command
     strcat(command, argv[1]);
@@ -65,70 +42,59 @@ int main (int argc, char **argv) {
 
     rapl_init(core);
 
-    // **Warm-up Phase**
+    // Warm-up Phase
     for (i = 0; i < WARMUP_RUNS; i++) {
-        system(command);  // Run the command but don't record performance
+        system(command);
     }
 
-    // Start total time measurement for throughput calculation
-    clock_gettime(CLOCK_MONOTONIC, &total_start_time); 
+    // Start total time measurement
+    clock_gettime(CLOCK_MONOTONIC, &total_start_time);
 
     for (i = 0; i < ntimes; i++) {
         fprintf(fp, "%s, ", test);
 
-#ifdef RUNTIME
-        // Get the start time using gettimeofday
+        // Use /usr/bin/time to measure memory usage
+        char time_command[600];
+        snprintf(time_command, sizeof(time_command), "/usr/bin/time -f '%%M' %s 2> memory_usage.txt", command);
+
+        // Start timing, CPU cycle, and energy measurement
         clock_gettime(CLOCK_MONOTONIC, &start);
-#endif
-        // Measure the CPU cycles before execution
         uint64_t start_cycles = read_tsc();
-
-        // Measure peak memory usage before execution
-        long peak_mem_before = 0;
-        get_peak_memory_usage(&peak_mem_before);
-
         rapl_before(fp, core);
 
-        system(command);
+        // Execute the command with memory measurement
+        system(time_command);
 
+        // End timing, CPU cycle, and energy measurement
         rapl_after(fp, core);
-
-        // Measure the CPU cycles after execution
         uint64_t end_cycles = read_tsc();
-
-        // Measure peak memory usage after execution
-        long peak_mem_after = 0;
-        get_peak_memory_usage(&peak_mem_after);
-
-#ifdef RUNTIME
-        // Get the end time using gettimeofday
         clock_gettime(CLOCK_MONOTONIC, &end);
-        double elapsed_time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1.0e9;
-#endif
 
-        // Calculate CPU cycles used during the command execution
+        // Calculate elapsed time and CPU cycles
+        elapsed_time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1.0e9;
         uint64_t cpu_cycles = end_cycles - start_cycles;
 
-        // Peak memory usage during the command execution
-        long peak_mem_usage = peak_mem_after - peak_mem_before;
+        // Read memory usage from the file
+        FILE *mem_file = fopen("memory_usage.txt", "r");
+        long peak_mem_usage = 0;
+        if (mem_file) {
+            fscanf(mem_file, "%ld", &peak_mem_usage);
+            fclose(mem_file);
+            remove("memory_usage.txt");
+        }
 
-#ifdef RUNTIME
-        fprintf(fp, "%G, ", elapsed_time);  // Log runtime in milliseconds
-#endif
-
-        // Log CPU cycles and peak memory usage
-        fprintf(fp, "%lu, ", (unsigned long)cpu_cycles);  // Log CPU cycles used
+        // Log results
+        fprintf(fp, "%G, ", elapsed_time);
+        fprintf(fp, "%lu, ", (unsigned long)cpu_cycles);
         fprintf(fp, "%ld\n", peak_mem_usage);  // Peak memory usage (in KB)
     }
 
     // End total time measurement
-    clock_gettime(CLOCK_MONOTONIC, &total_end_time); 
+    clock_gettime(CLOCK_MONOTONIC, &total_end_time);
 
-    // Calculate total time in seconds
-     double total_time = (total_end_time.tv_sec - total_start_time.tv_sec) + 
+    // Calculate total time and throughput
+    double total_time = (total_end_time.tv_sec - total_start_time.tv_sec) +
                         (total_end_time.tv_nsec - total_start_time.tv_nsec) / 1.0e9;
-
-    // Calculate throughput (executions per second)
     double throughput = ntimes / total_time;
 
     // Log throughput
