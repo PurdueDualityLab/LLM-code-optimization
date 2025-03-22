@@ -1,0 +1,169 @@
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 569  of event 'cycles:u'
+# Event count (approx.): 1235256946
+#
+# Children      Self       Samples
+# ........  ........  ............
+#
+   100.00%   100.00%           569
+            |          
+            |--13.97%--0x7f38cd14b8b7
+            |          
+            |--9.20%--0x7f38cd14b8fb
+            |          
+            |--7.74%--0xffffffffffffffff
+            |          |          
+            |          |--3.55%--Compile::Compile
+            |          |          |          
+            |          |          |--2.79%--Compile::Code_Gen
+            |          |          |          |          
+            |          |          |           --1.61%--PhaseChaitin::Register_Allocate
+            |          |          |          
+            |          |           --0.76%--Compile::Optimize
+            |          |          
+            |          |--2.35%--Compile::Optimize
+            |          |          PhaseIdealLoop::optimize
+            |          |          |          
+            |          |          |--1.62%--PhaseIdealLoop::build_and_optimize
+            |          |          |          
+            |          |           --0.74%--PhaseIterGVN::optimize
+            |          |                     PhaseIterGVN::transform_old
+            |          |          
+            |          |--0.76%--JLI_Launch
+            |          |          |          
+            |          |           --0.76%--LoadJavaVM
+            |          |                     ___dlopen (inlined)
+            |          |                     dlopen_implementation (inlined)
+            |          |                     _dlerror_run
+            |          |                     __GI__dl_catch_error (inlined)
+            |          |                     __GI__dl_catch_exception (inlined)
+            |          |                     dlopen_doit
+            |          |                     _dl_open
+            |          |                     __GI__dl_catch_exception (inlined)
+            |          |                     dl_open_worker
+            |          |                     __GI__dl_catch_exception (inlined)
+            |          |                     dl_open_worker_begin
+            |          |                     _dl_relocate_object
+            |          |                     elf_dynamic_do_Rela (inlined)
+            |          |                     |          
+            |          |                      --0.64%--elf_machine_rela (inlined)
+            |          |          
+            |           --0.52%--Compile::Compile
+            |                     Compile::Code_Gen
+            |          
+            |--3.30%--0x7f38cd14b8ff
+            |          
+            |--3.29%--__clone3 (inlined)
+            |          start_thread
+            |          |          
+            |          |--1.70%--thread_native_entry
+            |          |          |          
+            |          |           --1.63%--Thread::call_run
+            |          |                     |          
+            |          |                      --1.55%--JavaThread::thread_main_inner
+            |          |                                |          
+            |          |                                 --1.53%--CompileBroker::compiler_thread_loop
+            |          |                                           |          
+            |          |                                            --1.32%--CompileBroker::invoke_compiler_on_method
+            |          |                                                      |          
+            |          |                                                       --0.90%--Compiler::compile_method
+            |          |                                                                 Compilation::Compilation
+            |          |                                                                 Compilation::compile_method
+            |          |                                                                 Compilation::compile_java_method
+            |          |          
+            |           --1.58%--ThreadJavaMain
+            |                     JavaMain
+            |                     JNI_CreateJavaVM
+            |                     Threads::create_vm
+            |                     |          
+            |                      --1.39%--init_globals
+            |                                |          
+            |                                 --0.89%--universe_init
+            |                                           |          
+            |                                            --0.52%--Metaspace::global_initialize
+            |                                                      MetaspaceShared::initialize_runtime_shared_and_meta_spaces
+            |                                                      MetaspaceShared::map_archives
+            |                                                      MetaspaceShared::map_archive
+            |                                                      FileMapInfo::map_regions
+            |                                                      FileMapInfo::relocate_pointers_in_core_regions
+            |          
+            |--2.57%--0x7f38cd14b8db
+            |          
+            |--2.34%--0x7f38cd14907e
+            |          
+            |--2.18%--0x7f38cd14b8e7
+            |          
+            |--2.13%--0x7f38cd149a3f
+            |          
+            |--2.00%--0x7f38cd14a203
+            |          
+            |--1.88%--0x7f38c556367e
+            |          
+            |--1.81%--0x7f38cd14b857
+            |          
+            |--1.47%--0x7f38cd14b884
+            |          
+            |--1.47%--0x7f38cd1499ff
+            |          
+            |--1.33%--0x7f38cc9875c0
+            |          
+            |--1.18%--0x7f38cd149a19
+            |          
+            |--1.13%--0x7f38cd14a8a1
+            |          
+            |--1.11%--0x7f38cd14b8cd
+            |          
+            |--1.11%--0x7f38cd14b906
+            |          
+            |--1.10%--0x7f38cd14b876
+            |          
+            |--1.09%--0x7f38cd14b8eb
+            |          
+            |--1.06%--0x7f38c5566bbe
+            |          
+            |--1.05%--0x7f38cd1499ee
+            |          
+            |--1.03%--0x7f38cc99200a
+            |          InterpreterRuntime::newarray
+            |          TypeArrayKlass::allocate_common
+            |          MemAllocator::allocate
+            |          ObjArrayAllocator::initialize
+            |          __memset_evex_unaligned_erms
+            |          |          
+            |           --0.51%--0xffffffffa5400be0
+            |          
+            |--0.76%--0x7f38cd14b8bd
+            |          
+            |--0.74%--0x7f38cd14b868
+            |          
+            |--0.73%--0x7f38c5565abf
+            |          
+            |--0.71%--0x7f38c5566ba7
+            |          
+            |--0.71%--0x7f38cd1499d9
+            |          
+            |--0.71%--0x7f38cd14b88e
+            |          
+            |--0.70%--0x7f38c55669d8
+            |          
+            |--0.70%--0x7f38c5566cf7
+            |          
+            |--0.70%--0x7f38c5568b44
+            |          
+            |--0.70%--0x7f38c5568b1c
+            |          
+            |--0.68%--0x7f38cd149a2a
+            |          
+            |--0.66%--0x7f38cc9845d9
+            |          
+             --0.59%--0x7f38c5562792
+
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
