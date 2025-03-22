@@ -1,0 +1,29 @@
+Generated with the following command:
+java -agentpath:/home/hpeng/E2COOL/async-profiler/build/lib/libasyncProfiler.so=start,event=wall,flat=20,file=profile.txt,stackdepth=1024,include='org.apache.fop.*',exclude='.*libjvm.*|.*libz.*|.*pthread.*' -jar dacapo-evaluation-git-unknown\$\{git.dirty\}.jar fop
+
+--- Execution profile ---
+Total samples       : 1199
+GC_active           : 2 (0.17%)
+
+          ns  percent  samples  top
+  ----------  -------  -------  ---
+   700000000    0.48%       14  /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server/libjvm.so
+    50000000    0.03%        1  org.apache.fop.layoutmgr.BreakOpportunityHelper.getBreakBefore
+    50000000    0.03%        1  java.util.zip.InflaterInputStream.<init>
+    50000000    0.03%        1  jlong_disjoint_arraycopy
+    50000000    0.03%        1  org.apache.batik.anim.dom.AbstractSVGAnimatedLength$BaseSVGLength.getAssociatedElement
+    50000000    0.03%        1  org.apache.batik.css.engine.StyleMap.putValue
+    50000000    0.03%        1  org.apache.fop.fo.FOTreeBuilder$MainFOHandler.startElement
+    50000000    0.03%        1  org.apache.fop.fo.FObj.isBlockItem
+    50000000    0.03%        1  org.apache.fop.fonts.Typeface.isMultiByte
+    50000000    0.03%        1  org.apache.fop.layoutmgr.AbstractBreaker.getNextBlockList
+    50000000    0.03%        1  java.util.concurrent.ConcurrentHashMap.transfer
+    50000000    0.03%        1  org.apache.fop.layoutmgr.LayoutContext.newInstance
+    50000000    0.03%        1  org.apache.fop.layoutmgr.LocalBreaker.getNextKnuthElements
+    50000000    0.03%        1  org.apache.fop.layoutmgr.PageProvider.setStartOfNextElementList
+    50000000    0.03%        1  org.apache.fop.layoutmgr.inline.LineLayoutManager.getNextKnuthElements
+    50000000    0.03%        1  org.apache.fop.layoutmgr.inline.TextLayoutManager$TextAreaBuilder.addWordChars
+    50000000    0.03%        1  org.apache.fop.render.AbstractPathOrientedRenderer.handleBlockTraits
+    50000000    0.03%        1  org.apache.fop.render.pdf.PDFPainter.drawTextWithDX
+    50000000    0.03%        1  org.apache.xmlgraphics.util.DoubleFormatUtil.formatDouble
+    50000000    0.03%        1  sun.security.provider.MD5.implCompress
