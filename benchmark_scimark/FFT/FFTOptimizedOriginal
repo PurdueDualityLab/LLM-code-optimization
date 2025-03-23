@@ -1,39 +1,11 @@
 package jnt.scimark2;
-import java.io.*;
-
-/**
- * Computes FFT's of complex, double precision data where n is an integer power of 2.
- * This appears to be slower than the Radix2 method,
- * but the code is smaller and simpler, and it requires no extra storage.
- * <p>
- *
- * @author Bruce R. Miller bruce.miller@nist.gov,
- * @author Derived from GSL (Gnu Scientific Library),
- * @author GSL's FFT Code by Brian Gough bjg@vvv.lanl.gov
- */
-
-/* See {@link ComplexDoubleFFT ComplexDoubleFFT} for details of data layout.
- */
 
 public class FFTOptimized {
 
-    public static double num_flops(int N) {
-        double logN = log2(N);
-
-        return (5.0 * (double) N - 2) * logN + 2 * ((double) N + 1);
-    }
-
-
-    /**
-     * Compute Fast Fourier Transform of (complex) data, in place.
-     */
     public static void transform(double[] data) {
         transform_internal(data, -1);
     }
 
-    /**
-     * Compute Inverse Fast Fourier Transform of (complex) data, in place.
-     */
     public static void inverse(double[] data) {
         transform_internal(data, +1);
         // Normalize
@@ -44,10 +16,6 @@ public class FFTOptimized {
             data[i] *= norm;
     }
 
-    /**
-     * Accuracy check on FFT of data. Make a copy of data, Compute the FFT, then
-     * the inverse and compare to the original.  Returns the rms difference.
-     */
     public static double test(double[] data) {
         int nd = data.length;
         // Make duplicate for comparison
@@ -65,9 +33,6 @@ public class FFTOptimized {
         return Math.sqrt(diff / nd);
     }
 
-    /**
-     * Make a random array of n (complex) elements.
-     */
     public static double[] makeRandom(int n) {
         int nd = 2 * n;
         double[] data = new double[nd];
@@ -77,20 +42,18 @@ public class FFTOptimized {
     }
 
     /**
-     * Simple Test routine.
+     * Main method, strictly do not change.
      */
     public static void main(String[] args) {
         if (args.length == 0) {
-            int n = 1024;
-            System.out.println(test(makeRandom(n)));
+            int n = 1048576;
+            System.out.println(test(makeRandom(n)) / 1048576);
         }
         for (int i = 0; i < args.length; i++) {
             int n = Integer.parseInt(args[i]);
-            System.out.println(test(makeRandom(n)));
+            System.out.println(test(makeRandom(n)) / 1048576);
         }
     }
-    
-    /* ______________________________________________________________________ */
 
     protected static int log2(int n) {
         int log = 0;
@@ -200,11 +163,3 @@ public class FFTOptimized {
         }
     }
 }
-
-
-
-
-
-
-
-

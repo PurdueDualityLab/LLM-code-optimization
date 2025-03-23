@@ -23,7 +23,7 @@ logger = Logger("logs", sys.argv[2]).logger
 def parse_arguments():
     parser = argparse.ArgumentParser(description="LLM-Code-Optimization")
     parser.add_argument("--benchmark", type=str, default="EnergyLanguage", choices=["EnergyLanguage", "PIE", "SciMark", "Dacapobench", "Android"], help="dataset used for experiment")
-    parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "o3-mini", "deepseek-r1:671b","deepseek-r1:70b", "qwen2.5-coder:32b", "llama3.3:70b-instruct-q4_K_M", "codellama:70b"], help="llm used for inference")
+    parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "o3-mini", "deepseek-r1:671b","deepseek-r1:70b", "qwen2.5-coder:32b", "llama3.3:70b", "codellama:70b"], help="llm used for inference")
     parser.add_argument("--self_optimization_step", type=int, default=5, help="number of LLM self-optimization step")
     parser.add_argument("--num_programs", type=int, default=5, help="For PIE only, number of programs from the benchmark to test")
     parser.add_argument("--application_name", type=str, default="fop", choices=["fop", "cassandra", "h2", "h2o", "Kafka", "Luindex", "Lusearch", "Spring", "Tomact", "Tradebeans", "Tradesoap", "Xalan"], help="For Dacapobench only, name of the application from the benchmark to test")
@@ -56,6 +56,8 @@ def write_result(energy_data, program, evaluator_feedback_data, results_dir):
     avg_cpu_improvement = evaluator_feedback_data["max_avg_speedup"]["avg_cpu_improvement"]
     avg_memory_improvement = evaluator_feedback_data["max_avg_speedup"]["avg_memory_improvement"]
     avg_throughput_improvement = evaluator_feedback_data["max_avg_speedup"]["avg_throughput_improvement"]
+    if "mflops_improvement" in evaluator_feedback_data["max_avg_speedup"]:
+        avg_mflops_improvement = evaluator_feedback_data["max_avg_speedup"]["mflops_improvement"]
     lowest_loc = evaluator_feedback_data["max_avg_speedup"]["num_of_lines"]
     original_loc = evaluator_feedback_data["original"]["num_of_lines"]
 
@@ -65,6 +67,7 @@ def write_result(energy_data, program, evaluator_feedback_data, results_dir):
         "cpu_cycles_improvement": avg_cpu_improvement,
         "peak_memory_improvement": avg_memory_improvement,
         "throughput_improvement": avg_throughput_improvement,
+        "mflops_improvement": avg_mflops_improvement if "mflops_improvement" in evaluator_feedback_data["max_avg_speedup"] else None,
         "loc_improvement": round(original_loc / lowest_loc, 3),
     }
 

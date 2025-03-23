@@ -1,67 +1,26 @@
 package jnt.scimark2;
 
-/**
- * Estimate Pi by approximating the area of a circle.
- * <p>
- * How: generate N random numbers in the unit square, (0,0) to (1,1)
- * and see how are within a radius of 1 or less, i.e.
- * <pre>{@code
- *
- * sqrt(x^2 + y^2) < r
- *
- * }</pre>
- * since the radius is 1.0, we can square both sides
- * and avoid a sqrt() computation:
- * <pre>{@code
- *
- * x^2 + y^2 <= 1.0
- *
- * }</pre>
- * this area under the curve is (Pi * r^2)/ 4.0,
- * and the area of the unit of square is 1.0,
- * so Pi can be approximated by
- * <pre>{@code
- * # points with x^2+y^2 < 1
- * Pi =~        --------------------------  * 4.0
- * total # points
- *
- * }</pre>
- */
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MonteCarloOptimized {
-    final static int SEED = 113;
-
     public static void main(String[] args) {
-        int cycles = 1073741824;
+        long cycles = 1073741824;
         double result = integrate(cycles);
         System.out.println(result);
     } 
 
-    public static double num_flops(long Num_samples) {
-        // 3 flops in x^2+y^2 and 1 flop in random routine
-
-        return ((double) Num_samples) * 4.0;
-
-    }
-
-
-    public static double integrate(long Num_samples) {
-
-        Random R = new Random(SEED);
-
-
-        long under_curve = 0;
-        for (long count = 0; count < Num_samples; count++) {
-            double x = R.nextDouble();
-            double y = R.nextDouble();
-
-            if (x * x + y * y <= 1.0)
-                under_curve++;
-
+    public static double integrate(long numSamples) {
+        long underCurve = 0;
+        final int batchSize = 4; 
+        double x, y;
+        for (long count = 0; count < numSamples; count += batchSize) {
+            for (int i = 0; i < batchSize && count + i < numSamples; i++) {
+                x = ThreadLocalRandom.current().nextDouble();
+                y = ThreadLocalRandom.current().nextDouble();
+                if (x * x + y * y <= 1.0) underCurve++;
+            }
         }
 
-        return ((double) under_curve / Num_samples) * 4.0;
+        return ((double) underCurve / numSamples) * 4.0;
     }
-
-
 }

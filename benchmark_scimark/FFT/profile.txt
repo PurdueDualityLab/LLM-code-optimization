@@ -1,0 +1,15 @@
+--- Execution profile ---
+Total samples       : 32
+
+          ns  percent  samples  top
+  ----------  -------  -------  ---
+   180000000   56.25%       18  jnt.scimark2.FFT.transform_internal
+    30000000    9.38%        3  java.util.concurrent.atomic.AtomicLong.compareAndSet
+    30000000    9.38%        3  jnt.scimark2.FFT.bitreverse
+    10000000    3.13%        1  Node::clone
+    10000000    3.13%        1  Node::replace_edge
+    10000000    3.13%        1  Node::unique_ctrl_out
+    10000000    3.13%        1  PhaseChaitin::build_ifg_physical
+    10000000    3.13%        1  __GI___qsort_r
+    10000000    3.13%        1  jnt.scimark2.FFT.inverse
+    10000000    3.13%        1  jnt.scimark2.FFT.makeRandom

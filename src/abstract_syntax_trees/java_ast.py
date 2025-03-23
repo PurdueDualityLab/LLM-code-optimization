@@ -16,10 +16,7 @@ class JavaAST(AbstractSyntaxTree):
     def __init__(self, language):
         super().__init__(language)
 
-    def create_ast(self, source_code_path) -> str:
-        with open(source_code_path, "r") as file:
-            source_code = file.read()
-
+    def create_ast(self, source_code) -> str:
         input_stream = InputStream(source_code)
         lexer = JavaLexer(input_stream)
         stream = CommonTokenStream(lexer)

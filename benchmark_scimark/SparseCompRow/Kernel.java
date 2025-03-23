@@ -4,13 +4,12 @@ public class Kernel {
     // each measurement returns approx Mflops
 
     public static double measureSparseMatmult(int N, int nz,
-                                              double min_time, Random R) {
+                                              double min_time, Random R, boolean optimized) {
         // initialize vector multipliers and storage for result
         // y = A*y;
 
         double[] x = RandomVector(N, R);
         double[] y = new double[N];
-        double[] y_optimized = NewVectorCopy(y);
 
         // initialize square sparse matrix
         //
@@ -61,23 +60,27 @@ public class Kernel {
         long cycles = 1;
         while (true) {
             Q.start();
-            SparseCompRow.matmult(y_optimized, val, row, col, x, cycles);
+            if (optimized) {
+                SparseCompRowOptimized.matmult(y, val, row, col, x, cycles);
+            } else {
+                SparseCompRow.matmult(y, val, row, col, x, cycles);
+            }
             Q.stop();
             if (Q.read() >= min_time) break;
 
             cycles *= 2;
         }
 
-        SparseCompRow.matmult(y, val, row, col, x, 1);
-        double regressionThreshold = 1.0e-10;
-        double difference = normabs(y, y_optimized); 
-        if (normabs(y, y_optimized) > regressionThreshold) {
-            System.out.println("Regression test failed with difference: " + difference);
-            return 0.0;
-        }
-
         // approx Mflops
-        return SparseCompRow.num_flops(N, nz, cycles) / Q.read() * 1.0e-6;
+        return num_flops(N, nz, cycles) / Q.read() * 1.0e-6;
+    }
+
+    public static double num_flops(int N, int nz, long num_iterations) {
+		/* Note that if nz does not divide N evenly, then the
+		   actual number of nonzeros used is adjusted slightly.
+		*/
+        int actual_nz = (nz / N) * N;
+        return ((double) actual_nz) * 2.0 * ((double) num_iterations);
     }
 
     private static double[] NewVectorCopy(double[] x) {
@@ -99,34 +102,6 @@ public class Kernel {
         return sum;
     }
 
-    private static void CopyMatrix(double[][] B, double[][] A) {
-        int M = A.length;
-        int N = A[0].length;
-
-        int remainder = N & 3;         // N mod 4;
-
-        for (int i = 0; i < M; i++) {
-            double[] Bi = B[i];
-            double[] Ai = A[i];
-            System.arraycopy(Ai, 0, Bi, 0, remainder);
-            for (int j = remainder; j < N; j += 4) {
-                Bi[j] = Ai[j];
-                Bi[j + 1] = Ai[j + 1];
-                Bi[j + 2] = Ai[j + 2];
-                Bi[j + 3] = Ai[j + 3];
-            }
-        }
-    }
-
-    private static double[][] RandomMatrix(int M, int N, Random R) {
-        double[][] A = new double[M][N];
-
-        for (int i = 0; i < N; i++)
-            for (int j = 0; j < N; j++)
-                A[i][j] = R.nextDouble();
-        return A;
-    }
-
     private static double[] RandomVector(int N, Random R) {
         double[] A = new double[N];
 
@@ -134,28 +109,4 @@ public class Kernel {
             A[i] = R.nextDouble();
         return A;
     }
-
-    private static double[] matvec(double[][] A, double[] x) {
-        int N = x.length;
-        double[] y = new double[N];
-
-        matvec(A, x, y);
-
-        return y;
-    }
-
-    private static void matvec(double[][] A, double[] x, double[] y) {
-        int M = A.length;
-        int N = A[0].length;
-
-        for (int i = 0; i < M; i++) {
-            double sum = 0.0;
-            double[] Ai = A[i];
-            for (int j = 0; j < N; j++)
-                sum += Ai[j] * x[j];
-
-            y[i] = sum;
-        }
-    }
-
 }

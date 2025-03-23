@@ -7,6 +7,7 @@ from abstract_syntax_trees.java_ast import JavaAST
 from status import Status
 from utils import Logger
 import csv
+import re
 
 load_dotenv()
 USER_PREFIX = os.path.expanduser(os.getenv('USER_PREFIX'))
@@ -34,7 +35,9 @@ class DaCapoBenchmark(Benchmark):
         #the above path still is not general enough for all bms, apache only works for fop and 2.8 is only for fop
 
         with open(source_path, 'r') as file:
-            self.original_code = file.read() 
+            code = file.read() 
+        filtered_code = re.sub(r'\s*//.*?$|/\*[\s\S]*?\*/\s*', '', code, flags=re.MULTILINE)
+        self.original_code = filtered_code
         
     def get_original_code(self):
         return self.original_code
@@ -44,8 +47,7 @@ class DaCapoBenchmark(Benchmark):
 
         # compile
         # Needed for makefiles
-        # os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/{self.program}-2.8/{self.program}-core/")
-        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/")
+        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/{self.program}-2.8/{self.program}-core/")
 
         try:
             result = subprocess.run(["make", "compile", f"BENCHMARK={self.program}", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.test_name}"], check=True, capture_output=True, text=True)
@@ -61,28 +63,20 @@ class DaCapoBenchmark(Benchmark):
             return False
 
         #compute avg energy and avg runtime
-        avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
+        avg_energy, avg_latency, avg_cpu_cycles, avg_memory, throughput = self._compute_avg()
 
-        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_latency, 3),  avg_cpu_cycles, max_peak_memory, round(throughput, 3), len(self.original_code.splitlines()))        
+        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_latency, 3),  avg_cpu_cycles, avg_memory, round(throughput, 3), len(self.original_code.splitlines()))        
         return True
     
     def pre_process(self, code):
         ast = JavaAST("java")
-        # Create temp directory if it doesn't exist
-        temp_dir = f"{USER_PREFIX}/tmp"
-        os.makedirs(temp_dir, exist_ok=True)
-        
-        # Use temp directory for AST file
-        source_code_path = f"{temp_dir}/ast_{self.test_name}.java"
-        
-        with open(source_code_path, 'w') as file:
-            file.write(code)
-        return ast.create_ast(source_code_path)
+        return ast.create_ast(code)
     
     def post_process(self, code):
         code = code.replace("```java", "")
         code = code.replace("```", "")
-        return code
+        filtered_code = re.sub(r'\s*//.*?$|/\*[\s\S]*?\*/\s*', '', code, flags=re.MULTILINE)
+        return filtered_code
 
     def compile(self, optimized_code):
         #write optimized code to file
@@ -91,7 +85,7 @@ class DaCapoBenchmark(Benchmark):
             file.write(optimized_code)
 
         #compile optimized code
-        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/")
+        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8/fop-core")
 
         try:
             result = subprocess.run(
@@ -114,7 +108,7 @@ class DaCapoBenchmark(Benchmark):
         return super().get_compilation_error()
     
     def run_tests(self):
-        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/")
+        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8/fop-core")
 
         try:
             # Using subprocess.PIPE allows us to capture both stdout and stderr
@@ -149,12 +143,12 @@ class DaCapoBenchmark(Benchmark):
         logger.info(f"Iteration {self.optimization_iteration + 1}, run benchmark on the optimized code")
         self._run_rapl()
 
-        avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, throughput = self._compute_avg()
+        avg_energy, avg_latency, avg_cpu_cycles, avg_memory, throughput = self._compute_avg()
         original_data = self.energy_data[0]
         energy_change = original_data[1] / avg_energy
         speedup = original_data[2] / avg_latency
         cpu_change = original_data[3] / avg_cpu_cycles
-        memory_change = original_data[4] / max_peak_memory
+        memory_change = original_data[4] / avg_memory
         throughput_change = throughput / original_data[5]
 
         self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(energy_change, 3), round(speedup, 3), cpu_change, memory_change, throughput_change, len(optimized_code.splitlines()))
@@ -164,15 +158,14 @@ class DaCapoBenchmark(Benchmark):
 
     def _run_rapl(self):
         # First clear the contents of the energy data log file
-        logger.info(f"Benchmark.run: clearing content in c++.csv")
+        logger.info(f"Benchmark.run: clearing content in java.csv")
         log_file_path = f"{USER_PREFIX}/src/runtime_logs/java.csv"
         if os.path.exists(log_file_path):
             file = open(log_file_path, "w")
             file.close()
 
         #run make measure using make file
-        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/")
-        print(os.getcwd())
+        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8/fop-core")
 
         try:
             result = subprocess.run(["make", "measure", f"BENCHMARK={self.program}", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.test_name}"], check=True, capture_output=True, text=True, timeout=120)
@@ -193,7 +186,7 @@ class DaCapoBenchmark(Benchmark):
         with open(f'{USER_PREFIX}/src/runtime_logs/java.csv', mode='r', newline='') as file:
             csv_reader = csv.reader(file)
             for index, row in enumerate(csv_reader):
-                if index == 10:
+                if index == 5:
                     throughput = row[1]
                 else:
                     benchmark_name = row[0]
@@ -207,7 +200,7 @@ class DaCapoBenchmark(Benchmark):
         avg_energy = 0
         avg_latency = 0
         avg_cpu_cycles = 0
-        max_peak_memory = 0
+        avg_memory = 0
         for data in benchmark_data:
             energy = float(data[1])
             if energy < 0:
@@ -216,13 +209,14 @@ class DaCapoBenchmark(Benchmark):
                 avg_energy += energy
                 avg_latency += float(data[2])
                 avg_cpu_cycles += float(data[3])
-                max_peak_memory = max(max_peak_memory, float(data[4]))
+                avg_memory += float(data[4])
 
         avg_energy /= len(benchmark_data)
         avg_latency /= len(benchmark_data)
         avg_cpu_cycles /= len(benchmark_data)
+        avg_memory /= len(benchmark_data)
 
-        return avg_energy, avg_latency, avg_cpu_cycles, max_peak_memory, float(throughput)
+        return avg_energy, avg_latency, avg_cpu_cycles, avg_memory, float(throughput)
         
     def get_evaluator_feedback_data(self):
         return super().get_evaluator_feedback_data()
@@ -236,10 +230,8 @@ class DaCapoBenchmark(Benchmark):
 
         try:
             if not self.compile(optimized_code):
-                print(f"Compile failed: {self.compilation_error}")
                 return Status.COMPILATION_ERROR
             if not self.run_tests():
-                print(f"Test failed: {self.test_output}")
                 return Status.RUNTIME_ERROR_OR_TEST_FAILED 
             if not self.measure_energy(optimized_code):
                 return Status.ALL_TEST_PASSED
@@ -259,14 +251,14 @@ class DaCapoBenchmark(Benchmark):
         last_value = contents[last_key]
         
         # print all values
-        logger.info(f"key 0, avg_energy: {first_value[1]}, avg_runtime: {first_value[2]}, avg_cpu_cycles: {first_value[3]}, max_peak_memory: {first_value[4]}, throughput: {first_value[5]}, num_of_lines: {first_value[6]}")
-        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, max_peak_memory, throughput, num_of_lines) in list(contents.items())[1:]:
-            logger.info(f"key: {key}, avg_energy_improvement: {avg_energy}, avg_speedup: {avg_runtime}, avg_cpu_improvement: {avg_cpu_cycles}, avg_memory_improvement: {max_peak_memory}, avg_throughput_improvement: {throughput}, num_of_lines: {num_of_lines}")
+        logger.info(f"key 0, avg_energy: {first_value[1]}, avg_runtime: {first_value[2]}, avg_cpu_cycles: {first_value[3]}, avg_memory: {first_value[4]}, throughput: {first_value[5]}, num_of_lines: {first_value[6]}")
+        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, avg_memory, throughput, num_of_lines) in list(contents.items())[1:]:
+            logger.info(f"key: {key}, avg_energy_improvement: {avg_energy}, avg_speedup: {avg_runtime}, avg_cpu_improvement: {avg_cpu_cycles}, avg_memory_improvement: {avg_memory}, avg_throughput_improvement: {throughput}, num_of_lines: {num_of_lines}")
 
        # Loop through the contents to find the key with the highest speedup
         max_avg_speedup = float('-inf')
         max_avg_speedup_key = None
-        for key, (source_code, avg_energy, avg_speedup, avg_cpu_cycles, max_peak_memory, throughput, num_of_lines) in list(contents.items())[1:]:
+        for key, (source_code, avg_energy, avg_speedup, avg_cpu_cycles, avg_memory, throughput, num_of_lines) in list(contents.items())[1:]:
             if avg_speedup > max_avg_speedup:
                 max_avg_speedup = avg_speedup
                 max_avg_speedup_key = key
@@ -280,7 +272,7 @@ class DaCapoBenchmark(Benchmark):
                 "avg_energy": first_value[1],
                 "avg_runtime": first_value[2],
                 "avg_cpu_cycles": first_value[3],
-                "max_peak_memory": first_value[4],
+                "avg_memory": first_value[4],
                 "throughput": first_value[5],
                 "num_of_lines": first_value[6]
             },
@@ -315,7 +307,21 @@ def get_valid_dacapo_classes(application_name):
                         #biojava:[],
                         }
 
+    setup_makefile(application_name)
     return benchmark_classes[application_name]
+
+def setup_makefile(application_name):
+    folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{application_name}/build/fop-2.8"
+    subfolders = [f.path for f in os.scandir(folder_path) if f.is_dir()]
+    for subfolder in subfolders:
+        print(subfolder)
+        makefile_template = open(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/makefile_template.mak", "r")
+        makefile_content = makefile_template.read()
+        makefile_template.close()
+        # TODO: customize the makefile content
+        makefile_template = open(f"{subfolder}/Makefile", "w")
+        makefile_template.write(makefile_content)
+        makefile_template.close()
 
 #just to test the code
 def main():

@@ -1,124 +1,95 @@
+package jnt.scimark2;
+
 public class FFTOptimized {
 
-    public static double num_flops(int N) {
-        double logN = log2(N);
-        return (5.0 * (double) N - 2) * logN + 2 * ((double) N + 1);
-    }
-
     public static void transform(double[] data) {
-        transform_internal(data, -1);
+        int n = data.length;
+        double[] real = new double[n];
+        double[] imag = new double[n];
+
+        for (int i = 0; i < n; i++) {
+            real[i] = data[i];
+        }
+
+        fft(real, imag);
     }
 
     public static void inverse(double[] data) {
-        transform_internal(data, +1);
-        int nd = data.length;
-        int n = nd / 2;
-        double norm = 1.0 / n;
-        for (int i = 0; i < nd; i++) {
-            data[i] *= norm;
+        int n = data.length;
+        double[] real = new double[n];
+        double[] imag = new double[n];
+
+        for (int i = 0; i < n; i++) {
+            real[i] = data[i];
+        }
+
+        ifft(real, imag);
+    }
+
+    private static void fft(double[] real, double[] imag) {
+        int n = real.length;
+        if (n <= 1) {
+            return;
+        }
+
+        double[] realEven = new double[n / 2];
+        double[] imagEven = new double[n / 2];
+        double[] realOdd = new double[n / 2];
+        double[] imagOdd = new double[n / 2];
+
+        for (int i = 0; i < n / 2; i++) {
+            realEven[i] = real[2 * i];
+            imagEven[i] = imag[2 * i];
+            realOdd[i] = real[2 * i + 1];
+            imagOdd[i] = imag[2 * i + 1];
+        }
+
+        fft(realEven, imagEven);
+        fft(realOdd, imagOdd);
+
+        for (int k = 0; k < n / 2; k++) {
+            double twiddleReal = Math.cos(2 * Math.PI * k / n);
+            double twiddleImag = -Math.sin(2 * Math.PI * k / n);
+
+            double tempReal = realOdd[k] * twiddleReal - imagOdd[k] * twiddleImag;
+            double tempImag = realOdd[k] * twiddleImag + imagOdd[k] * twiddleReal;
+
+            real[k] = realEven[k] + tempReal;
+            imag[k] = imagEven[k] + tempImag;
+            real[n / 2 + k] = realEven[k] - tempReal;
+            imag[n / 2 + k] = imagEven[k] - tempImag;
         }
     }
 
-    public static double test(double[] data) {
-        int nd = data.length;
-        double[] copy = new double[nd];
-        System.arraycopy(data, 0, copy, 0, nd);
-        transform(data);
-        inverse(data);
-        double diff = 0.0;
-        for (int i = 0; i < nd; i++) {
-            double d = data[i] - copy[i];
-            diff += d * d;
-        }
-        return Math.sqrt(diff / nd);
-    }
+    private static void ifft(double[] real, double[] imag) {
+        int n = real.length;
 
-    public static double[] makeRandom(int n) {
-        int nd = 2 * n;
-        double[] data = new double[nd];
-        for (int i = 0; i < nd; i++) {
-            data[i] = Math.random();
+        for (int i = 0; i < n / 2; i++) {
+            double tempReal = real[i];
+            double tempImag = imag[i];
+
+            real[i] = real[n - 1 - i];
+            imag[i] = -imag[n - 1 - i];
+
+            real[n - 1 - i] = tempReal;
+            imag[n - 1 - i] = -tempImag;
         }
-        return data;
+
+        fft(real, imag);
+
+        for (int i = 0; i < n; i++) {
+            real[i] /= n;
+            imag[i] /= n;
+        }
     }
 
     public static void main(String[] args) {
-        if (args.length == 0) {
-            int n = 1024;
-            System.out.println("n=" + n + " => RMS Error=" + test(makeRandom(n)));
+        double[] x = {1, 2, 3, 4, 5, 6, 7, 8};
+        transform(x); 
+        inverse(x); 
+
+        for (double value : x) {
+            System.out.print(value + " ");
         }
-        for (String arg : args) {
-            int n = Integer.parseInt(arg);
-            System.out.println("n=" + n + " => RMS Error=" + test(makeRandom(n)));
-        }
-    }
-
-    protected static int log2(int n) {
-        if (n <= 0 || (n & (n - 1)) != 0) throw new IllegalArgumentException("FFT: Data length is not a power of 2!: " + n);
-        return Integer.numberOfTrailingZeros(n);
-    }
-
-    protected static void transform_internal(double[] data, int direction) {
-        if (data.length == 0) return;
-
-        int n = data.length / 2;
-        int logn = log2(n);
-
-        bitreverse(data);
-
-        double[] cosTable = new double[n / 2];
-        double[] sinTable = new double[n / 2];
-        for (int i = 0; i < n / 2; i++) {
-            double angle = 2 * Math.PI * i / n;
-            cosTable[i] = Math.cos(angle);
-            sinTable[i] = Math.sin(angle);
-        }
-
-        int dual = 1;
-        for (int bit = 0; bit < logn; bit++, dual *= 2) {
-            for (int b = 0; b < n; b += 2 * dual) {
-                for (int j = 0; j < dual; j++) {
-                    int i = 2 * (b + j), k = 2 * (b + j + dual);
-                    int index = j * (n / (2 * dual));
-                    double cos = cosTable[index];
-                    double sin = direction * sinTable[index];
-
-                    double tempReal = cos * data[k] - sin * data[k + 1];
-                    double tempImag = sin * data[k] + cos * data[k + 1];
-
-                    data[k] = data[i] - tempReal;
-                    data[k + 1] = data[i + 1] - tempImag;
-                    data[i] += tempReal;
-                    data[i + 1] += tempImag;
-                }
-            }
-        }
-    }
-
-    protected static void bitreverse(double[] data) {
-        int n = data.length / 2;
-        int j = 0;
-        for (int i = 0; i < n; i++) {
-            if (i < j) {
-                int swapIndex = j << 1;
-                int currentIndex = i << 1;
-                swap(data, swapIndex, currentIndex);
-            }
-            int m = n >> 1;
-            while (j >= m && m > 0) {
-                j -= m;
-                m >>= 1;
-            }
-            j += m;
-        }
-    }
-
-    private static void swap(double[] data, int a, int b) {
-        double tempReal = data[a];
-        double tempImag = data[a + 1];
-        data[a] = data[b];
-        data[a + 1] = data[b + 1];
-        data[b] = tempReal;
-        data[b + 1] = tempImag;
     }
 }
