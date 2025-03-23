@@ -7,6 +7,7 @@ from abstract_syntax_trees.java_ast import JavaAST
 from status import Status
 from utils import Logger
 import csv
+import re
 
 load_dotenv()
 USER_PREFIX = os.path.expanduser(os.getenv('USER_PREFIX'))
@@ -34,7 +35,9 @@ class DaCapoBenchmark(Benchmark):
         #the above path still is not general enough for all bms, apache only works for fop and 2.8 is only for fop
 
         with open(source_path, 'r') as file:
-            self.original_code = file.read() 
+            code = file.read() 
+        filtered_code = re.sub(r'\s*//.*?$|/\*[\s\S]*?\*/\s*', '', code, flags=re.MULTILINE)
+        self.original_code = filtered_code
         
     def get_original_code(self):
         return self.original_code
@@ -44,8 +47,7 @@ class DaCapoBenchmark(Benchmark):
 
         # compile
         # Needed for makefiles
-        # os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/{self.program}-2.8/{self.program}-core/")
-        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/")
+        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/{self.program}-2.8/{self.program}-core/")
 
         try:
             result = subprocess.run(["make", "compile", f"BENCHMARK={self.program}", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.test_name}"], check=True, capture_output=True, text=True)
@@ -68,21 +70,13 @@ class DaCapoBenchmark(Benchmark):
     
     def pre_process(self, code):
         ast = JavaAST("java")
-        # Create temp directory if it doesn't exist
-        temp_dir = f"{USER_PREFIX}/tmp"
-        os.makedirs(temp_dir, exist_ok=True)
-        
-        # Use temp directory for AST file
-        source_code_path = f"{temp_dir}/ast_{self.test_name}.java"
-        
-        with open(source_code_path, 'w') as file:
-            file.write(code)
-        return ast.create_ast(source_code_path)
+        return ast.create_ast(code)
     
     def post_process(self, code):
         code = code.replace("```java", "")
         code = code.replace("```", "")
-        return code
+        filtered_code = re.sub(r'\s*//.*?$|/\*[\s\S]*?\*/\s*', '', code, flags=re.MULTILINE)
+        return filtered_code
 
     def compile(self, optimized_code):
         #write optimized code to file
@@ -91,7 +85,7 @@ class DaCapoBenchmark(Benchmark):
             file.write(optimized_code)
 
         #compile optimized code
-        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/")
+        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8/fop-core")
 
         try:
             result = subprocess.run(
@@ -114,7 +108,7 @@ class DaCapoBenchmark(Benchmark):
         return super().get_compilation_error()
     
     def run_tests(self):
-        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/")
+        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8/fop-core")
 
         try:
             # Using subprocess.PIPE allows us to capture both stdout and stderr
@@ -164,15 +158,14 @@ class DaCapoBenchmark(Benchmark):
 
     def _run_rapl(self):
         # First clear the contents of the energy data log file
-        logger.info(f"Benchmark.run: clearing content in c++.csv")
+        logger.info(f"Benchmark.run: clearing content in java.csv")
         log_file_path = f"{USER_PREFIX}/src/runtime_logs/java.csv"
         if os.path.exists(log_file_path):
             file = open(log_file_path, "w")
             file.close()
 
         #run make measure using make file
-        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/")
-        print(os.getcwd())
+        os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8/fop-core")
 
         try:
             result = subprocess.run(["make", "measure", f"BENCHMARK={self.program}", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.test_name}"], check=True, capture_output=True, text=True, timeout=120)
@@ -193,7 +186,7 @@ class DaCapoBenchmark(Benchmark):
         with open(f'{USER_PREFIX}/src/runtime_logs/java.csv', mode='r', newline='') as file:
             csv_reader = csv.reader(file)
             for index, row in enumerate(csv_reader):
-                if index == 10:
+                if index == 5:
                     throughput = row[1]
                 else:
                     benchmark_name = row[0]
@@ -237,10 +230,8 @@ class DaCapoBenchmark(Benchmark):
 
         try:
             if not self.compile(optimized_code):
-                print(f"Compile failed: {self.compilation_error}")
                 return Status.COMPILATION_ERROR
             if not self.run_tests():
-                print(f"Test failed: {self.test_output}")
                 return Status.RUNTIME_ERROR_OR_TEST_FAILED 
             if not self.measure_energy(optimized_code):
                 return Status.ALL_TEST_PASSED
@@ -316,7 +307,21 @@ def get_valid_dacapo_classes(application_name):
                         #biojava:[],
                         }
 
+    setup_makefile(application_name)
     return benchmark_classes[application_name]
+
+def setup_makefile(application_name):
+    folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{application_name}/build/fop-2.8"
+    subfolders = [f.path for f in os.scandir(folder_path) if f.is_dir()]
+    for subfolder in subfolders:
+        print(subfolder)
+        makefile_template = open(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/makefile_template.mak", "r")
+        makefile_content = makefile_template.read()
+        makefile_template.close()
+        # TODO: customize the makefile content
+        makefile_template = open(f"{subfolder}/Makefile", "w")
+        makefile_template.write(makefile_content)
+        makefile_template.close()
 
 #just to test the code
 def main():
