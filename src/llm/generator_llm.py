@@ -8,27 +8,29 @@ import os
 logger = Logger("logs", sys.argv[2]).logger
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
-with open(f"{USER_PREFIX}/src/llm/llm_prompts/generator_prompt.txt", "r") as file:
+with open(f"{USER_PREFIX}/src/llm/llm_prompts/generator_prompt_topk.txt", "r") as file:
     generator_prompt = file.read()
 
-def llm_optimize(code, llm_assistant, evaluator_feedback, optimization_patterns, ast):
-    class Strategy(BaseModel):
-        Strategy: str
-        Pros: str
-        Cons: str
+def llm_optimize(code, llm_assistant, evaluator_feedback, optimization_pattern, ast):
+    # use the pattern corresponding to current value of k_iter
+
+    #class Strategy(BaseModel):
+    #    Strategy: str
+    #    Pros: str
+    #    Cons: str
 
     class OptimizationReasoning(BaseModel):
         analysis: str
-        optimization_opportunities: str
-        strategies: list[Strategy] 
-        selected_strategy: str
+        #optimization_opportunities: str
+        #strategies: list[Strategy] 
+        strategy: str
         final_code: str
-        optimization_pattern: str
+        optimization_pattern_name: str
+        optimization_pattern_description: str
+        optimization_pattern_rank: str
     
-    # adding optimization patterns to prompt
-    formatted_patterns = json.dumps(optimization_patterns, indent=4)
-    #logger.info(formatted_patterns) # testing
-    updated_generator_prompt = generator_prompt.replace('{optimization_patterns}', formatted_patterns)
+    # add optimization pattern to prompt
+    updated_generator_prompt = generator_prompt.replace('{optimization_pattern}', optimization_pattern)
 
     if evaluator_feedback == "":
         prompt = updated_generator_prompt + f"Here is the code to optimize, follow the instruction to provide the optimized code WHILE MAINTAINING IT'S FUNCTIONAL EQUIVALENCE:\n{code}.\n" + f"Here is the AST of the source code: {ast}"
@@ -38,9 +40,7 @@ def llm_optimize(code, llm_assistant, evaluator_feedback, optimization_patterns,
     logger.info(f"llm_optimize: Generator LLM Optimizing ....")
     
     if llm_assistant.is_genai_studio():
-        prompt = prompt + "\n Strictly only output final code. Don't change class name."
-
-    logger.info(f"Generator prompt: {prompt}")
+        prompt = prompt + "\n Strictly only output final code only."
 
     llm_assistant.add_to_memory("user", prompt)
     llm_assistant.generate_response(OptimizationReasoning)
@@ -64,17 +64,22 @@ def llm_optimize(code, llm_assistant, evaluator_feedback, optimization_patterns,
         logger.error("Error in llm completion")
         return
     
-    return final_code
+    #need to return more than just final code for top_k.
+    #will just return dictionary to keep it simple.
+    #looking at the code above (line53-54) this will not work with genai_studo, this will only work with openai_model.
+    return content_dict
 
 def handle_compilation_error(error_message, llm_assistant):
     class ErrorReasoning(BaseModel):
         analysis: str
         final_code: str
-        
+    
+    # removing the sentence on considering different optimizations for Top-K accuracy test.
     compilation_error_prompt = f"""The code you returned failed to compile with the following error message: {error_message}. 
         Analyze the error message and explicitly identify the issue in the code that caused the compilation error. 
-        Then, consider if there's a need to use a different optimization prompt to compile successfully or if there are code changes which can fix this implementation.
-        Finally, update the code accordingly and ensure it compiles successfully. Ensure that the optimized code is both efficient and error-free and return it. """   
+        Then, consider if there are code changes which can fix this implementation.
+        Finally, update the code accordingly and ensure it compiles successfully.
+        Ensure that the optimized code is both efficient and error-free and return it. """   
         
     if llm_assistant.is_genai_studio():
         compilation_error_prompt = compilation_error_prompt + "\n Strictly only output final code only."

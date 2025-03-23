@@ -5,11 +5,12 @@ Task Instructions:
         - Examing the Source Code to identify inefficiencies and areas for improvement.
         - Look for areas of high latency, use of complex operations/instructions, inefficient memory allocations, inefficient memory accesses, and inefficient I/O operations.
     2. Analyze the Optimization Patterns
-        - Using pattern description and example, assess how well each optimization pattern addresses the inefficiencies found in Source Code.
-        - Based on the assessment, select the five best optimization patterns.
+        - Using pattern description and example, assess and rank how well each optimization pattern addresses the inefficiencies found in Source Code.
+        - Rank the patterns accordingly, assigning 1 to the most effective pattern and higher numbers to less effective ones.
+        - Based on the ranking, select the five best optimization patterns.
 
 Output Requirements:
-    - For the five selected patterns, return the pattern name, description, and example.
+    - For the five selected patterns, return the pattern name, description, example, and rank.
 
 Optimization Patterns:
 {patterns}

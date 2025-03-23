@@ -13,11 +13,12 @@ energy_patterns = f"{USER_PREFIX}/pattern_catalog/energy_patterns.xlsx"
 with open(f"{USER_PREFIX}/src/llm/llm_prompts/advisor_prompt.txt", "r") as file:
     advisor_prompt = file.read()
 
-def filter_patterns(llm_assistant, source_code):
+def rank_patterns(llm_assistant, source_code):
     class Pattern(BaseModel):
         pattern_name: str
         pattern_description: str
         pattern_example: str
+        rank: str
 
     class PatternSelection(BaseModel):
         patterns: list[Pattern]
@@ -39,18 +40,27 @@ def filter_patterns(llm_assistant, source_code):
         return -1
     logger.info(response)
 
-    # format response
+    # return dictionary
+    # using for top_k_test
     try:
-        if (llm_assistant.is_openai_model()):
+        if(llm_assistant.is_openai_model()):
             content_dict = json.loads(response["content"])
-            patterns = "\n".join(
-                f"{entry['pattern_name']}:\nDescription:{entry['pattern_description']}\nExample:{entry['pattern_example']}"
-                for entry in content_dict["patterns"]
-            )
-        else:
-            #TODO Need to fix patterns assignment below.
-            patterns = [entry.pattern_name for entry in PatternSelection.model_validate_json(response["content"]).patterns]
-        return patterns
+            return content_dict
     except json.JSONDecodeError as e:
         logger.error(f"Failed to decode JSON: {e}")
-        return
+
+    # format string response
+    #try:
+    #    if (llm_assistant.is_openai_model()):
+    #        content_dict = json.loads(response["content"])
+    #        patterns = "\n".join(
+    #            f"{entry['pattern_name']}:\nDescription:{entry['pattern_description']}\nExample:{entry['pattern_example']}\nRank:{entry['rank']}"
+    #            for entry in content_dict["patterns"]
+    #        )
+    #    else:
+    #        #TODO Need to fix patterns assignment below.
+    #        patterns = [entry.pattern_name for entry in PatternSelection.model_validate_json(response["content"]).patterns]
+    #    return patterns
+    #except json.JSONDecodeError as e:
+    #    logger.error(f"Failed to decode JSON: {e}")
+    #    return
