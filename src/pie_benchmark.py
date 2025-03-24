@@ -176,14 +176,12 @@ class PIEBenchmark(Benchmark):
 
             self._run_rapl(problem_id, optimized=True, input_file=input_file)
             energy, latency, cpu_cycles, peak_memory, throughput = self._compute_avg()
-            #testing-peak_memory is 0 resulting in division by 0 error
             #print(f"optimized metrics: {energy}, {latency}, {cpu_cycles}, {peak_memory}, {throughput}")
 
             energy_changes.append(original_energy / energy)
             speedups.append(original_latency / latency)
             cpu_changes.append(original_cpu_cycles / cpu_cycles)
-            #hard coding peak_memory to 1 to bypass error for now
-            memory_changes.append(original_peak_memory / 1)
+            memory_changes.append(original_peak_memory / peak_memory)
             throughput_changes.append(throughput / original_throughput)
 
         avg_energy_change = sum(energy_changes) / len(energy_changes)
