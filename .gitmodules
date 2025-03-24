@@ -4,3 +4,6 @@
 [submodule "async-profiler"]
 	path = async-profiler
 	url = https://github.com/async-profiler/async-profiler
+[submodule "kernelbench-samples"]
+	path = benchmark_kernelbench/kernelbench-samples
+	url = https://huggingface.co/datasets/ScalingIntelligence/kernelbench-samples
