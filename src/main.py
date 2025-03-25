@@ -72,8 +72,8 @@ def write_result(energy_data, program, evaluator_feedback_data, results_dir):
 
 def master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio):
     #create LLM agent
-    generator = LLMAgent(api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
-    evaluator = LLMAgent(api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
+    generator = LLMAgent(openai_api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
+    evaluator = LLMAgent(openai_api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
 
     results = {}
     

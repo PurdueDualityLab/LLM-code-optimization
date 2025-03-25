@@ -53,9 +53,7 @@ def evaluator_llm(evaluator_feedback_data, llm_assistant):
     response = llm_assistant.get_last_msg()
 
     try:
-        if llm_assistant.is_genai_studio():
-            feedback = response["content"]
-        elif llm_assistant.is_openai_model():
+        if llm_assistant.is_genai_studio() or llm_assistant.is_openai_model():
             content_dict = json.loads(response["content"])
             feedback = content_dict["feedback"]
         else:
