@@ -20,17 +20,12 @@ class LLMAgent:
         self.use_genai_studio = use_genai_studio
         self.genai_api_key = genai_api_key
 
-        base_url="https://api.openai.com/v1/models",
-        api_key=openai_api_key
-        if use_genai_studio:
-            base_url="https://genai.rcac.purdue.edu/api"
-            api_key=genai_api_key
-
-        if self.is_openai_model() or use_genai_studio:
+        if self.is_openai_model():
+            self.client=OpenAI(api_key=openai_api_key)
+        elif use_genai_studio:
             self.client=OpenAI(
-                base_url=base_url,
-                api_key=api_key
-            )
+                base_url="https://genai.rcac.purdue.edu/api",
+                api_key=genai_api_key)
         else:
             try:
                 subprocess.run(["ollama", "pull", model], check=True)
