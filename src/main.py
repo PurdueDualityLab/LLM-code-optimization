@@ -183,6 +183,10 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                 logger.info("Regression test success, getting evaluator feedback")
                 evaluator_feedback = evaluator_llm(evaluator_feedback_data=evaluator_feedback_data, llm_assistant=evaluator)
                 logger.info("Got evaluator feedback")
+        
+        # clearing LLM memory
+        generator.clear_memory()
+        evaluator.clear_memory()
 
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
