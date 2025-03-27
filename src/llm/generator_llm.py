@@ -74,7 +74,7 @@ def handle_compilation_error(error_message, llm_assistant):
             content_dict = json.loads(response["content"])
             final_code = content_dict["final_code"]
         else:
-            final_code = ErrorReasoning.model_validate_json(response["content"])["final_code"]
+            final_code = ErrorReasoning.model_validate_json(response["content"]).final_code
     except json.JSONDecodeError as e:
         logger.error(f"Failed to decode JSON: {e}")
         return

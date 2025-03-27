@@ -22,7 +22,7 @@ logger = Logger("logs", sys.argv[2]).logger
 def parse_arguments():
     parser = argparse.ArgumentParser(description="LLM-Code-Optimization")
     parser.add_argument("--benchmark", type=str, default="EnergyLanguage", choices=["EnergyLanguage", "PIE", "SciMark", "Dacapobench", "Android"], help="dataset used for experiment")
-    parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "o3-mini", "deepseek-r1:671b","deepseek-r1:70b", "qwen2.5-coder:32b", "llama3.3:70b", "codellama:70b"], help="llm used for inference")
+    parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "o3-mini", "deepseek-r1:32b","deepseek-r1:70b", "qwen2.5-coder:32b", "llama3.3:70b", "codellama:70b"], help="llm used for inference")
     parser.add_argument("--self_optimization_step", type=int, default=5, help="number of LLM self-optimization step")
     parser.add_argument("--num_programs", type=int, default=5, help="For PIE only, number of programs from the benchmark to test")
     parser.add_argument("--application_name", type=str, default="fop", choices=["fop", "cassandra", "h2", "h2o", "Kafka", "Luindex", "Lusearch", "Spring", "Tomact", "Tradebeans", "Tradesoap", "Xalan"], help="For Dacapobench only, name of the application from the benchmark to test")
@@ -85,10 +85,11 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         elif benchmark == "SciMark":
             benchmark_obj = SciMarkBenchmark(program)
         elif benchmark == "Dacapobench":
-            #program is a tuple of (test_group, test_class_name)
+            #program is a tuple of (test_group, test_class_name, test_method)
             test_group = program[0]
             test_class = program[1]
-            benchmark_obj = DaCapoBenchmark(test_class, test_group, application_name)
+            test_method = program[2]
+            benchmark_obj = DaCapoBenchmark(test_method, test_class, test_group, application_name)
         else:
             logger.error("Invalid benchmark")
             break

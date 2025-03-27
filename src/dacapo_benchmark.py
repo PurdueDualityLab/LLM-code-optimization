@@ -8,6 +8,8 @@ from status import Status
 from utils import Logger
 import csv
 import re
+from dacapo_profiling import get_hotspots
+from collections import defaultdict
 
 load_dotenv()
 USER_PREFIX = os.path.expanduser(os.getenv('USER_PREFIX'))
@@ -17,8 +19,9 @@ logger = Logger("logs", sys.argv[2]).logger
 
 class DaCapoBenchmark(Benchmark):
 
-    def __init__(self, test_class, test_group, benchmark_name):
+    def __init__(self, test_method, test_class, test_group, benchmark_name):
         # ex. test_class = PDFNumsArray, test_group = pdf, benchmark_name = fop
+        self.method_name = test_method
         self.test_name = test_class
         self.class_name = test_group
         self.program = benchmark_name
@@ -299,13 +302,25 @@ class DaCapoBenchmark(Benchmark):
         return benchmark_info
 
 def get_valid_dacapo_classes(application_name):
-    '''
-    Temporary solution: hardcode a list of 10 classe names from this application
-    '''
-    benchmark_classes = {'fop': [('pdf','PDFNumsArray'), ('pdf','PDFRoot'), ('pdf','PDFFactory'), ('pdf','PDFDocument'), ('pdf','PDFPage'), ('pdf','PDFPageSequence'), ('pdf','PDFPageSequence.PagePosition'), ('pdf','PDFPageSequence.PagePosition.PagePositionComparator'), ('pdf','PDFPageSequence.PagePosition.PagePositionComparator.PagePositionComparator'), ('pdf','PDFPageSequence.PagePosition.PagePositionComparator.PagePositionComparator.PagePositionComparator')]
-                        #spring:[],
-                        #biojava:[],
-                        }
+    hotspots = get_hotspots(application_name, top_K=5)
+    methods_name = list(hotspots.keys())
+
+    transformed_data = defaultdict(list)
+    
+    for method in methods_name:
+        parts = method.split('/')
+        class_name, method_name = parts[-1].split('.')  # Split the last part into class and method
+        
+        group_name = parts[3] #hardcode for fop e.g. org/apache/fop/cli/Main.startFOP
+        
+        transformed_data[application_name].append((group_name, class_name, method_name))
+    
+    benchmark_classes = dict(transformed_data)
+
+    # benchmark_classes = {'fop': [('pdf','PDFNumsArray'), ('pdf','PDFRoot'), ('pdf','PDFFactory'), ('pdf','PDFDocument'), ('pdf','PDFPage'), ('pdf','PDFPageSequence'), ('pdf','PDFPageSequence.PagePosition'), ('pdf','PDFPageSequence.PagePosition.PagePositionComparator'), ('pdf','PDFPageSequence.PagePosition.PagePositionComparator.PagePositionComparator'), ('pdf','PDFPageSequence.PagePosition.PagePositionComparator.PagePositionComparator.PagePositionComparator')]
+    #                     #spring:[],
+    #                     #biojava:[],
+    #                     }
 
     setup_makefile(application_name)
     return benchmark_classes[application_name]
