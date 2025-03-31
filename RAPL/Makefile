@@ -8,4 +8,4 @@ rapl.o : rapl.c rapl.h
 	gcc -O2 -Wall -c rapl.c  -lm
 
 clean:
-	rm -rf main.o rapl.o
+	rm -rf main main.o rapl.o
