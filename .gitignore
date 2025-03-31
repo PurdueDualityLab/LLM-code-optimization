@@ -10,3 +10,4 @@ src/runtime_logs
 benchmark_android/__pycache__
 RAPL/main
 RAPL/*.o
+results/
