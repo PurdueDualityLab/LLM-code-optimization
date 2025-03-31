@@ -1,0 +1,11 @@
+--- Execution profile ---
+Total samples       : 32
+
+          ns  percent  samples  top
+  ----------  -------  -------  ---
+   200000000   62.50%       20  jnt.scimark2.FFT.transform_internal
+    40000000   12.50%        4  java.util.Random.next
+    40000000   12.50%        4  jnt.scimark2.FFT.bitreverse
+    20000000    6.25%        2  java.util.Random.nextDouble
+    10000000    3.13%        1  jnt.scimark2.FFT.inverse
+    10000000    3.13%        1  jnt.scimark2.FFT.test

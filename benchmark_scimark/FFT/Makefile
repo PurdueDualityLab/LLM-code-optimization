@@ -43,3 +43,22 @@ measure_mflops_optimized:
 
 clean:
 	rm -rf *.class
+
+# cpu profile
+# java -agentpath:/home/leoDeng/SciMark/E2COOL/async-profiler/build/lib/libasyncProfiler.so=start,event=cpu,flat=10,file=cpu_profile.txt jnt/scimark2/FFT
+# java -agentpath:/home/leoDeng/SciMark/E2COOL/async-profiler/build/lib/libasyncProfiler.so=start,event=wall,flat=10,file=wall_profile.txt jnt/scimark2/FFT
+
+# alloc profile
+# java -agentpath:/home/leoDeng/SciMark/E2COOL/async-profiler/build/lib/libasyncProfiler.so=start,event=alloc,flat=10,file=alloc_profile.txt jnt/scimark2/FFT
+
+# native memory alocation
+# java -agentpath:/home/leoDeng/SciMark/E2COOL/async-profiler/build/lib/libasyncProfiler.so=start,event=nativemem,flat=10,file=nativemem_profile.txt jnt/scimark2/FFT
+
+# thread state (lock)
+# java -agentpath:/home/leoDeng/SciMark/E2COOL/async-profiler/build/lib/libasyncProfiler.so=start,event=lock,flat=10,file=lock_profile.txt jnt/scimark2/FFT
+
+# itimer 
+# java -agentpath:/home/leoDeng/SciMark/E2COOL/async-profiler/build/lib/libasyncProfiler.so=start,event=itimer,flat=10,file=itimer_profile.txt jnt/scimark2/FFT
+
+# ctimer
+# java -agentpath:/home/leoDeng/SciMark/E2COOL/async-profiler/build/lib/libasyncProfiler.so=start,event=ctimer,flat=10,file=ctimer_profile.txt jnt/scimark2/FFT
