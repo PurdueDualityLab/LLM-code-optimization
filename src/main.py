@@ -188,6 +188,11 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         generator.clear_memory()
         evaluator.clear_memory()
 
+    try:
+        results_dir
+    except NameError:
+        results_dir = f"{USER_PREFIX}/results"
+
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
     with open(f"{results_dir}/results.txt", "w+") as file:
