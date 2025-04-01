@@ -13,6 +13,9 @@ endif
 ifeq ($(BENCHMARK), biojava)
 	sudo mvn compile -q
 endif
+ifeq ($(BENCHMARK), pmd)
+	sudo mvn compile -q
+endif
 
 measure:
 ifeq ($(BENCHMARK),fop)
@@ -30,6 +33,11 @@ ifeq ($(BENCHMARK), biojava)
 	sudo /home/rishi/E2COOL/RAPL/main "mvn surefire:test -Dtest=org.biojava.nbio.$(TEST_FOLDER).$(TEST_GROUP).$(TEST_CLASS)Test" java biojava_$(TEST_GROUP)_$(TEST_CLASS)
 	sudo chmod -R 777 /home/rishi/E2COOL/src/runtime_logs/java.csv
 endif
+ifeq ($(BENCHMARK), pmd)
+	sudo modprobe msr
+	sudo /home/rishi/E2COOL/RAPL/main "mvn surefire:test -Dtest=net.sourceforge.pmd.$(TEST_GROUP).$(TEST_CLASS)Test" java pmd_$(TEST_GROUP)_$(TEST_CLASS)
+	sudo chmod -R 777 /home/rishi/E2COOL/src/runtime_logs/java.csv
+endif
 
 test:
 ifeq ($(BENCHMARK),fop)
@@ -40,4 +48,7 @@ ifeq ($(BENCHMARK),spring)
 endif
 ifeq ($(BENCHMARK), biojava)
 	sudo mvn surefire:test -Dtest=org.biojava.nbio.$(TEST_FOLDER).$(TEST_GROUP).$(TEST_CLASS)Test
+endif
+ifeq ($(BENCHMARK), pmd)
+	sudo mvn surefire:test -Dtest=net.sourceforge.pmd.$(TEST_GROUP).$(TEST_CLASS)Test
 endif
