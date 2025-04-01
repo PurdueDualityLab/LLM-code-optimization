@@ -20,10 +20,12 @@ logger = Logger("logs", sys.argv[2]).logger
 class DaCapoBenchmark(Benchmark):
 
     def __init__(self, test_method, test_class, test_group, benchmark_name):
-        # ex. test_class = PDFNumsArray, test_group = pdf, benchmark_name = fop
+
+        # ex. test_method = PDFNumsArray, test_class = pdf, test_group = core, benchmark_name = fop
+
         self.method_name = test_method
-        self.test_name = test_class
-        self.class_name = test_group
+        self.class_name = test_class
+        self.group_name = test_group
         self.program = benchmark_name
         self.compilation_error = None
         self.energy_data = {}
@@ -36,11 +38,11 @@ class DaCapoBenchmark(Benchmark):
     def set_original_code(self):
 
         if self.program == 'fop':
-            source_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/{self.program}-2.8/{self.program}-core/src/main/java/org/apache/{self.program}/{self.class_name}/{self.test_name}.java"
+            source_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/{self.program}-2.8/{self.program}-{self.group_name}/src/main/java/org/apache/{self.program}/{self.class_name}/{self.method_name}.java"
         elif self.program == 'spring':
-            source_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/src/main/java/org/springframework/samples/petclinic/{self.class_name}/{self.test_name}.java"
+            source_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/src/main/java/org/springframework/samples/petclinic/{self.class_name}/{self.method_name}.java"
         elif self.program == 'biojava':
-            pass
+            source_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/biojava-{self.group_name}/src/main/java/org/biojava/nbio/{self.group_name}/{self.class_name}/{self.method_name}.java"
 
 
 
@@ -60,19 +62,19 @@ class DaCapoBenchmark(Benchmark):
         # compile
         # Needed for makefiles
         if self.program == 'fop':
-            os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/{self.program}-2.8/{self.program}-core/")
+            os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/{self.program}-2.8/{self.program}-{self.group_name}/")
         elif self.program == 'spring':
             os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/")
         elif self.program == 'biojava':
-            pass
+            os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/biojava-{self.group_name}/")
 
         try:
-            result = subprocess.run(["make", "compile", f"BENCHMARK={self.program}", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.test_name}"], check=True, capture_output=True, text=True)
+            result = subprocess.run(["make", "compile", f"BENCHMARK={self.program}", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.method_name}", f"TEST_FOLDER={self.group_name}"], check=True, capture_output=True, text=True)
             logger.info("Original code compile successfully.\n")
             self.compilation_error = result.stdout + result.stderr
         except subprocess.CalledProcessError as e:
-            logger.error(f"Original code compile failed: {e}\n")
             print(e.stderr + e.stdout)
+            logger.error(f"Original code compile failed: {e}\n")
             return False
         
         #run make measure using make file for same test class
@@ -99,26 +101,26 @@ class DaCapoBenchmark(Benchmark):
         #write optimized code to file
 
         if self.program == 'fop':
-            destination_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/{self.program}-2.8/{self.program}-core/src/main/java/org/apache/{self.program}/{self.class_name}/{self.test_name}.java"
+            destination_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/{self.program}-2.8/{self.program}-{self.group_name}/src/main/java/org/apache/{self.program}/{self.class_name}/{self.method_name}.java"
         elif self.program == 'spring':
-            destination_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/src/main/java/org/springframework/samples/petclinic/{self.class_name}/{self.test_name}.java"
+            destination_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/src/main/java/org/springframework/samples/petclinic/{self.class_name}/{self.method_name}.java"
         elif self.program == 'biojava':
-            pass
+            destination_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/biojava-{self.group_name}/src/main/java/org/biojava/nbio/{self.group_name}/{self.class_name}/{self.method_name}.java"
         
         with open(destination_path, "w") as file:
             file.write(optimized_code)
 
         #compile optimized code
         if self.program == 'fop':
-            os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8/fop-core")
+            os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8/fop-{self.group_name}")
         elif self.program == 'spring':
             os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/spring/build")
         elif self.program == 'biojava':
-            pass
+            os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/biojava/build/biojava-{self.group_name}") 
 
         try:
             result = subprocess.run(
-                ["make", "compile", f"BENCHMARK={self.program}", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.test_name}"],
+                ["make", "compile", f"BENCHMARK={self.program}", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.method_name}", f"TEST_FOLDER={self.group_name}"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
@@ -140,16 +142,16 @@ class DaCapoBenchmark(Benchmark):
     def run_tests(self):
 
         if self.program == 'fop':
-            os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8/fop-core")
+            os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8/fop-{self.group_name}")
         elif self.program == 'spring':
             os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/spring/build")
         elif self.program == 'biojava':
-            pass
+            os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/biojava/build/biojava-{self.group_name}")
 
         try:
             # Using subprocess.PIPE allows us to capture both stdout and stderr
             result = subprocess.run(
-                ["make", "test", f"BENCHMARK={self.program}", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.test_name}"],
+                ["make", "test", f"BENCHMARK={self.program}", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.method_name}", f"TEST_FOLDER={self.group_name}"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
@@ -202,14 +204,14 @@ class DaCapoBenchmark(Benchmark):
 
         #run make measure using make file
         if self.program == 'fop':
-            os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8/fop-core")
+            os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8/fop-{self.group_name}")
         elif self.program == 'spring':
             os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/spring/build")
         elif self.program == 'biojava':
-            pass
+            os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/biojava/build/biojava-{self.group_name}")
 
         try:
-            result = subprocess.run(["make", "measure", f"BENCHMARK={self.program}", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.test_name}"], check=True, capture_output=True, text=True, timeout=120)
+            result = subprocess.run(["make", "measure", f"BENCHMARK={self.program}", f"TEST_GROUP={self.class_name}", f"TEST_CLASS={self.method_name}", f"TEST_FOLDER={self.group_name}"], check=True, capture_output=True, text=True, timeout=120)
             logger.info("Original code compile successfully.\n")
             logger.info(result.stdout)
             return True
@@ -217,6 +219,7 @@ class DaCapoBenchmark(Benchmark):
             logger.error("Make measure timeout")
             return False
         except subprocess.CalledProcessError as e:
+            print(e.stderr + e.stdout)
             logger.error(f"Make measure failed: {e}\n")
             #to get the error message, might have to return the error message from here
             return False
@@ -265,11 +268,11 @@ class DaCapoBenchmark(Benchmark):
     def static_analysis(self, optimized_code):
 
         if self.program == 'fop':
-            destination_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/{self.program}-2.8/{self.program}-core/src/main/java/org/apache/{self.program}/{self.class_name}/{self.test_name}.java"
+            destination_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/{self.program}-2.8/{self.program}-{self.group_name}/src/main/java/org/apache/{self.program}/{self.class_name}/{self.method_name}.java"
         elif self.program == 'spring':
-            destination_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/src/main/java/org/springframework/samples/petclinic/{self.class_name}/{self.test_name}.java"
+            destination_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/src/main/java/org/springframework/samples/petclinic/{self.class_name}/{self.method_name}.java"
         elif self.program == 'biojava':
-            pass
+            destination_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{self.program}/build/biojava-{self.group_name}/src/main/java/org/biojava/nbio/{self.group_name}/{self.class_name}/{self.method_name}.java"
 
         def restore_original():
             with open(destination_path, "w") as file:
@@ -301,7 +304,7 @@ class DaCapoBenchmark(Benchmark):
         logger.info(f"key 0, avg_energy: {first_value[1]}, avg_runtime: {first_value[2]}, avg_cpu_cycles: {first_value[3]}, avg_memory: {first_value[4]}, throughput: {first_value[5]}, num_of_lines: {first_value[6]}")
         for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, avg_memory, throughput, num_of_lines) in list(contents.items())[1:]:
             logger.info(f"key: {key}, avg_energy_improvement: {avg_energy}, avg_speedup: {avg_runtime}, avg_cpu_improvement: {avg_cpu_cycles}, avg_memory_improvement: {avg_memory}, avg_throughput_improvement: {throughput}, num_of_lines: {num_of_lines}")
-
+            
 
        # Loop through the contents to find the key with the highest speedup
         max_avg_speedup = float('-inf')
@@ -381,7 +384,8 @@ def setup_makefile(application_name):
         folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{application_name}"
         subfolders = [f.path for f in os.scandir(folder_path) if f.is_dir() and f.name == 'build']
     elif application_name == 'biojava':
-        pass
+        folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{application_name}/build"
+        subfolders = [f.path for f in os.scandir(folder_path) if f.is_dir() and f.name.startswith('biojava-')]
 
     for subfolder in subfolders:
         print(subfolder)
@@ -398,15 +402,20 @@ def setup_makefile(application_name):
 def main():
 
 
-    # ff = DaCapoBenchmark('PDFNumsArray', 'pdf', 'fop')
-    #ff.set_original_energy()
+    # ff = DaCapoBenchmark('PDFNumsArray', 'pdf', 'core', 'fop')
+    # ff.set_original_energy()
     # status = ff.static_analysis(ff.original_code)
     # print(f"Status: {status}")
-    ff = DaCapoBenchmark('OwnerController', 'OwnerController', 'owner', 'spring')
-    ff.set_original_energy()
+    # ff = DaCapoBenchmark('OwnerController', 'owner', 'none', 'spring')
+    # ff.set_original_energy()
 
-    setup_makefile('spring')
-    ff.static_analysis(ff.original_code)
+    # setup_makefile('spring')
+    # ff.static_analysis(ff.original_code)
+
+    ff = DaCapoBenchmark('ChromosomeSequence', 'sequence', 'core', 'biojava')
+    setup_makefile('biojava')
+    ff.set_original_energy()
+    status = ff.static_analysis(ff.original_code)
 
 
 if __name__ == '__main__':
