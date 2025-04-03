@@ -26,6 +26,11 @@ def get_hotspots(application_name, top_K):
     return hotspots
 
 def extract_hotspots(filter_term, top_K):
+    ignore = [
+            "org/apache/fop/fo/FOTreeBuilder$3.run",
+            "org/apache/fop/cli/Main.startFOP",
+        ]
+
     try:
         with open("profile.txt", 'r') as file:
             data = file.readlines()
@@ -36,6 +41,8 @@ def extract_hotspots(filter_term, top_K):
             if line:
                 methods_in_line = line.split(';')
                 for method in methods_in_line:
+                    if method in ignore:
+                        continue
                     if filter_term in method:
                         methods[method] += 1
         
