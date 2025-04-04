@@ -2,6 +2,7 @@ BENCHMARK ?= fop
 TEST_GROUP ?= pdf
 TEST_CLASS ?= PDFNumsArray
 TEST_FOLDER ?= core
+TEST ?= org.biojava.nbio.core.sequence.JoiningSequenceReaderTest
 
 compile:
 ifeq ($(BENCHMARK),fop)
@@ -30,11 +31,7 @@ ifeq ($(BENCHMARK),spring)
 endif
 ifeq ($(BENCHMARK), biojava)
 	sudo modprobe msr
-ifneq ($(TEST_GROUP),)
-	sudo ${USER_PREFIX}/RAPL/main "sudo mvn surefire:test -Dtest=org.biojava.nbio.$(TEST_FOLDER).$(TEST_GROUP).$(TEST_CLASS)Test" java biojava_$(TEST_GROUP)_$(TEST_CLASS)
-else
-	sudo ${USER_PREFIX}/RAPL/main "sudo mvn surefire:test -Dtest=org.biojava.nbio.$(TEST_FOLDER).$(TEST_CLASS)Test" java biojava_$(TEST_CLASS)
-endif
+	sudo ${USER_PREFIX}/RAPL/main "sudo mvn surefire:test -Dtest=$(TEST)" java biojava_$(TEST)
 	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
 endif
 ifeq ($(BENCHMARK), pmd)
@@ -45,18 +42,14 @@ endif
 
 test:
 ifeq ($(BENCHMARK),fop)
-	sudo mvn surefire:test -Dtest=org.apache.fop.$(TEST_GROUP).$(TEST_CLASS)TestCase
+	sudo mvn test -Dtest=org.apache.fop.$(TEST_GROUP).$(TEST_CLASS)TestCase
 endif
 ifeq ($(BENCHMARK),spring)
-	sudo mvn surefire:test -Dtest=org.springframework.samples.petclinic.$(TEST_GROUP).$(TEST_CLASS)Tests
+	sudo mvn test -Dtest=org.springframework.samples.petclinic.$(TEST_GROUP).$(TEST_CLASS)Tests
 endif
 ifeq ($(BENCHMARK), biojava)
-ifeq ($(TEST_GROUP),)
-	sudo mvn surefire:test -Dtest=org.biojava.nbio.$(TEST_FOLDER).$(TEST_GROUP).$(TEST_CLASS)Test
-else
-	sudo mvn surefire:test -Dtest=org.biojava.nbio.$(TEST_FOLDER).$(TEST_CLASS)Test
-endif
+	sudo mvn test -Dtest=$(TEST)
 endif
 ifeq ($(BENCHMARK), pmd)
-	sudo mvn surefire:test -Dtest=net.sourceforge.pmd.$(TEST_GROUP).$(TEST_CLASS)Test
+	sudo mvn test -Dtest=net.sourceforge.pmd.$(TEST_GROUP).$(TEST_CLASS)Test
 endif

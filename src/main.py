@@ -90,7 +90,8 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
             test_class = program[1]
             test_namespace = program[2]
             test_group = program[3]
-            benchmark_obj = DaCapoBenchmark(test_method, test_class, test_namespace, test_group, application_name)
+            unit_tests = program[4]
+            benchmark_obj = DaCapoBenchmark(test_method, test_class, test_namespace, test_group, unit_tests, application_name)
         else:
             logger.error("Invalid benchmark")
             break
@@ -112,15 +113,17 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
 
         results_dir = f"{USER_PREFIX}/results/{benchmark}"
         
+        folder_name = program[1] if isinstance(program, tuple) else program
+       
         while True:
             if total_output_difference == 3 or total_compilation_failure == 2:
                 logger.error("Unable to produce functional equivalent programs.")
                 if num_success_iteration == 0:
-                    results[program] = "Unable to produce functional equivalent programs."
+                    results[folder_name] = "Unable to produce functional equivalent programs."
                 else:
                     logger.info(f"{num_success_iteration} optimization completes, writing results to file.....")
                     energy_data = benchmark_obj.get_energy_data()
-                    results[program] = write_result(energy_data, program, evaluator_feedback_data, results_dir)
+                    results[folder_name] = write_result(energy_data, folder_name, evaluator_feedback_data, results_dir)
                 break
             # optimize code
             if reoptimize_lastly_flag == 0:
@@ -177,7 +180,7 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                 if num_success_iteration == self_optimization_step:
                     logger.info("Optimization Complete, writing results to file.....")
                     energy_data = benchmark_obj.get_energy_data()
-                    results[program] = write_result(energy_data, program, evaluator_feedback_data, results_dir)
+                    results[folder_name] = write_result(energy_data, folder_name, evaluator_feedback_data, results_dir)
                     break
 
                 # getting feedback from the evaluator

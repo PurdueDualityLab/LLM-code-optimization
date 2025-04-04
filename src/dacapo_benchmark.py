@@ -8,7 +8,7 @@ from status import Status
 from utils import Logger
 import csv
 import re
-from dacapo_profiling import get_hotspots
+from dacapo_profiling import get_hotspots, find_unit_test
 from collections import defaultdict
 
 load_dotenv()
@@ -27,18 +27,17 @@ biojava_root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/biojava/build
 pmd_root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/pmd/build"
 
 class DaCapoBenchmark(Benchmark):
-
-    def __init__(self, test_method, test_class, test_namespace, test_group, benchmark_name):
+    def __init__(self, test_method, test_class, test_namespace, test_group, unit_tests, benchmark_name):
         # ex. test_class = PDFNumsArray, test_namespace = pdf, test_group = core, benchmark_name = fop
         self.method_name = test_method
         self.class_name = test_class
         self.namespace_name = test_namespace
         self.group_name = test_group
+        self.unit_tests = unit_tests
         self.program = benchmark_name
         self.compilation_error = None
         self.energy_data = {}
         self.evaluator_feedback_data = {}
-        self.expect_test_output = None
         self.original_code = None
         self.optimization_iteration = 0
         self.set_original_code()
@@ -84,7 +83,7 @@ class DaCapoBenchmark(Benchmark):
             os.chdir(f"{pmd_root_dir}/pmd-{self.group_name}/")
 
         try:
-            result = subprocess.run(["make", "compile", f"BENCHMARK={self.program}", f"TEST_GROUP={self.namespace_name}", f"TEST_CLASS={self.class_name}", f"TEST_FOLDER={self.group_name}"], check=True, capture_output=True, text=True)
+            result = subprocess.run(["make", "compile", f"BENCHMARK={self.program}"], check=True, capture_output=True, text=True)
             logger.info("Original code compile successfully.\n")
             self.compilation_error = result.stdout + result.stderr
         except subprocess.CalledProcessError as e:
@@ -143,7 +142,7 @@ class DaCapoBenchmark(Benchmark):
 
         try:
             result = subprocess.run(
-                ["make", "compile", f"BENCHMARK={self.program}", f"TEST_GROUP={self.namespace_name}", f"TEST_CLASS={self.class_name}", f"TEST_FOLDER={self.group_name}"],
+                ["make", "compile", f"BENCHMARK={self.program}"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
@@ -174,33 +173,30 @@ class DaCapoBenchmark(Benchmark):
         elif self.program == 'pmd':
             os.chdir(f"{pmd_root_dir}/pmd-{self.group_name}")
 
-        try:
-            # Using subprocess.PIPE allows us to capture both stdout and stderr
-            result = subprocess.run(
-                ["make", "test", f"BENCHMARK={self.program}", f"TEST_GROUP={self.namespace_name}", f"TEST_CLASS={self.class_name}", f"TEST_FOLDER={self.group_name}"],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                encoding='latin-1'
-            )
-            
-            # Check if the command failed (non-zero return code)
-            if result.returncode != 0:
-                print(f"Test failed with error:\nstdout: {result.stdout}\nstderr: {result.stderr}")
+        for test in self.unit_tests:
+            try:
+                # Using subprocess.PIPE allows us to capture both stdout and stderr
+                result = subprocess.run(
+                    ["make", "test", f"BENCHMARK={self.program}", f"TEST={test}"],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    encoding='latin-1'
+                )
+                
+                # Check if the command failed (non-zero return code)
+                if result.returncode != 0:
+                    print(f"Test {test} failed with error:\nstdout: {result.stdout}\nstderr: {result.stderr}")
+                    return False
+                
+                print(f"Test {test} output:\n{result.stdout}")
+                
+            except subprocess.CalledProcessError as e:
+                print(f"Test {test} execution failed: {e}\nstdout: {e.stdout}\nstderr: {e.stderr}")
                 return False
-            
-            print(f"Test output:\n{result.stdout}")
-
-            #check if all tests pass
-            #is this the right way to check if all tests pass?
-            if "BUILD FAILURE" in result.stdout:
-                return False
-            else:
-                return True
-            
-        except subprocess.CalledProcessError as e:
-            print(f"Test execution failed: {e}\nstdout: {e.stdout}\nstderr: {e.stderr}")
-            return False
+        
+        # If all tests pass, return True
+        return True
         
     def measure_energy(self, optimized_code):
          #load the optimized code and data
@@ -208,6 +204,10 @@ class DaCapoBenchmark(Benchmark):
         self._run_rapl()
 
         avg_energy, avg_latency, avg_cpu_cycles, avg_memory, throughput = self._compute_avg()
+        if avg_energy == 0 or avg_latency == 0 or avg_cpu_cycles == 0 or avg_memory == 0 or throughput == 0:
+            logger.error(f"RAPL returns 0")
+            return False
+
         original_data = self.energy_data[0]
         energy_change = original_data[1] / avg_energy
         speedup = original_data[2] / avg_latency
@@ -240,8 +240,8 @@ class DaCapoBenchmark(Benchmark):
             os.chdir(f"{pmd_root_dir}/pmd-{self.group_name}")
 
         try:
-            result = subprocess.run(["make", "measure", f"BENCHMARK={self.program}", f"TEST_GROUP={self.namespace_name}", f"TEST_CLASS={self.class_name}", f"TEST_FOLDER={self.group_name}"], check=True, capture_output=True, text=True, timeout=120)
-            logger.info("Original code compile successfully.\n")
+            result = subprocess.run(["make", "measure", f"BENCHMARK={self.program}", f"TEST={self.unit_tests[0]}"], check=True, capture_output=True, text=True, timeout=120)
+            logger.info("Make measure successfully.\n")
             logger.info(result.stdout)
             return True
         except subprocess.TimeoutExpired:
@@ -312,7 +312,6 @@ class DaCapoBenchmark(Benchmark):
         logger.info(f"key 0, avg_energy: {first_value[1]}, avg_runtime: {first_value[2]}, avg_cpu_cycles: {first_value[3]}, avg_memory: {first_value[4]}, throughput: {first_value[5]}, num_of_lines: {first_value[6]}")
         for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, avg_memory, throughput, num_of_lines) in list(contents.items())[1:]:
             logger.info(f"key: {key}, avg_energy_improvement: {avg_energy}, avg_speedup: {avg_runtime}, avg_cpu_improvement: {avg_cpu_cycles}, avg_memory_improvement: {avg_memory}, avg_throughput_improvement: {throughput}, num_of_lines: {num_of_lines}")
-            
 
        # Loop through the contents to find the key with the highest speedup
         max_avg_speedup = float('-inf')
@@ -358,22 +357,32 @@ class DaCapoBenchmark(Benchmark):
         return benchmark_info
 
 def get_valid_dacapo_classes(application_name):
-    hotspots = get_hotspots(application_name, top_K=5)
-    methods_name = list(hotspots.keys())
+    hotspots = get_hotspots(application_name, top_K=32)
+    methods_name = [method for method, count in hotspots]
 
-    transformed_data = defaultdict(list)
+    transformed_data = []
     
     for method in methods_name:
+        print(f"method: {method}")
         parts = method.split('/')
         test_class, test_method = parts[-1].split('.')  # Split the last part into class and method
         
         test_namespace = '/'.join(parts[4:-1])
         test_group = parts[3]
 
-        transformed_data[application_name].append((test_method, test_class, test_namespace, test_group))
-    
-    benchmark_classes = dict(transformed_data)
+        folder_name = "aa-prop" if test_group == "aaproperties" else test_group
+        # hard-code for biojava for now
+        root_path = f"{biojava_root_dir}/biojava-{folder_name}/src/test/java/org/biojava/nbio/{test_group}"
 
+        unit_test_class_name = f"{test_class}Test"
+        unit_tests = find_unit_test(root_path, unit_test_class_name, test_class)
+
+        if len(unit_tests) == 0:
+            logger.error(f"{test_class} has no unit tests!")
+            continue
+
+        transformed_data.append((test_method, test_class, test_namespace, test_group, unit_tests))
+    
     # benchmark_classes = {'fop': [('pdf','PDFNumsArray'), ('pdf','PDFRoot'), ('pdf','PDFFactory'), ('pdf','PDFDocument'), ('pdf','PDFPage'), ('pdf','PDFPageSequence'), ('pdf','PDFPageSequence.PagePosition'), ('pdf','PDFPageSequence.PagePosition.PagePositionComparator'), ('pdf','PDFPageSequence.PagePosition.PagePositionComparator.PagePositionComparator'), ('pdf','PDFPageSequence.PagePosition.PagePositionComparator.PagePositionComparator.PagePositionComparator')]
     #                     #spring:[],
     # spring':[('owner','OwnerController')]
@@ -381,10 +390,10 @@ def get_valid_dacapo_classes(application_name):
     #                     #biojava:[],
     #                     }
 
-    print(benchmark_classes[application_name])
+    print(transformed_data)
 
     setup_makefile(application_name)
-    return benchmark_classes[application_name]
+    return transformed_data
 
 def setup_makefile(application_name):
 
