@@ -4,12 +4,10 @@ import subprocess
 import sys
 from dotenv import load_dotenv
 from abstract_syntax_trees.java_ast import JavaAST
-from status import Status
 from utils import Logger
 import csv
 import re
 from dacapo_profiling import get_hotspots, find_unit_test
-from collections import defaultdict
 
 load_dotenv()
 USER_PREFIX = os.path.expanduser(os.getenv('USER_PREFIX'))
@@ -59,11 +57,32 @@ class DaCapoBenchmark(Benchmark):
 
         #the above path still is not general enough for all bms, apache only works for fop and 2.8 is only for fop
 
-        with open(source_path, 'r') as file:
-            code = file.read() 
-        filtered_code = re.sub(r'\s*//.*?$|/\*[\s\S]*?\*/\s*', '', code, flags=re.MULTILINE)
+        try:
+            with open(source_path, 'r') as file:
+                code = file.read()
+        except FileNotFoundError:
+            logger.error(f"File not found: {source_path}")
+            return
+        
+        filtered_code = self.remove_java_comments(code)
         self.original_code = filtered_code
         
+    def remove_java_comments(self, code):
+        pattern = r'''
+            ("(?:\\.|[^"\\])*")       |  # Group 1: Match double-quoted strings
+            ('(?:\\.|[^'\\])*')       |  # Group 2: Match single-quoted strings
+            (//.*?$)                  |  # Group 3: Match single-line comments
+            (/\*[\s\S]*?\*/)             # Group 4: Match multi-line comments
+        '''
+        def replacer(match):
+            # Keep string literals untouched
+            if match.group(1) or match.group(2):
+                return match.group(0)
+            else:
+                return ''  # Remove comments
+
+        return re.sub(pattern, replacer, code, flags=re.MULTILINE | re.VERBOSE)
+    
     def get_original_code(self):
         return self.original_code
     
@@ -73,7 +92,7 @@ class DaCapoBenchmark(Benchmark):
         # compile
         # Needed for makefiles
         if self.program == 'fop':
-            os.chdir(f"{fop_src_dir}/")
+            os.chdir(f"{fop_root_dir}/")
         elif self.program == 'spring':
             os.chdir(f"{spring_root_dir}/")
         elif self.program == 'biojava':
@@ -107,7 +126,7 @@ class DaCapoBenchmark(Benchmark):
     def post_process(self, code):
         code = code.replace("```java", "")
         code = code.replace("```", "")
-        filtered_code = re.sub(r'\s*//.*?$|/\*[\s\S]*?\*/\s*', '', code, flags=re.MULTILINE)
+        filtered_code = self.remove_java_comments(code)
         return filtered_code
 
     def compile(self, optimized_code):
@@ -357,7 +376,7 @@ class DaCapoBenchmark(Benchmark):
         return benchmark_info
 
 def get_valid_dacapo_classes(application_name):
-    hotspots = get_hotspots(application_name, top_K=32)
+    hotspots = get_hotspots(application_name, top_K=50)
     methods_name = [method for method, count in hotspots]
 
     transformed_data = []
@@ -366,15 +385,19 @@ def get_valid_dacapo_classes(application_name):
         print(f"method: {method}")
         parts = method.split('/')
         test_class, test_method = parts[-1].split('.')  # Split the last part into class and method
-        
-        test_namespace = '/'.join(parts[4:-1])
-        test_group = parts[3]
 
-        folder_name = "aa-prop" if test_group == "aaproperties" else test_group
-        # hard-code for biojava for now
-        root_path = f"{biojava_root_dir}/biojava-{folder_name}/src/test/java/org/biojava/nbio/{test_group}"
+        if application_name == "biojava":
+            test_namespace = '/'.join(parts[4:-1])
+            test_group = parts[3]
+            folder_name = "aa-prop" if test_group == "aaproperties" else test_group
+            root_path = f"{biojava_root_dir}/biojava-{folder_name}/src/test/java/org/biojava/nbio/{test_group}"
+            unit_test_class_name = f"{test_class}Test"
+        elif application_name == "fop":
+            test_namespace = '/'.join(parts[3:-1])
+            test_group = "test_group"
+            root_path = f"{fop_root_dir}/src/test/java/org/apache/fop"
+            unit_test_class_name = f"{test_class}TestCase"
 
-        unit_test_class_name = f"{test_class}Test"
         unit_tests = find_unit_test(root_path, unit_test_class_name, test_class)
 
         if len(unit_tests) == 0:

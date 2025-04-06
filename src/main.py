@@ -95,10 +95,17 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         else:
             logger.error("Invalid benchmark")
             break
+
+        folder_name = program[1] if isinstance(program, tuple) else program
+
+        if benchmark_obj.get_original_code() is None:
+            results[folder_name] = "Unable to find original code"
+            continue
+
         original_code_compiles = benchmark_obj.set_original_energy()
         if not original_code_compiles:
             logger.error(f"Unable to compile original code for {program}")
-            results[program] = "Unable to compile original code or timeout"
+            results[folder_name] = "Unable to compile original code or timeout"
             continue
         
         compilation_errors = 0
@@ -112,8 +119,6 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         total_compilation_failure = 0
 
         results_dir = f"{USER_PREFIX}/results/{benchmark}"
-        
-        folder_name = program[1] if isinstance(program, tuple) else program
        
         while True:
             if total_output_difference == 3 or total_compilation_failure == 2:

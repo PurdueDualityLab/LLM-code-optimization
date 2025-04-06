@@ -56,38 +56,46 @@ def aggregate_by_rightmost_method(marker, top_n):
 
         truncated_frames = frames[first_idx:last_idx+1]
 
-        # Strip trailing frames with '$', but keep lambda frames
-        # (i.e. frames containing ".lambda$")
-        while truncated_frames:
-            last_frame = truncated_frames[-1]
-            if '$' in last_frame and '.lambda$' not in last_frame:
-                truncated_frames.pop()  # This is likely a synthetic frame we'd remove
-            else:
-                break
-
         if not truncated_frames:
             return None
 
         return truncated_frames
 
-    def rewrite_lambda_frame(method_name):
-        """
-        If method_name is something like:
-          org/biojava/nbio/aaproperties/Utils.lambda$getNumberOfInvalidChar$0
-        transform it into:
-          org/biojava/nbio/aaproperties/Utils.getNumberOfInvalidChar
 
-        Otherwise return it unchanged.
+    def rewrite_method_name(method_name):
         """
-        # Regex captures:
-        #   group(1) = everything before '.lambda$'
-        #   group(2) = the method name after 'lambda$' (e.g. getNumberOfInvalidChar)
-        pattern = re.compile(r'^(.*)\.lambda\$([A-Za-z0-9_]+)\$\d+$')
-        m = pattern.match(method_name)
+        Rewrite the method name to a more concise form.
+
+        Two cases are handled:
+        
+        1. Lambda methods:
+            For example, if method_name is:
+            org/biojava/nbio/aaproperties/Utils.lambda$getNumberOfInvalidChar$0
+            it is transformed into:
+            org/biojava/nbio/aaproperties/Utils.getNumberOfInvalidChar
+
+        2. Inner class methods:
+            For example, if method_name is:
+            org/apache/fop/image/loader/batik/PreloaderWMF$Loader.getImage
+            it is transformed into:
+            org/apache/fop/image/loader/batik/PreloaderWMF.getImage
+
+        Otherwise, the method_name is returned unchanged.
+        """
+        # Handle lambda method names
+        lambda_pattern = re.compile(r'^(.*)\.lambda\$([A-Za-z0-9_]+)\$\d+$')
+        m = lambda_pattern.match(method_name)
         if m:
-            prefix = m.group(1)    # e.g. org/biojava/nbio/aaproperties/Utils
-            real_method = m.group(2)  # e.g. getNumberOfInvalidChar
+            prefix = m.group(1)
+            real_method = m.group(2)
             return f"{prefix}.{real_method}"
+        
+        # Handle inner class method names by removing the inner class part
+        if '$' in method_name:
+            # This regex removes any inner class section (e.g. "$Loader")
+            # that appears before the method call.
+            method_name = re.sub(r'\$[^.]+(?=\.)', '', method_name)
+        
         return method_name
 
     sums = {}
@@ -117,7 +125,7 @@ def aggregate_by_rightmost_method(marker, top_n):
             rightmost_method = truncated_frames[-1]
 
             # If it's a lambda frame, rewrite
-            rightmost_method = rewrite_lambda_frame(rightmost_method)
+            rightmost_method = rewrite_method_name(rightmost_method)
 
             sums[rightmost_method] = sums.get(rightmost_method, 0) + count
 
@@ -131,17 +139,8 @@ def aggregate_by_rightmost_method(marker, top_n):
 
 def main():
     # Example usage
-    import sys
-    if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} <profile_file> [top_n]")
-        sys.exit(1)
-
-    profile_file = sys.argv[1]
-    top_n = 20
-    if len(sys.argv) > 2:
-        top_n = int(sys.argv[2])
-
-    results = aggregate_by_rightmost_method(marker="biojava", top_n=32)
+    results = get_hotspots("fop", 50)
+    print(f"results length: {len(results)}")
     for method, total in results:
         print(f"{method} {total}")
 
@@ -159,7 +158,6 @@ def extract_package(file_path):
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
     return None
-
 
 def contains_uncommented_test(file_path):
     """
