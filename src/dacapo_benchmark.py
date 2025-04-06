@@ -22,7 +22,8 @@ spring_src_dir = f"{spring_root_dir}/src/main/java/org/springframework/samples/p
 
 biojava_root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/biojava/build"
 
-pmd_root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/pmd/build"
+pmd_root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/pmd/build/pmd-core"
+pmd_src_dir = f"{pmd_root_dir}/src/main/java/net/sourceforge/pmd"
 
 class DaCapoBenchmark(Benchmark):
     def __init__(self, test_method, test_class, test_namespace, test_group, unit_tests, benchmark_name):
@@ -43,7 +44,10 @@ class DaCapoBenchmark(Benchmark):
     def set_original_code(self):
 
         if self.program == 'fop':
-            source_path = f"{fop_src_dir}/{self.namespace_name}/{self.class_name}.java"
+            if self.namespace_name and self.namespace_name != "":
+                source_path = f"{fop_src_dir}/{self.class_name}.java"
+            else:
+                source_path = f"{fop_src_dir}/{self.namespace_name}/{self.class_name}.java"
         elif self.program == 'spring':
             source_path = f"{spring_src_dir}/{self.namespace_name}/{self.class_name}.java"
         elif self.program == 'biojava':
@@ -53,7 +57,10 @@ class DaCapoBenchmark(Benchmark):
             else:
                 source_path = f"{biojava_root_dir}/biojava-{folder_name}/src/main/java/org/biojava/nbio/{self.group_name}/{self.class_name}.java"
         elif self.program == 'pmd':
-            source_path = f"{pmd_root_dir}/pmd-{self.group_name}/src/main/java/net/sourceforge/pmd/{self.namespace_name}/{self.class_name}.java"
+            if self.namespace_name and self.namespace_name != "":
+                source_path = f"{pmd_src_dir}/{self.namespace_name}/{self.class_name}.java"
+            else:
+                source_path = f"{pmd_src_dir}/{self.class_name}.java"
 
         #the above path still is not general enough for all bms, apache only works for fop and 2.8 is only for fop
 
@@ -99,7 +106,7 @@ class DaCapoBenchmark(Benchmark):
             folder_name = "aa-prop" if self.group_name == "aaproperties" else self.group_name
             os.chdir(f"{biojava_root_dir}/biojava-{folder_name}/")
         elif self.program == 'pmd':
-            os.chdir(f"{pmd_root_dir}/pmd-{self.group_name}/")
+            os.chdir(f"{pmd_root_dir}/")
 
         try:
             result = subprocess.run(["make", "compile", f"BENCHMARK={self.program}"], check=True, capture_output=True, text=True)
@@ -131,19 +138,24 @@ class DaCapoBenchmark(Benchmark):
 
     def compile(self, optimized_code):
         #write optimized code to file
-
         if self.program == 'fop':
-            destination_path = f"{fop_src_dir}/{self.namespace_name}/{self.class_name}.java"
+            if self.namespace_name and self.namespace_name != "":
+                destination_path = f"{fop_src_dir}/{self.namespace_name}/{self.class_name}.java"
+            else:
+                destination_path = f"{fop_src_dir}/{self.class_name}.java"
         elif self.program == 'spring':
             destination_path = f"{spring_src_dir}/{self.namespace_name}/{self.class_name}.java"
         elif self.program == 'biojava':
             folder_name = "aa-prop" if self.group_name == "aaproperties" else self.group_name
-            if self.namespace_name:
+            if self.namespace_name and self.namespace_name != "":
                 destination_path = f"{biojava_root_dir}/biojava-{folder_name}/src/main/java/org/biojava/nbio/{self.group_name}/{self.namespace_name}/{self.class_name}.java"
             else:
                 destination_path = f"{biojava_root_dir}/biojava-{folder_name}/src/main/java/org/biojava/nbio/{self.group_name}/{self.class_name}.java"
         elif self.program == 'pmd':
-            destination_path = f"{pmd_root_dir}/pmd-{self.group_name}/src/main/java/net/sourceforge/pmd/{self.namespace_name}/{self.class_name}.java"
+            if self.namespace_name and self.namespace_name != "":
+                destination_path = f"{pmd_src_dir}/{self.namespace_name}/{self.class_name}.java"
+            else:
+                destination_path = f"{pmd_src_dir}/{self.class_name}.java"
         
         with open(destination_path, "w") as file:
             file.write(optimized_code)
@@ -157,7 +169,7 @@ class DaCapoBenchmark(Benchmark):
             folder_name = "aa-prop" if self.group_name == "aaproperties" else self.group_name
             os.chdir(f"{biojava_root_dir}/biojava-{folder_name}")
         elif self.program == 'pmd':
-            os.chdir(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/pmd/build/pmd-{self.group_name}")
+            os.chdir(f"{fop_root_dir}")
 
         try:
             result = subprocess.run(
@@ -190,7 +202,7 @@ class DaCapoBenchmark(Benchmark):
             folder_name = "aa-prop" if self.group_name == "aaproperties" else self.group_name
             os.chdir(f"{biojava_root_dir}/biojava-{folder_name}")
         elif self.program == 'pmd':
-            os.chdir(f"{pmd_root_dir}/pmd-{self.group_name}")
+            os.chdir(f"{pmd_root_dir}")
 
         for test in self.unit_tests:
             try:
@@ -256,7 +268,7 @@ class DaCapoBenchmark(Benchmark):
             folder_name = "aa-prop" if self.group_name == "aaproperties" else self.group_name
             os.chdir(f"{biojava_root_dir}/biojava-{folder_name}")
         elif self.program == 'pmd':
-            os.chdir(f"{pmd_root_dir}/pmd-{self.group_name}")
+            os.chdir(f"{pmd_root_dir}")
 
         try:
             result = subprocess.run(["make", "measure", f"BENCHMARK={self.program}", f"TEST={self.unit_tests[0]}"], check=True, capture_output=True, text=True, timeout=120)
@@ -397,6 +409,11 @@ def get_valid_dacapo_classes(application_name):
             test_group = "test_group"
             root_path = f"{fop_root_dir}/src/test/java/org/apache/fop"
             unit_test_class_name = f"{test_class}TestCase"
+        elif application_name == "pmd":
+            test_namespace = '/'.join(parts[3:-1])
+            test_group = "test_group"
+            root_path = f"{pmd_root_dir}/src/test/java/net/sourceforge/pmd"
+            unit_test_class_name = f"{test_class}Test"
 
         unit_tests = find_unit_test(root_path, unit_test_class_name, test_class)
 

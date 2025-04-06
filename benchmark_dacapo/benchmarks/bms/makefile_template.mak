@@ -40,7 +40,7 @@ endif
 ifeq ($(BENCHMARK), pmd)
 	sudo mvn test -Dtest=$(TEST)
 	sudo modprobe msr
-	sudo ${USER_PREFIX}/RAPL/main "sudo mvn surefire:test -Dtest=net.sourceforge.pmd.$(TEST_GROUP).$(TEST_CLASS)Test" java pmd_$(TEST_GROUP)_$(TEST_CLASS)
+	sudo ${USER_PREFIX}/RAPL/main "sudo mvn surefire:test -Dtest=$(TEST)" java pmd_$(TEST)
 	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
 endif
 
@@ -55,5 +55,5 @@ ifeq ($(BENCHMARK), biojava)
 	sudo mvn test -Dtest=$(TEST)
 endif
 ifeq ($(BENCHMARK), pmd)
-	sudo mvn test -Dtest=net.sourceforge.pmd.$(TEST_GROUP).$(TEST_CLASS)Test
+	sudo mvn test -Dtest=$(TEST)
 endif
