@@ -194,6 +194,30 @@ class PIEBenchmark(Benchmark):
         # Find the required benchmark elements
         self.evaluator_feedback_data = self._extract_content(self.energy_data)
 
+    def generate_flame_report(self, optimized):
+        # Needed for makefiles
+        os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}")
+
+        #Generate flame report using test case #0
+        problem_id = self.program.split('_')[0]
+        test_case_folder = f"{USER_PREFIX}/benchmark_pie/{problem_id}/test_cases"
+        input_files = sorted(glob.glob(f"{test_case_folder}/input.*.txt"))        
+        input_file = input_files[0]
+
+        if optimized:
+            logger.info(f"Generating flame report for optimized program with input file: {input_file}")
+            result = subprocess.run(["make", "generate_flame_report_optimized"], stdin=open(input_file, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
+            flame_report_file = open(f"{USER_PREFIX}/benchmark_pie/{problem_id}/flame_report_optimized.txt", 'r')
+        else:
+            logger.info(f"Generating flame report for original program with input file: {input_file}")
+            result = subprocess.run(["make", "generate_flame_report"], stdin=open(input_file, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
+            flame_report_file = open(f"{USER_PREFIX}/benchmark_pie/{problem_id}/flame_report.txt", 'r')
+        
+        flame_report = flame_report_file.read()
+        self.evaluator_feedback_data["flame_report"] = flame_report
+        flame_report_file.close()
+        
+
     def get_energy_data(self):
         return super().get_energy_data()
     
@@ -202,6 +226,9 @@ class PIEBenchmark(Benchmark):
     
     def static_analysis(self, optimized_code):
         return super().static_analysis(optimized_code)
+
+    def dynamic_analysis(self, optimized):
+        return super().dynamic_analysis(optimized)
 
     def _run_program(self, optimized, input_file):
         # Run the make command and capture the output in a variable
@@ -419,7 +446,7 @@ def setup_benchmarks(valid_programs, source_code):
         
         #Copy the test case folder from all_test_cases/ into the program's folder
         problem_id = program.split('_')[0]
-        test_case_folder_src = f"{USER_PREFIX}/benchmark_pie/merged_test_cases/{problem_id}"
+        test_case_folder_src = f"{USER_PREFIX}/benchmark_pie/all_test_cases/{problem_id}"
         test_case_folder_dest = f"{folder_path}/test_cases"
         if not os.path.exists(test_case_folder_dest):
             shutil.copytree(test_case_folder_src, test_case_folder_dest)

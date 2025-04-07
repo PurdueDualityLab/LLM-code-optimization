@@ -26,6 +26,8 @@ def evaluator_llm(evaluator_feedback_data, llm_assistant):
     current_source_code = evaluator_feedback_data["current"]["source_code"]  
     current_avg_runtime = evaluator_feedback_data["current"]["avg_speedup"]
 
+    flame_report = evaluator_feedback_data["flame_report"]
+
     prompt = evaluator_prompt + f"""
     Here is the original code snippet:
     ```
@@ -45,7 +47,10 @@ def evaluator_llm(evaluator_feedback_data, llm_assistant):
     ```
     Average speedup: {current_avg_runtime}
 
-    Please respond in natural language (English) with actionable suggestions for improving the current code's performance. Provide only the best code with the lowest runtime.
+    Here is a textual representation of the flame graph for the current source code:
+    {flame_report}
+
+    Please respond in natural language (English) with actionable suggestions for improving the current code's performance in terms of energy usage. Provide only the best code with the lowest energy usage.
     """
 
     llm_assistant.add_to_memory("user", prompt)

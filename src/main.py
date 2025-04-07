@@ -138,14 +138,22 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                     last_optimized_code = handle_compilation_error(error_message=compilation_error_message, llm_assistant=generator)
                 else:
                     ast = benchmark_obj.pre_process(last_optimized_code)
-                    last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast)
+                    if num_success_iteration == 0:
+                        flame_report = benchmark_obj.dynamic_analysis(optimized=False)
+                        last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report)
+                    else:
+                        last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast)
             else:
                 logger.info("re-optimizing from latest working optimization")
                 generator.clear_memory()
                 evaluator.clear_memory()
                 evaluator_feedback = ""
                 ast = benchmark_obj.pre_process(last_working_optimized_code)
-                last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast)
+                if num_success_iteration == 0:
+                    flame_report = benchmark_obj.dynamic_analysis(optimized=False)    
+                    last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report)
+                else:
+                    last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast)
                 reoptimize_lastly_flag = 0
             
             # code post_process
@@ -179,6 +187,9 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                 last_working_optimized_code = last_optimized_code
                 total_output_difference = 0
                 total_compilation_failure = 0
+
+                # Perform dynamic analysis using flame graph
+                benchmark_obj.dynamic_analysis(optimized=True)
 
                 evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
                 
