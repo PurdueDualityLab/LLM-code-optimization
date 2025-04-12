@@ -139,7 +139,7 @@ def aggregate_by_rightmost_method(marker, top_n):
 
 def main():
     # Example usage
-    results = get_hotspots("pmd", 50)
+    results = get_hotspots("spring", 50)
     print(f"results length: {len(results)}")
     for method, total in results:
         print(f"{method} {total}")

@@ -62,8 +62,6 @@ class DaCapoBenchmark(Benchmark):
             else:
                 source_path = f"{pmd_src_dir}/{self.class_name}.java"
 
-        #the above path still is not general enough for all bms, apache only works for fop and 2.8 is only for fop
-
         try:
             with open(source_path, 'r') as file:
                 code = file.read()
@@ -414,6 +412,11 @@ def get_valid_dacapo_classes(application_name):
             test_group = "test_group"
             root_path = f"{pmd_root_dir}/src/test/java/net/sourceforge/pmd"
             unit_test_class_name = f"{test_class}Test"
+        elif application_name == "spring":
+            test_namespace = '/'.join(parts[3:-1])
+            test_group = "test_group"
+            root_path = f"{spring_root_dir}/src/test/java/org/springframework/samples/petclinic"
+            unit_test_class_name = f"{test_class}Tests"
 
         unit_tests = find_unit_test(root_path, unit_test_class_name, test_class)
 
