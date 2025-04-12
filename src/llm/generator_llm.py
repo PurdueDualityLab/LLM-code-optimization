@@ -25,7 +25,9 @@ def llm_optimize(code, llm_assistant, evaluator_feedback, ast, flame_report=None
         final_code: str
 
     if evaluator_feedback == "":
-        prompt = generator_prompt + f"Here is the code to optimize, follow the instruction to provide the optimized code WHILE STRICTLY MAINTAINING IT'S FUNCTIONAL EQUIVALENCE:\n{code}.\n" + f"Here is the AST of the source code: {ast}\n" + f"Here is the textual representation of the flame graph of the source code: {flame_report}\n"
+        prompt = generator_prompt + f"Here is the code to optimize, follow the instruction to provide the optimized code WHILE STRICTLY MAINTAINING IT'S FUNCTIONAL EQUIVALENCE:\n{code}.\n" + f"Here is the AST of the source code: {ast}\n"
+        if flame_report:
+            prompt += f"Here is the flame report of the source code: {flame_report}\n"
     else:
         prompt = f"The code you generated did not improve performance, please reoptimize WHILE MAINTAINING IT'S FUNCTIONAL CORRECTNESS. Here are some feedbacks: {evaluator_feedback}.\n Original code to optimize:\n {code}"
     

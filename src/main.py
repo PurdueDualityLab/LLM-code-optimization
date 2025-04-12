@@ -27,6 +27,7 @@ def parse_arguments():
     parser.add_argument("--num_programs", type=int, default=5, help="For PIE only, number of programs from the benchmark to test")
     parser.add_argument("--application_name", type=str, default="fop", choices=["biojava", "fop", "cassandra", "h2", "h2o", "Kafka", "Luindex", "Lusearch", "spring", "Tomact", "Tradebeans", "Tradesoap", "Xalan", "pmd"], help="For Dacapobench only, name of the application from the benchmark to test")
     parser.add_argument("--genai_studio", type=bool, default=False, help="Flag to indicate if genai_studio is used to inference open-source llms")
+    parser.add_argument("--method_level", type=bool, default=True, help="Flag to indicate if method level optimization is used")
 
     args = parser.parse_args()
     return args
@@ -70,7 +71,7 @@ def write_result(energy_data, program, evaluator_feedback_data, results_dir):
         "loc_improvement": round(original_loc / lowest_loc, 3),
     }
 
-def master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio):
+def master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio, method_level):
     #create LLM agent
     generator = LLMAgent(openai_api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
     evaluator = LLMAgent(openai_api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
@@ -91,7 +92,7 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
             test_namespace = program[2]
             test_group = program[3]
             unit_tests = program[4]
-            benchmark_obj = DaCapoBenchmark(test_method, test_class, test_namespace, test_group, unit_tests, application_name)
+            benchmark_obj = DaCapoBenchmark(test_method, test_class, test_namespace, test_group, unit_tests, application_name, method_level)
         else:
             logger.error("Invalid benchmark")
             break
@@ -227,9 +228,9 @@ def main():
     self_optimization_step = args.self_optimization_step
     use_genai_studio = args.genai_studio
     application_name = args.application_name
-       
+    method_level = args.method_level
     #run benchmark
-    master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio)
+    master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio, method_level)
 
 if __name__ == "__main__":
     main()

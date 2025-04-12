@@ -26,7 +26,10 @@ def evaluator_llm(evaluator_feedback_data, llm_assistant):
     current_source_code = evaluator_feedback_data["current"]["source_code"]  
     current_avg_runtime = evaluator_feedback_data["current"]["avg_speedup"]
 
-    flame_report = evaluator_feedback_data["flame_report"]
+    if "flame_report" in evaluator_feedback_data:
+        flame_report = evaluator_feedback_data["flame_report"]
+    else:
+        flame_report = ""
 
     prompt = evaluator_prompt + f"""
     Here is the original code snippet:

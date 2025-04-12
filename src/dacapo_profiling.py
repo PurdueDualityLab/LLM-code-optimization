@@ -1,6 +1,5 @@
 import subprocess
 import sys
-from collections import Counter
 from dotenv import load_dotenv
 from utils import Logger
 import os
@@ -62,11 +61,13 @@ def aggregate_by_rightmost_method(marker, top_n):
         return truncated_frames
 
 
+    import re
+
     def rewrite_method_name(method_name):
         """
         Rewrite the method name to a more concise form.
 
-        Two cases are handled:
+        Three cases are handled:
         
         1. Lambda methods:
             For example, if method_name is:
@@ -80,6 +81,12 @@ def aggregate_by_rightmost_method(marker, top_n):
             it is transformed into:
             org/apache/fop/image/loader/batik/PreloaderWMF.getImage
 
+        3. Weird hex segments:
+            For example, if method_name is:
+            org/biojava/nbio/aaproperties/CommandPrompt.0x00007fb99013e050.<init>
+            it is transformed into:
+            org/biojava/nbio/aaproperties/CommandPrompt.<init>
+
         Otherwise, the method_name is returned unchanged.
         """
         # Handle lambda method names
@@ -89,13 +96,16 @@ def aggregate_by_rightmost_method(marker, top_n):
             prefix = m.group(1)
             real_method = m.group(2)
             return f"{prefix}.{real_method}"
-        
-        # Handle inner class method names by removing the inner class part
+
+        # Remove any '.0x...' segments (case #3)
+        # e.g. org/biojava/nbio/aaproperties/CommandPrompt.0x00007fb99013e050.<init> -> org/biojava/nbio/aaproperties/CommandPrompt.<init>
+        method_name = re.sub(r'\.0x[a-fA-F0-9]+[^.]*(?=\.)', '', method_name)
+
+        # Handle inner class method names by removing the inner class part (case #2)
+        # This regex removes any inner class section (e.g. "$Loader") that appears before the method call.
         if '$' in method_name:
-            # This regex removes any inner class section (e.g. "$Loader")
-            # that appears before the method call.
             method_name = re.sub(r'\$[^.]+(?=\.)', '', method_name)
-        
+
         return method_name
 
     sums = {}

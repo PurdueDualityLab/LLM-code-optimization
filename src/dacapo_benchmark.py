@@ -8,6 +8,7 @@ from utils import Logger
 import csv
 import re
 from dacapo_profiling import get_hotspots, find_unit_test
+from java_method_profiling import replace_method_body, get_method_source_code, compile_java_project
 
 load_dotenv()
 USER_PREFIX = os.path.expanduser(os.getenv('USER_PREFIX'))
@@ -26,7 +27,7 @@ pmd_root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/pmd/build/pmd-cor
 pmd_src_dir = f"{pmd_root_dir}/src/main/java/net/sourceforge/pmd"
 
 class DaCapoBenchmark(Benchmark):
-    def __init__(self, test_method, test_class, test_namespace, test_group, unit_tests, benchmark_name):
+    def __init__(self, test_method, test_class, test_namespace, test_group, unit_tests, benchmark_name, method_level):
         # ex. test_class = PDFNumsArray, test_namespace = pdf, test_group = core, benchmark_name = fop
         self.method_name = test_method
         self.class_name = test_class
@@ -39,10 +40,10 @@ class DaCapoBenchmark(Benchmark):
         self.evaluator_feedback_data = {}
         self.original_code = None
         self.optimization_iteration = 0
+        self.method_level = method_level
         self.set_original_code()
         
     def set_original_code(self):
-
         if self.program == 'fop':
             if self.namespace_name and self.namespace_name != "":
                 source_path = f"{fop_src_dir}/{self.class_name}.java"
@@ -62,15 +63,20 @@ class DaCapoBenchmark(Benchmark):
             else:
                 source_path = f"{pmd_src_dir}/{self.class_name}.java"
 
-        try:
-            with open(source_path, 'r') as file:
-                code = file.read()
-        except FileNotFoundError:
-            logger.error(f"File not found: {source_path}")
-            return
+        if self.method_level:
+            compile_java_project()
+            code = get_method_source_code(source_path, self.method_name)
+        else:
+            try:
+                with open(source_path, 'r') as file:
+                    code = file.read()
+            except FileNotFoundError:
+                logger.error(f"File not found: {source_path}")
+                return
         
         filtered_code = self.remove_java_comments(code)
         self.original_code = filtered_code
+        logger.info(f"Original code: {self.original_code}")
         
     def remove_java_comments(self, code):
         pattern = r'''
@@ -155,8 +161,29 @@ class DaCapoBenchmark(Benchmark):
             else:
                 destination_path = f"{pmd_src_dir}/{self.class_name}.java"
         
-        with open(destination_path, "w") as file:
-            file.write(optimized_code)
+        # save optimized code to optimized_java.txt first with the format { method_body }
+        # then replace the method body with the optimized code
+        def extract_block_only(optimized_code: str) -> str:
+            start = optimized_code.find("{")
+            end = optimized_code.rfind("}")
+            if start == -1 or end == -1 or start > end:
+                raise ValueError("Could not locate complete block braces in the method source.")
+            return optimized_code[start:end+1]
+
+        if self.method_level:
+            # remove method signature from optimized code
+            try:
+                optimized_code = extract_block_only(optimized_code)
+            except ValueError as e:
+                logger.error(f"Error extracting block from optimized code: {e}")
+                return False
+            with open(f"{USER_PREFIX}/src/runtime_logs/optimized_java.txt", "w") as file:
+                file.write(optimized_code)
+            logger.info(f"optimized_code: {optimized_code}")
+            replace_method_body(destination_path, self.method_name)
+        else:
+            with open(destination_path, "w") as file:
+                file.write(optimized_code)
 
         #compile optimized code
         if self.program == 'fop':
@@ -185,13 +212,11 @@ class DaCapoBenchmark(Benchmark):
             logger.error(f"Compile optimized code failed: {e}\n")
             logger.error(f"Maven output: {self.compilation_error}")
             return False
-        
 
     def get_compilation_error(self):
         return super().get_compilation_error()
     
     def run_tests(self):
-
         if self.program == 'fop':
             os.chdir(f"{fop_root_dir}")
         elif self.program == 'spring':
@@ -425,13 +450,6 @@ def get_valid_dacapo_classes(application_name):
             continue
 
         transformed_data.append((test_method, test_class, test_namespace, test_group, unit_tests))
-    
-    # benchmark_classes = {'fop': [('pdf','PDFNumsArray'), ('pdf','PDFRoot'), ('pdf','PDFFactory'), ('pdf','PDFDocument'), ('pdf','PDFPage'), ('pdf','PDFPageSequence'), ('pdf','PDFPageSequence.PagePosition'), ('pdf','PDFPageSequence.PagePosition.PagePositionComparator'), ('pdf','PDFPageSequence.PagePosition.PagePositionComparator.PagePositionComparator'), ('pdf','PDFPageSequence.PagePosition.PagePositionComparator.PagePositionComparator.PagePositionComparator')]
-    #                     #spring:[],
-    # spring':[('owner','OwnerController')]
-    # DaCapoBenchmark('OwnerController', 'owner', 'spring')
-    #                     #biojava:[],
-    #                     }
 
     print(transformed_data)
 
@@ -439,7 +457,6 @@ def get_valid_dacapo_classes(application_name):
     return transformed_data
 
 def setup_makefile(application_name):
-
     if application_name == 'fop':
         folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{application_name}/build/fop-2.8"
         subfolders = [f.path for f in os.scandir(folder_path) if f.is_dir()]
