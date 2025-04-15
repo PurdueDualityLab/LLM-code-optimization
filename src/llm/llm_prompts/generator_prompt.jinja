@@ -23,8 +23,10 @@ Task Instructions:
 Here is the code to optimize, follow the instruction to provide the optimized code WHILE STRICTLY MAINTAINING IT'S FUNCTIONAL EQUIVALENCE:
 {{ code }}
 
+{% if ast %}
 Here is the AST of the source code:
 {{ ast }}
+{% endif %}
 
 {% if flame_report %}
 Here is a textual representation of the flame graph for the current source code:

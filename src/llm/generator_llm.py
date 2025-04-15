@@ -12,7 +12,7 @@ USER_PREFIX = os.getenv('USER_PREFIX')
 
 env = Environment(loader=FileSystemLoader(f"{USER_PREFIX}/src/llm/llm_prompts"))
 
-def llm_optimize(code, llm_assistant, evaluator_feedback, ast, flame_report=None):
+def llm_optimize(code, llm_assistant, evaluator_feedback=None, ast=None, flame_report=None):
     class Strategy(BaseModel):
         Strategy: str
         Pros: str
@@ -27,7 +27,7 @@ def llm_optimize(code, llm_assistant, evaluator_feedback, ast, flame_report=None
         
     logger.info(f"flamegraph: {flame_report}")
 
-    if evaluator_feedback == "":
+    if not evaluator_feedback or evaluator_feedback == "":
         template = env.get_template("generator_prompt.jinja")
         data = {
             "code": code,

@@ -28,6 +28,7 @@ def parse_arguments():
     parser.add_argument("--application_name", type=str, default="fop", choices=["biojava", "fop", "cassandra", "h2", "h2o", "Kafka", "Luindex", "Lusearch", "spring", "Tomact", "Tradebeans", "Tradesoap", "Xalan", "pmd"], help="For Dacapobench only, name of the application from the benchmark to test")
     parser.add_argument("--genai_studio", type=bool, default=False, help="Flag to indicate if genai_studio is used to inference open-source llms")
     parser.add_argument("--method_level", type=bool, default=True, help="Flag to indicate if method level optimization is used for dacapo")
+    parser.add_argument("--ablation", type=int, default=0, choices=[0, 1, 2, 3, 4], help="ablation study level: 0 indicates no ablation, 1 indicates generator with source code and basic prompt, 2 adds ast and flamegraph, 3 adds advisor, 4 adds feedback without evaluator")
 
     args = parser.parse_args()
     return args
@@ -218,6 +219,68 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         os.makedirs(results_dir)
     with open(f"{results_dir}/results.txt", "w+") as file:
         json.dump(results, file, indent=4)
+        
+def ablation_script_level_1_and_2(benchmark, num_programs, application_name, model, use_genai_studio, ablation):
+    #create LLM agent
+    generator = LLMAgent(openai_api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
+    
+    results = {}
+    
+    for program in get_valid_programs(benchmark, num_programs, application_name):  
+        benchmark_obj = PIEBenchmark(program)
+
+        if benchmark_obj.get_original_code() is None:
+            results[program] = "Unable to find original code"
+            continue
+
+        original_code_compiles = benchmark_obj.set_original_energy()
+        if not original_code_compiles:
+            results[program] = "Unable to compile original code or timeout"
+            continue
+        
+        original_code = benchmark_obj.get_original_code()
+
+        # create direct if not exist
+        if not os.path.exists(f"{USER_PREFIX}/results/ablation"):
+            os.makedirs(f"{USER_PREFIX}/results/ablation")
+        if not os.path.exists(f"{USER_PREFIX}/results/ablation/level1"):
+            os.makedirs(f"{USER_PREFIX}/results/ablation/level1")
+        results_dir = f"{USER_PREFIX}/results/ablation/level1"
+        
+        if ablation == 1:
+            logger.info(f"Optimizing {program} with ast and flamegraph")
+            ast = benchmark_obj.pre_process(original_code)
+            flame_report = benchmark_obj.dynamic_analysis(optimized=False)
+            optimized_code = llm_optimize(code=original_code, llm_assistant=generator, ast=ast, flame_report=flame_report)
+        else:
+            logger.info(f"Optimizing {program} with only source code")
+            optimized_code = llm_optimize(code=original_code, llm_assistant=generator)
+        
+        # code post_process
+        optimized_code = benchmark_obj.post_process(optimized_code)
+
+        # static analysis
+        status = benchmark_obj.static_analysis(optimized_code)
+
+        # switch case of status
+        if (status == Status.COMPILATION_ERROR or status == Status.RUNTIME_ERROR_OR_TEST_FAILED):
+            logger.error("Error in optimized file")
+            results[program] = "Unable to produce functional equivalent programs."
+        else:
+            logger.info("Optimization Complete, writing results to file.....")
+            energy_data = benchmark_obj.get_energy_data()
+            evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
+            results[program] = write_result(energy_data, program, evaluator_feedback_data, results_dir)
+
+    try:
+        results_dir
+    except NameError:
+        results_dir = f"{USER_PREFIX}/results"
+
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+    with open(f"{results_dir}/results.txt", "w+") as file:
+        json.dump(results, file, indent=4)
 
 def main():
     args=parse_arguments()
@@ -229,8 +292,12 @@ def main():
     use_genai_studio = args.genai_studio
     application_name = args.application_name
     method_level = args.method_level
-    #run benchmark
-    master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio, method_level)
+    ablation = args.ablation
+    
+    if ablation == 0:
+        master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio, method_level)
+    elif ablation == 1 or ablation == 2:
+        ablation_script_level_1_and_2(benchmark, num_programs, application_name, model, use_genai_studio, ablation)      
 
 if __name__ == "__main__":
     main()
