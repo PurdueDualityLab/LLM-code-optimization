@@ -85,4 +85,4 @@ class Benchmark:
         return Status.PERFORMANCE_IMPROVED     
 
     def dynamic_analysis(self, optimized):
-        self.generate_flame_report(optimized)
+        return self.generate_flame_report(optimized)

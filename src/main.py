@@ -27,7 +27,7 @@ def parse_arguments():
     parser.add_argument("--num_programs", type=int, default=5, help="For PIE only, number of programs from the benchmark to test")
     parser.add_argument("--application_name", type=str, default="fop", choices=["biojava", "fop", "cassandra", "h2", "h2o", "Kafka", "Luindex", "Lusearch", "spring", "Tomact", "Tradebeans", "Tradesoap", "Xalan", "pmd"], help="For Dacapobench only, name of the application from the benchmark to test")
     parser.add_argument("--genai_studio", type=bool, default=False, help="Flag to indicate if genai_studio is used to inference open-source llms")
-    parser.add_argument("--method_level", type=bool, default=True, help="Flag to indicate if method level optimization is used")
+    parser.add_argument("--method_level", type=bool, default=True, help="Flag to indicate if method level optimization is used for dacapo")
 
     args = parser.parse_args()
     return args
