@@ -74,13 +74,25 @@ def write_result(energy_data, program, evaluator_feedback_data, results_dir):
         "loc_improvement": round(original_loc / lowest_loc, 3),
     }
 
-def master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio, method_level):
+def master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio, method_level, ablation=0):
     #create LLM agent
     generator = LLMAgent(openai_api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
     evaluator = LLMAgent(openai_api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
     advisor = LLMAgent(openai_api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are an expert in software optimization patterns. You will be given a list of optimization patterns and source code. Your task is to analyze the source code and patterns to determine which are most suitable for improving its overall efficiency.")
 
     results = {}
+    
+    if ablation == 0:
+        results_dir = f"{USER_PREFIX}/results/{benchmark}"
+    elif ablation == 4:
+        if not os.path.exists(f"{USER_PREFIX}/results/ablation"):
+            os.makedirs(f"{USER_PREFIX}/results/ablation")
+        if not os.path.exists(f"{USER_PREFIX}/results/ablation/level_{ablation}"):
+            os.makedirs(f"{USER_PREFIX}/results/ablation/level_{ablation}")
+        results_dir = f"{USER_PREFIX}/results/ablation/level_{ablation}"
+    else:
+        logger.error("Invalid ablation level")
+        sys.exit(1)
     
     for program in get_valid_programs(benchmark, num_programs, application_name):  
         if benchmark == "EnergyLanguage":
@@ -126,8 +138,6 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         top_k_patterns = filter_patterns(llm_assistant=advisor, code=original_code)
 
         total_compilation_failure = 0
-
-        results_dir = f"{USER_PREFIX}/results/{benchmark}"
        
         while True:
             if total_output_difference == 3 or total_compilation_failure == 2:
@@ -210,7 +220,10 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
 
                 # getting feedback from the evaluator
                 logger.info("Regression test success, getting evaluator feedback")
-                evaluator_feedback = evaluator_llm(evaluator_feedback_data=evaluator_feedback_data, llm_assistant=evaluator)
+                if ablation == 4:
+                    evaluator_feedback = "Please optimize the code further."
+                else:
+                    evaluator_feedback = evaluator_llm(evaluator_feedback_data=evaluator_feedback_data, llm_assistant=evaluator)
                 logger.info("Got evaluator feedback")
         
         # clearing LLM memory
@@ -220,11 +233,20 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
 
     evaluation_summary(results, results_dir)
         
-def ablation_script_level_1_and_2(benchmark, num_programs, application_name, model, use_genai_studio, ablation):
+def ablation_script_level_1_to_3(benchmark, num_programs, application_name, model, use_genai_studio, ablation):
     #create LLM agent
     generator = LLMAgent(openai_api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
-    
+    if ablation == 3:
+        advisor = LLMAgent(openai_api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are an expert in software optimization patterns. You will be given a list of optimization patterns and source code. Your task is to analyze the source code and patterns to determine which are most suitable for improving its overall efficiency.")
+
     results = {}
+    
+    # create direct if not exist
+    if not os.path.exists(f"{USER_PREFIX}/results/ablation"):
+        os.makedirs(f"{USER_PREFIX}/results/ablation")
+    if not os.path.exists(f"{USER_PREFIX}/results/ablation/level_{ablation}"):
+        os.makedirs(f"{USER_PREFIX}/results/ablation/level_{ablation}")
+    results_dir = f"{USER_PREFIX}/results/ablation/level_{ablation}"
     
     for program in get_valid_programs(benchmark, num_programs, application_name):  
         benchmark_obj = PIEBenchmark(program)
@@ -239,22 +261,22 @@ def ablation_script_level_1_and_2(benchmark, num_programs, application_name, mod
             continue
         
         original_code = benchmark_obj.get_original_code()
-
-        # create direct if not exist
-        if not os.path.exists(f"{USER_PREFIX}/results/ablation"):
-            os.makedirs(f"{USER_PREFIX}/results/ablation")
-        if not os.path.exists(f"{USER_PREFIX}/results/ablation/level_{ablation}"):
-            os.makedirs(f"{USER_PREFIX}/results/ablation/level_{ablation}")
-        results_dir = f"{USER_PREFIX}/results/ablation/level_{ablation}"
         
-        if ablation == 2:
+        if ablation == 1:
+            logger.info(f"Optimizing {program} with only source code")
+            optimized_code = llm_optimize(code=original_code, llm_assistant=generator)
+        elif ablation == 2:
             logger.info(f"Optimizing {program} with ast and flamegraph")
             ast = benchmark_obj.pre_process(original_code)
             flame_report = benchmark_obj.dynamic_analysis(optimized=False)
             optimized_code = llm_optimize(code=original_code, llm_assistant=generator, ast=ast, flame_report=flame_report)
-        else:
-            logger.info(f"Optimizing {program} with only source code")
-            optimized_code = llm_optimize(code=original_code, llm_assistant=generator)
+        elif ablation == 3:
+            logger.info(f"Optimizing {program} with ast and flamegraph and optimization patterns")
+            ast = benchmark_obj.pre_process(original_code)
+            flame_report = benchmark_obj.dynamic_analysis(optimized=False)
+             # filter optimization patterns for most applicable
+            top_k_patterns = filter_patterns(llm_assistant=advisor, code=original_code)
+            optimized_code = llm_optimize(code=original_code, llm_assistant=generator, ast=ast, flame_report=flame_report, optimization_patterns=top_k_patterns)
         
         # code post_process
         optimized_code = benchmark_obj.post_process(optimized_code)
@@ -350,10 +372,13 @@ def main():
     method_level = args.method_level
     ablation = args.ablation
     
-    if ablation == 0:
-        master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio, method_level)
-    elif ablation == 1 or ablation == 2:
-        ablation_script_level_1_and_2(benchmark, num_programs, application_name, model, use_genai_studio, ablation)      
+    if ablation == 0 or ablation == 4:
+        master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio, method_level, ablation)
+    elif ablation == 1 or ablation == 2 or ablation == 3:
+        ablation_script_level_1_to_3(benchmark, num_programs, application_name, model, use_genai_studio, ablation)
+    else:
+        logger.error("Invalid ablation level")
+        sys.exit(1)        
 
 if __name__ == "__main__":
     main()
