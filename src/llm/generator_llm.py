@@ -4,14 +4,15 @@ import sys
 from utils import Logger
 import json
 import os
+from jinja2 import Environment, FileSystemLoader
 
 logger = Logger("logs", sys.argv[2]).logger
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
-with open(f"{USER_PREFIX}/src/llm/llm_prompts/generator_prompt.txt", "r") as file:
-    generator_prompt = file.read()
 
-def llm_optimize(code, llm_assistant, evaluator_feedback, optimization_patterns, ast):
+env = Environment(loader=FileSystemLoader(f"{USER_PREFIX}/src/llm/llm_prompts"))
+#todo: add back optimization patterns
+def llm_optimize(code, llm_assistant, evaluator_feedback=None, ast=None, flame_report=None, optimization_patterns=None):
     class Strategy(BaseModel):
         Strategy: str
         Pros: str
@@ -20,25 +21,33 @@ def llm_optimize(code, llm_assistant, evaluator_feedback, optimization_patterns,
     class OptimizationReasoning(BaseModel):
         analysis: str
         optimization_opportunities: str
-        strategies: list[Strategy] 
+        strategies: list[Strategy]
         selected_strategy: str
         final_code: str
-        optimization_pattern: str
-    
-    # adding optimization patterns to prompt
-    formatted_patterns = json.dumps(optimization_patterns, indent=4)
-    #logger.info(formatted_patterns) # testing
-    updated_generator_prompt = generator_prompt.replace('{optimization_patterns}', formatted_patterns)
+        
+    logger.info(f"flamegraph: {flame_report}")
 
-    if evaluator_feedback == "":
-        prompt = updated_generator_prompt + f"Here is the code to optimize, follow the instruction to provide the optimized code WHILE MAINTAINING IT'S FUNCTIONAL EQUIVALENCE:\n{code}.\n" + f"Here is the AST of the source code: {ast}"
+    if not evaluator_feedback or evaluator_feedback == "":
+        template = env.get_template("generator_prompt.jinja")
+        data = {
+            "code": code,
+            "ast": ast,
+            "flame_report": flame_report,
+            "optimization_patterns": optimization_patterns,
+        }
+        prompt = template.render(data)
     else:
-        prompt = f"The code you generated did not improve performance, please reoptimize WHILE MAINTAINING IT'S FUNCTIONAL CORRECTNESS. Here are some feedbacks: {evaluator_feedback}.\n Original code to optimize:\n {code}"
-    
+        template = env.get_template("generator_feedback_prompt.jinja")
+        data = {
+            "code": code,
+            "ast": ast,
+            "flame_report": flame_report,
+            "optimization_patterns": optimization_patterns,
+            "evaluator_feedback": evaluator_feedback,
+        }
+        prompt = template.render(data)    
+
     logger.info(f"llm_optimize: Generator LLM Optimizing ....")
-    
-    if llm_assistant.is_genai_studio():
-        prompt = prompt + "\n Strictly only output final code. Don't change class name."
 
     logger.info(f"Generator prompt: {prompt}")
 
@@ -49,9 +58,7 @@ def llm_optimize(code, llm_assistant, evaluator_feedback, optimization_patterns,
     logger.info(response)
     
     try:
-        if llm_assistant.is_genai_studio():
-            final_code = response["content"]
-        elif (llm_assistant.is_openai_model()):
+        if llm_assistant.is_genai_studio() or llm_assistant.is_openai_model():
             content_dict = json.loads(response["content"])
             final_code = content_dict["final_code"]
         else:
@@ -70,27 +77,25 @@ def handle_compilation_error(error_message, llm_assistant):
     class ErrorReasoning(BaseModel):
         analysis: str
         final_code: str
-        
-    compilation_error_prompt = f"""The code you returned failed to compile with the following error message: {error_message}. 
-        Analyze the error message and explicitly identify the issue in the code that caused the compilation error. 
-        Then, consider if there's a need to use a different optimization prompt to compile successfully or if there are code changes which can fix this implementation.
-        Finally, update the code accordingly and ensure it compiles successfully. Ensure that the optimized code is both efficient and error-free and return it. """   
-        
-    if llm_assistant.is_genai_studio():
-        compilation_error_prompt = compilation_error_prompt + "\n Strictly only output final code only."
+    
+    template = env.get_template("compilation_error_prompt.jinja")
+    data = {
+        "error_message": error_message
+    }
+    compilation_error_prompt = template.render(data)
+    logger.info(f"Prompt: {compilation_error_prompt}")
+    logger.info(f"llm_optimize: Generator LLM Handling Compilation Error ....")
     
     llm_assistant.add_to_memory("user", compilation_error_prompt)
     llm_assistant.generate_response(ErrorReasoning)
     response = llm_assistant.get_last_msg()
 
     try:
-        if llm_assistant.is_genai_studio():
-            final_code = response["content"]
-        elif (llm_assistant.is_openai_model()):
+        if llm_assistant.is_genai_studio() or llm_assistant.is_openai_model():
             content_dict = json.loads(response["content"])
             final_code = content_dict["final_code"]
         else:
-            final_code = ErrorReasoning.model_validate_json(response["content"])["final_code"]
+            final_code = ErrorReasoning.model_validate_json(response["content"]).final_code
     except json.JSONDecodeError as e:
         logger.error(f"Failed to decode JSON: {e}")
         return

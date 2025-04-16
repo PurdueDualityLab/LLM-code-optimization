@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
 
         // Use /usr/bin/time to measure memory usage
         char time_command[600];
-        snprintf(time_command, sizeof(time_command), "/usr/bin/time -f '%%M' %s 2> memory_usage.txt", command);
+        snprintf(time_command, sizeof(time_command),  "/usr/bin/time -f '%%M' -o memory_usage.txt bash -c \"%s\"", command);
 
         // Start timing, CPU cycle, and energy measurement
         clock_gettime(CLOCK_MONOTONIC, &start);

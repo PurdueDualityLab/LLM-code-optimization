@@ -1,0 +1,6 @@
+--- Execution profile ---
+Total samples       : 2
+
+       bytes  percent  samples  top
+  ----------  -------  -------  ---
+    33554464  100.00%        2  double[]

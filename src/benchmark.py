@@ -60,6 +60,13 @@ class Benchmark:
         """
         pass
 
+    @abstractmethod
+    def generate_flame_report(self, optimized):
+        """
+        Generate aggregated flame report across all test cases
+        """
+        pass
+
     def get_energy_data(self):
         return self.energy_data
     
@@ -76,3 +83,6 @@ class Benchmark:
             return Status.ALL_TEST_PASSED
         self.optimization_iteration += 1
         return Status.PERFORMANCE_IMPROVED     
+
+    def dynamic_analysis(self, optimized):
+        return self.generate_flame_report(optimized)

@@ -3,165 +3,1051 @@
 #
 # Total Lost Samples: 0
 #
-# Samples: 569  of event 'cycles:u'
-# Event count (approx.): 1235256946
+# Samples: 114  of event 'cycles'
+# Event count (approx.): 2978928305
 #
-# Children      Self       Samples
-# ........  ........  ............
+# Children      Self       Samples  Command          Shared Object         Symbol                                              
+# ........  ........  ............  ...............  ....................  ....................................................
 #
-   100.00%   100.00%           569
-            |          
-            |--13.97%--0x7f38cd14b8b7
-            |          
-            |--9.20%--0x7f38cd14b8fb
-            |          
-            |--7.74%--0xffffffffffffffff
-            |          |          
-            |          |--3.55%--Compile::Compile
-            |          |          |          
-            |          |          |--2.79%--Compile::Code_Gen
-            |          |          |          |          
-            |          |          |           --1.61%--PhaseChaitin::Register_Allocate
-            |          |          |          
-            |          |           --0.76%--Compile::Optimize
-            |          |          
-            |          |--2.35%--Compile::Optimize
-            |          |          PhaseIdealLoop::optimize
-            |          |          |          
-            |          |          |--1.62%--PhaseIdealLoop::build_and_optimize
-            |          |          |          
-            |          |           --0.74%--PhaseIterGVN::optimize
-            |          |                     PhaseIterGVN::transform_old
-            |          |          
-            |          |--0.76%--JLI_Launch
-            |          |          |          
-            |          |           --0.76%--LoadJavaVM
-            |          |                     ___dlopen (inlined)
-            |          |                     dlopen_implementation (inlined)
-            |          |                     _dlerror_run
-            |          |                     __GI__dl_catch_error (inlined)
-            |          |                     __GI__dl_catch_exception (inlined)
-            |          |                     dlopen_doit
-            |          |                     _dl_open
-            |          |                     __GI__dl_catch_exception (inlined)
-            |          |                     dl_open_worker
-            |          |                     __GI__dl_catch_exception (inlined)
-            |          |                     dl_open_worker_begin
-            |          |                     _dl_relocate_object
-            |          |                     elf_dynamic_do_Rela (inlined)
-            |          |                     |          
-            |          |                      --0.64%--elf_machine_rela (inlined)
-            |          |          
-            |           --0.52%--Compile::Compile
-            |                     Compile::Code_Gen
-            |          
-            |--3.30%--0x7f38cd14b8ff
-            |          
-            |--3.29%--__clone3 (inlined)
-            |          start_thread
-            |          |          
-            |          |--1.70%--thread_native_entry
-            |          |          |          
-            |          |           --1.63%--Thread::call_run
-            |          |                     |          
-            |          |                      --1.55%--JavaThread::thread_main_inner
-            |          |                                |          
-            |          |                                 --1.53%--CompileBroker::compiler_thread_loop
-            |          |                                           |          
-            |          |                                            --1.32%--CompileBroker::invoke_compiler_on_method
-            |          |                                                      |          
-            |          |                                                       --0.90%--Compiler::compile_method
-            |          |                                                                 Compilation::Compilation
-            |          |                                                                 Compilation::compile_method
-            |          |                                                                 Compilation::compile_java_method
-            |          |          
-            |           --1.58%--ThreadJavaMain
-            |                     JavaMain
-            |                     JNI_CreateJavaVM
-            |                     Threads::create_vm
-            |                     |          
-            |                      --1.39%--init_globals
-            |                                |          
-            |                                 --0.89%--universe_init
-            |                                           |          
-            |                                            --0.52%--Metaspace::global_initialize
-            |                                                      MetaspaceShared::initialize_runtime_shared_and_meta_spaces
-            |                                                      MetaspaceShared::map_archives
-            |                                                      MetaspaceShared::map_archive
-            |                                                      FileMapInfo::map_regions
-            |                                                      FileMapInfo::relocate_pointers_in_core_regions
-            |          
-            |--2.57%--0x7f38cd14b8db
-            |          
-            |--2.34%--0x7f38cd14907e
-            |          
-            |--2.18%--0x7f38cd14b8e7
-            |          
-            |--2.13%--0x7f38cd149a3f
-            |          
-            |--2.00%--0x7f38cd14a203
-            |          
-            |--1.88%--0x7f38c556367e
-            |          
-            |--1.81%--0x7f38cd14b857
-            |          
-            |--1.47%--0x7f38cd14b884
-            |          
-            |--1.47%--0x7f38cd1499ff
-            |          
-            |--1.33%--0x7f38cc9875c0
-            |          
-            |--1.18%--0x7f38cd149a19
-            |          
-            |--1.13%--0x7f38cd14a8a1
-            |          
-            |--1.11%--0x7f38cd14b8cd
-            |          
-            |--1.11%--0x7f38cd14b906
-            |          
-            |--1.10%--0x7f38cd14b876
-            |          
-            |--1.09%--0x7f38cd14b8eb
-            |          
-            |--1.06%--0x7f38c5566bbe
-            |          
-            |--1.05%--0x7f38cd1499ee
-            |          
-            |--1.03%--0x7f38cc99200a
-            |          InterpreterRuntime::newarray
-            |          TypeArrayKlass::allocate_common
-            |          MemAllocator::allocate
-            |          ObjArrayAllocator::initialize
-            |          __memset_evex_unaligned_erms
-            |          |          
-            |           --0.51%--0xffffffffa5400be0
-            |          
-            |--0.76%--0x7f38cd14b8bd
-            |          
-            |--0.74%--0x7f38cd14b868
-            |          
-            |--0.73%--0x7f38c5565abf
-            |          
-            |--0.71%--0x7f38c5566ba7
-            |          
-            |--0.71%--0x7f38cd1499d9
-            |          
-            |--0.71%--0x7f38cd14b88e
-            |          
-            |--0.70%--0x7f38c55669d8
-            |          
-            |--0.70%--0x7f38c5566cf7
-            |          
-            |--0.70%--0x7f38c5568b44
-            |          
-            |--0.70%--0x7f38c5568b1c
-            |          
-            |--0.68%--0x7f38cd149a2a
-            |          
-            |--0.66%--0x7f38cc9845d9
-            |          
-             --0.59%--0x7f38c5562792
+    69.66%     0.00%             0  java             libc.so.6             [.] start_thread
+            |
+            ---start_thread
+               |          
+               |--66.88%--ThreadJavaMain
+               |          JavaMain
+               |          |          
+               |          |--57.75%--jni_CallStaticVoidMethod
+               |          |          jni_invoke_static
+               |          |          JavaCalls::call_helper
+               |          |          0x7f1eec977cc9
+               |          |          0x7f1eec9802a5
+               |          |          |          
+               |          |          |--55.76%--0x7f1eec980260
+               |          |          |          |          
+               |          |          |          |--50.77%--0x7f1ee5564832
+               |          |          |          |          
+               |          |          |           --4.99%--0x7f1eec980260
+               |          |          |                     0x7f1eec980260
+               |          |          |                     |          
+               |          |          |                     |--3.00%--0x7f1eec9875c0
+               |          |          |                     |          
+               |          |          |                      --1.99%--0x7f1eec98836c
+               |          |          |          
+               |          |           --1.98%--0x7f1eec989129
+               |          |          
+               |           --9.13%--JNI_CreateJavaVM
+               |                     Threads::create_vm
+               |                     init_globals
+               |                     universe_init
+               |                     G1CollectedHeap::initialize
+               |                     G1RegionToSpaceMapper::create_mapper
+               |                     G1RegionToSpaceMapper::G1RegionToSpaceMapper
+               |                     G1PageBasedVirtualSpace::G1PageBasedVirtualSpace
+               |                     __memset_evex_unaligned_erms
+               |                     asm_exc_page_fault
+               |          
+               |--1.40%--thread_native_entry
+               |          |          
+               |           --1.20%--Thread::record_stack_base_and_size
+               |                     |          
+               |                      --0.99%--os::current_stack_base
+               |          
+                --0.79%--entry_SYSCALL_64_after_hwframe
+                          do_syscall_64
 
+    66.88%     0.00%             0  java             libjli.so             [.] ThreadJavaMain
+            |
+            ---ThreadJavaMain
+               JavaMain
+               |          
+               |--57.75%--jni_CallStaticVoidMethod
+               |          jni_invoke_static
+               |          JavaCalls::call_helper
+               |          0x7f1eec977cc9
+               |          0x7f1eec9802a5
+               |          |          
+               |          |--55.76%--0x7f1eec980260
+               |          |          |          
+               |          |          |--50.77%--0x7f1ee5564832
+               |          |          |          
+               |          |           --4.99%--0x7f1eec980260
+               |          |                     0x7f1eec980260
+               |          |                     |          
+               |          |                     |--3.00%--0x7f1eec9875c0
+               |          |                     |          
+               |          |                      --1.99%--0x7f1eec98836c
+               |          |          
+               |           --1.98%--0x7f1eec989129
+               |          
+                --9.13%--JNI_CreateJavaVM
+                          Threads::create_vm
+                          init_globals
+                          universe_init
+                          G1CollectedHeap::initialize
+                          G1RegionToSpaceMapper::create_mapper
+                          G1RegionToSpaceMapper::G1RegionToSpaceMapper
+                          G1PageBasedVirtualSpace::G1PageBasedVirtualSpace
+                          __memset_evex_unaligned_erms
+                          asm_exc_page_fault
+
+    66.88%     0.00%             0  java             libjli.so             [.] JavaMain
+            |
+            ---JavaMain
+               |          
+               |--57.75%--jni_CallStaticVoidMethod
+               |          jni_invoke_static
+               |          JavaCalls::call_helper
+               |          0x7f1eec977cc9
+               |          0x7f1eec9802a5
+               |          |          
+               |          |--55.76%--0x7f1eec980260
+               |          |          |          
+               |          |          |--50.77%--0x7f1ee5564832
+               |          |          |          
+               |          |           --4.99%--0x7f1eec980260
+               |          |                     0x7f1eec980260
+               |          |                     |          
+               |          |                     |--3.00%--0x7f1eec9875c0
+               |          |                     |          
+               |          |                      --1.99%--0x7f1eec98836c
+               |          |          
+               |           --1.98%--0x7f1eec989129
+               |          
+                --9.13%--JNI_CreateJavaVM
+                          Threads::create_vm
+                          init_globals
+                          universe_init
+                          G1CollectedHeap::initialize
+                          G1RegionToSpaceMapper::create_mapper
+                          G1RegionToSpaceMapper::G1RegionToSpaceMapper
+                          G1PageBasedVirtualSpace::G1PageBasedVirtualSpace
+                          __memset_evex_unaligned_erms
+                          asm_exc_page_fault
+
+    57.75%     0.00%             0  java             libjvm.so             [.] jni_CallStaticVoidMethod
+            |
+            ---jni_CallStaticVoidMethod
+               jni_invoke_static
+               JavaCalls::call_helper
+               0x7f1eec977cc9
+               0x7f1eec9802a5
+               |          
+               |--55.76%--0x7f1eec980260
+               |          |          
+               |          |--50.77%--0x7f1ee5564832
+               |          |          
+               |           --4.99%--0x7f1eec980260
+               |                     0x7f1eec980260
+               |                     |          
+               |                     |--3.00%--0x7f1eec9875c0
+               |                     |          
+               |                      --1.99%--0x7f1eec98836c
+               |          
+                --1.98%--0x7f1eec989129
+
+    57.75%     0.00%             0  java             libjvm.so             [.] jni_invoke_static
+            |
+            ---jni_invoke_static
+               JavaCalls::call_helper
+               0x7f1eec977cc9
+               0x7f1eec9802a5
+               |          
+               |--55.76%--0x7f1eec980260
+               |          |          
+               |          |--50.77%--0x7f1ee5564832
+               |          |          
+               |           --4.99%--0x7f1eec980260
+               |                     0x7f1eec980260
+               |                     |          
+               |                     |--3.00%--0x7f1eec9875c0
+               |                     |          
+               |                      --1.99%--0x7f1eec98836c
+               |          
+                --1.98%--0x7f1eec989129
+
+    57.75%     0.00%             0  java             libjvm.so             [.] JavaCalls::call_helper
+            |
+            ---JavaCalls::call_helper
+               0x7f1eec977cc9
+               0x7f1eec9802a5
+               |          
+               |--55.76%--0x7f1eec980260
+               |          |          
+               |          |--50.77%--0x7f1ee5564832
+               |          |          
+               |           --4.99%--0x7f1eec980260
+               |                     0x7f1eec980260
+               |                     |          
+               |                     |--3.00%--0x7f1eec9875c0
+               |                     |          
+               |                      --1.99%--0x7f1eec98836c
+               |          
+                --1.98%--0x7f1eec989129
+
+    57.75%     0.00%             0  java             [JIT] tid 2585494     [.] 0x00007f1eec977cc9
+            |
+            ---0x7f1eec977cc9
+               0x7f1eec9802a5
+               |          
+               |--55.76%--0x7f1eec980260
+               |          |          
+               |          |--50.77%--0x7f1ee5564832
+               |          |          
+               |           --4.99%--0x7f1eec980260
+               |                     0x7f1eec980260
+               |                     |          
+               |                     |--3.00%--0x7f1eec9875c0
+               |                     |          
+               |                      --1.99%--0x7f1eec98836c
+               |          
+                --1.98%--0x7f1eec989129
+
+    57.75%     0.00%             0  java             [JIT] tid 2585494     [.] 0x00007f1eec9802a5
+            |
+            ---0x7f1eec9802a5
+               |          
+               |--55.76%--0x7f1eec980260
+               |          |          
+               |          |--50.77%--0x7f1ee5564832
+               |          |          
+               |           --4.99%--0x7f1eec980260
+               |                     0x7f1eec980260
+               |                     |          
+               |                     |--3.00%--0x7f1eec9875c0
+               |                     |          
+               |                      --1.99%--0x7f1eec98836c
+               |          
+                --1.98%--0x7f1eec989129
+
+    55.76%     0.00%             0  java             [JIT] tid 2585494     [.] 0x00007f1eec980260
+            |
+            ---0x7f1eec980260
+               |          
+               |--50.77%--0x7f1ee5564832
+               |          
+                --4.99%--0x7f1eec980260
+                          0x7f1eec980260
+                          |          
+                          |--3.00%--0x7f1eec9875c0
+                          |          
+                           --1.99%--0x7f1eec98836c
+
+    50.77%    50.77%             1  java             [JIT] tid 2585494     [.] 0x00007f1ee556482f
+            |
+            ---start_thread
+               ThreadJavaMain
+               JavaMain
+               jni_CallStaticVoidMethod
+               jni_invoke_static
+               JavaCalls::call_helper
+               0x7f1eec977cc9
+               0x7f1eec9802a5
+               0x7f1eec980260
+               0x7f1ee5564832
+
+    50.77%     0.00%             0  java             [JIT] tid 2585494     [.] 0x00007f1ee5564832
+            |
+            ---0x7f1ee5564832
+
+    15.30%     0.00%             0  java             [kernel.kallsyms]     [k] asm_exc_page_fault
+            |
+            ---asm_exc_page_fault
+               |          
+                --6.17%--exc_page_fault
+                          do_user_addr_fault
+                          handle_mm_fault
+                          __handle_mm_fault
+                          handle_pte_fault
+                          do_fault
+                          do_read_fault
+                          filemap_map_pages
+                          next_uptodate_page
+
+     9.13%     9.13%             1  java             libc.so.6             [.] __memset_evex_unaligned_erms
+            |
+            ---start_thread
+               ThreadJavaMain
+               JavaMain
+               JNI_CreateJavaVM
+               Threads::create_vm
+               init_globals
+               universe_init
+               G1CollectedHeap::initialize
+               G1RegionToSpaceMapper::create_mapper
+               G1RegionToSpaceMapper::G1RegionToSpaceMapper
+               G1PageBasedVirtualSpace::G1PageBasedVirtualSpace
+               __memset_evex_unaligned_erms
+               asm_exc_page_fault
+
+     9.13%     0.00%             0  java             libjvm.so             [.] JNI_CreateJavaVM
+            |
+            ---JNI_CreateJavaVM
+               Threads::create_vm
+               init_globals
+               universe_init
+               G1CollectedHeap::initialize
+               G1RegionToSpaceMapper::create_mapper
+               G1RegionToSpaceMapper::G1RegionToSpaceMapper
+               G1PageBasedVirtualSpace::G1PageBasedVirtualSpace
+               __memset_evex_unaligned_erms
+               asm_exc_page_fault
+
+     9.13%     0.00%             0  java             libjvm.so             [.] Threads::create_vm
+            |
+            ---Threads::create_vm
+               init_globals
+               universe_init
+               G1CollectedHeap::initialize
+               G1RegionToSpaceMapper::create_mapper
+               G1RegionToSpaceMapper::G1RegionToSpaceMapper
+               G1PageBasedVirtualSpace::G1PageBasedVirtualSpace
+               __memset_evex_unaligned_erms
+               asm_exc_page_fault
+
+     9.13%     0.00%             0  java             libjvm.so             [.] init_globals
+            |
+            ---init_globals
+               universe_init
+               G1CollectedHeap::initialize
+               G1RegionToSpaceMapper::create_mapper
+               G1RegionToSpaceMapper::G1RegionToSpaceMapper
+               G1PageBasedVirtualSpace::G1PageBasedVirtualSpace
+               __memset_evex_unaligned_erms
+               asm_exc_page_fault
+
+     9.13%     0.00%             0  java             libjvm.so             [.] universe_init
+            |
+            ---universe_init
+               G1CollectedHeap::initialize
+               G1RegionToSpaceMapper::create_mapper
+               G1RegionToSpaceMapper::G1RegionToSpaceMapper
+               G1PageBasedVirtualSpace::G1PageBasedVirtualSpace
+               __memset_evex_unaligned_erms
+               asm_exc_page_fault
+
+     9.13%     0.00%             0  java             libjvm.so             [.] G1CollectedHeap::initialize
+            |
+            ---G1CollectedHeap::initialize
+               G1RegionToSpaceMapper::create_mapper
+               G1RegionToSpaceMapper::G1RegionToSpaceMapper
+               G1PageBasedVirtualSpace::G1PageBasedVirtualSpace
+               __memset_evex_unaligned_erms
+               asm_exc_page_fault
+
+     9.13%     0.00%             0  java             libjvm.so             [.] G1RegionToSpaceMapper::create_mapper
+            |
+            ---G1RegionToSpaceMapper::create_mapper
+               G1RegionToSpaceMapper::G1RegionToSpaceMapper
+               G1PageBasedVirtualSpace::G1PageBasedVirtualSpace
+               __memset_evex_unaligned_erms
+               asm_exc_page_fault
+
+     9.13%     0.00%             0  java             libjvm.so             [.] G1RegionToSpaceMapper::G1RegionToSpaceMapper
+            |
+            ---G1RegionToSpaceMapper::G1RegionToSpaceMapper
+               G1PageBasedVirtualSpace::G1PageBasedVirtualSpace
+               __memset_evex_unaligned_erms
+               asm_exc_page_fault
+
+     9.13%     0.00%             0  java             libjvm.so             [.] G1PageBasedVirtualSpace::G1PageBasedVirtualSpace
+            |
+            ---G1PageBasedVirtualSpace::G1PageBasedVirtualSpace
+               __memset_evex_unaligned_erms
+               asm_exc_page_fault
+
+     9.08%     9.08%             1  C1 CompilerThre  libjvm.so             [.] NullCheckEliminator::iterate_one
+            |
+            ---start_thread
+               thread_native_entry
+               Thread::call_run
+               JavaThread::thread_main_inner
+               CompileBroker::compiler_thread_loop
+               CompileBroker::invoke_compiler_on_method
+               Compiler::compile_method
+               Compilation::Compilation
+               Compilation::compile_method
+               Compilation::compile_java_method
+               Compilation::build_hir
+               IR::eliminate_null_checks
+               Optimizer::eliminate_null_checks
+               NullCheckEliminator::iterate_one
+
+     9.08%     0.00%             0  C1 CompilerThre  libc.so.6             [.] start_thread
+            |
+            ---start_thread
+               thread_native_entry
+               Thread::call_run
+               JavaThread::thread_main_inner
+               CompileBroker::compiler_thread_loop
+               CompileBroker::invoke_compiler_on_method
+               Compiler::compile_method
+               Compilation::Compilation
+               Compilation::compile_method
+               Compilation::compile_java_method
+               Compilation::build_hir
+               IR::eliminate_null_checks
+               Optimizer::eliminate_null_checks
+               NullCheckEliminator::iterate_one
+
+     9.08%     0.00%             0  C1 CompilerThre  libjvm.so             [.] thread_native_entry
+            |
+            ---thread_native_entry
+               Thread::call_run
+               JavaThread::thread_main_inner
+               CompileBroker::compiler_thread_loop
+               CompileBroker::invoke_compiler_on_method
+               Compiler::compile_method
+               Compilation::Compilation
+               Compilation::compile_method
+               Compilation::compile_java_method
+               Compilation::build_hir
+               IR::eliminate_null_checks
+               Optimizer::eliminate_null_checks
+               NullCheckEliminator::iterate_one
+
+     9.08%     0.00%             0  C1 CompilerThre  libjvm.so             [.] Thread::call_run
+            |
+            ---Thread::call_run
+               JavaThread::thread_main_inner
+               CompileBroker::compiler_thread_loop
+               CompileBroker::invoke_compiler_on_method
+               Compiler::compile_method
+               Compilation::Compilation
+               Compilation::compile_method
+               Compilation::compile_java_method
+               Compilation::build_hir
+               IR::eliminate_null_checks
+               Optimizer::eliminate_null_checks
+               NullCheckEliminator::iterate_one
+
+     9.08%     0.00%             0  C1 CompilerThre  libjvm.so             [.] JavaThread::thread_main_inner
+            |
+            ---JavaThread::thread_main_inner
+               CompileBroker::compiler_thread_loop
+               CompileBroker::invoke_compiler_on_method
+               Compiler::compile_method
+               Compilation::Compilation
+               Compilation::compile_method
+               Compilation::compile_java_method
+               Compilation::build_hir
+               IR::eliminate_null_checks
+               Optimizer::eliminate_null_checks
+               NullCheckEliminator::iterate_one
+
+     9.08%     0.00%             0  C1 CompilerThre  libjvm.so             [.] CompileBroker::compiler_thread_loop
+            |
+            ---CompileBroker::compiler_thread_loop
+               CompileBroker::invoke_compiler_on_method
+               Compiler::compile_method
+               Compilation::Compilation
+               Compilation::compile_method
+               Compilation::compile_java_method
+               Compilation::build_hir
+               IR::eliminate_null_checks
+               Optimizer::eliminate_null_checks
+               NullCheckEliminator::iterate_one
+
+     9.08%     0.00%             0  C1 CompilerThre  libjvm.so             [.] CompileBroker::invoke_compiler_on_method
+            |
+            ---CompileBroker::invoke_compiler_on_method
+               Compiler::compile_method
+               Compilation::Compilation
+               Compilation::compile_method
+               Compilation::compile_java_method
+               Compilation::build_hir
+               IR::eliminate_null_checks
+               Optimizer::eliminate_null_checks
+               NullCheckEliminator::iterate_one
+
+     9.08%     0.00%             0  C1 CompilerThre  libjvm.so             [.] Compiler::compile_method
+            |
+            ---Compiler::compile_method
+               Compilation::Compilation
+               Compilation::compile_method
+               Compilation::compile_java_method
+               Compilation::build_hir
+               IR::eliminate_null_checks
+               Optimizer::eliminate_null_checks
+               NullCheckEliminator::iterate_one
+
+     9.08%     0.00%             0  C1 CompilerThre  libjvm.so             [.] Compilation::Compilation
+            |
+            ---Compilation::Compilation
+               Compilation::compile_method
+               Compilation::compile_java_method
+               Compilation::build_hir
+               IR::eliminate_null_checks
+               Optimizer::eliminate_null_checks
+               NullCheckEliminator::iterate_one
+
+     9.08%     0.00%             0  C1 CompilerThre  libjvm.so             [.] Compilation::compile_method
+            |
+            ---Compilation::compile_method
+               Compilation::compile_java_method
+               Compilation::build_hir
+               IR::eliminate_null_checks
+               Optimizer::eliminate_null_checks
+               NullCheckEliminator::iterate_one
+
+     9.08%     0.00%             0  C1 CompilerThre  libjvm.so             [.] Compilation::compile_java_method
+            |
+            ---Compilation::compile_java_method
+               Compilation::build_hir
+               IR::eliminate_null_checks
+               Optimizer::eliminate_null_checks
+               NullCheckEliminator::iterate_one
+
+     9.08%     0.00%             0  C1 CompilerThre  libjvm.so             [.] Compilation::build_hir
+            |
+            ---Compilation::build_hir
+               IR::eliminate_null_checks
+               Optimizer::eliminate_null_checks
+               NullCheckEliminator::iterate_one
+
+     9.08%     0.00%             0  C1 CompilerThre  libjvm.so             [.] IR::eliminate_null_checks
+            |
+            ---IR::eliminate_null_checks
+               Optimizer::eliminate_null_checks
+               NullCheckEliminator::iterate_one
+
+     9.08%     0.00%             0  C1 CompilerThre  libjvm.so             [.] Optimizer::eliminate_null_checks
+            |
+            ---Optimizer::eliminate_null_checks
+               NullCheckEliminator::iterate_one
+
+     8.32%     8.32%             1  C2 CompilerThre  libjvm.so             [.] PhaseChaitin::gather_lrg_masks
+            |
+            ---start_thread
+               thread_native_entry
+               Thread::call_run
+               JavaThread::thread_main_inner
+               CompileBroker::compiler_thread_loop
+               CompileBroker::init_compiler_runtime
+               C2Compiler::initialize
+               OptoRuntime::generate
+               OptoRuntime::generate_stub
+               Compile::Compile
+               Compile::Code_Gen
+               PhaseChaitin::Register_Allocate
+               PhaseChaitin::gather_lrg_masks
+
+     8.32%     0.00%             0  C2 CompilerThre  libc.so.6             [.] start_thread
+            |
+            ---start_thread
+               thread_native_entry
+               Thread::call_run
+               JavaThread::thread_main_inner
+               CompileBroker::compiler_thread_loop
+               CompileBroker::init_compiler_runtime
+               C2Compiler::initialize
+               OptoRuntime::generate
+               OptoRuntime::generate_stub
+               Compile::Compile
+               Compile::Code_Gen
+               PhaseChaitin::Register_Allocate
+               PhaseChaitin::gather_lrg_masks
+
+     8.32%     0.00%             0  C2 CompilerThre  libjvm.so             [.] thread_native_entry
+            |
+            ---thread_native_entry
+               Thread::call_run
+               JavaThread::thread_main_inner
+               CompileBroker::compiler_thread_loop
+               CompileBroker::init_compiler_runtime
+               C2Compiler::initialize
+               OptoRuntime::generate
+               OptoRuntime::generate_stub
+               Compile::Compile
+               Compile::Code_Gen
+               PhaseChaitin::Register_Allocate
+               PhaseChaitin::gather_lrg_masks
+
+     8.32%     0.00%             0  C2 CompilerThre  libjvm.so             [.] Thread::call_run
+            |
+            ---Thread::call_run
+               JavaThread::thread_main_inner
+               CompileBroker::compiler_thread_loop
+               CompileBroker::init_compiler_runtime
+               C2Compiler::initialize
+               OptoRuntime::generate
+               OptoRuntime::generate_stub
+               Compile::Compile
+               Compile::Code_Gen
+               PhaseChaitin::Register_Allocate
+               PhaseChaitin::gather_lrg_masks
+
+     8.32%     0.00%             0  C2 CompilerThre  libjvm.so             [.] JavaThread::thread_main_inner
+            |
+            ---JavaThread::thread_main_inner
+               CompileBroker::compiler_thread_loop
+               CompileBroker::init_compiler_runtime
+               C2Compiler::initialize
+               OptoRuntime::generate
+               OptoRuntime::generate_stub
+               Compile::Compile
+               Compile::Code_Gen
+               PhaseChaitin::Register_Allocate
+               PhaseChaitin::gather_lrg_masks
+
+     8.32%     0.00%             0  C2 CompilerThre  libjvm.so             [.] CompileBroker::compiler_thread_loop
+            |
+            ---CompileBroker::compiler_thread_loop
+               CompileBroker::init_compiler_runtime
+               C2Compiler::initialize
+               OptoRuntime::generate
+               OptoRuntime::generate_stub
+               Compile::Compile
+               Compile::Code_Gen
+               PhaseChaitin::Register_Allocate
+               PhaseChaitin::gather_lrg_masks
+
+     8.32%     0.00%             0  C2 CompilerThre  libjvm.so             [.] CompileBroker::init_compiler_runtime
+            |
+            ---CompileBroker::init_compiler_runtime
+               C2Compiler::initialize
+               OptoRuntime::generate
+               OptoRuntime::generate_stub
+               Compile::Compile
+               Compile::Code_Gen
+               PhaseChaitin::Register_Allocate
+               PhaseChaitin::gather_lrg_masks
+
+     8.32%     0.00%             0  C2 CompilerThre  libjvm.so             [.] C2Compiler::initialize
+            |
+            ---C2Compiler::initialize
+               OptoRuntime::generate
+               OptoRuntime::generate_stub
+               Compile::Compile
+               Compile::Code_Gen
+               PhaseChaitin::Register_Allocate
+               PhaseChaitin::gather_lrg_masks
+
+     8.32%     0.00%             0  C2 CompilerThre  libjvm.so             [.] OptoRuntime::generate
+            |
+            ---OptoRuntime::generate
+               OptoRuntime::generate_stub
+               Compile::Compile
+               Compile::Code_Gen
+               PhaseChaitin::Register_Allocate
+               PhaseChaitin::gather_lrg_masks
+
+     8.32%     0.00%             0  C2 CompilerThre  libjvm.so             [.] OptoRuntime::generate_stub
+            |
+            ---OptoRuntime::generate_stub
+               Compile::Compile
+               Compile::Code_Gen
+               PhaseChaitin::Register_Allocate
+               PhaseChaitin::gather_lrg_masks
+
+     8.32%     0.00%             0  C2 CompilerThre  libjvm.so             [.] Compile::Compile
+            |
+            ---Compile::Compile
+               Compile::Code_Gen
+               PhaseChaitin::Register_Allocate
+               PhaseChaitin::gather_lrg_masks
+
+     8.32%     0.00%             0  C2 CompilerThre  libjvm.so             [.] Compile::Code_Gen
+            |
+            ---Compile::Code_Gen
+               PhaseChaitin::Register_Allocate
+               PhaseChaitin::gather_lrg_masks
+
+     8.32%     0.00%             0  C2 CompilerThre  libjvm.so             [.] PhaseChaitin::Register_Allocate
+            |
+            ---PhaseChaitin::Register_Allocate
+               PhaseChaitin::gather_lrg_masks
+
+     6.17%     6.17%             1  java             [kernel.kallsyms]     [k] next_uptodate_page
+            |
+            ---dl_open_worker_begin
+               _dl_relocate_object
+               asm_exc_page_fault
+               exc_page_fault
+               do_user_addr_fault
+               handle_mm_fault
+               __handle_mm_fault
+               handle_pte_fault
+               do_fault
+               do_read_fault
+               filemap_map_pages
+               next_uptodate_page
+
+     6.17%     0.00%             0  java             ld-linux-x86-64.so.2  [.] dl_open_worker_begin
+            |
+            ---dl_open_worker_begin
+               _dl_relocate_object
+               asm_exc_page_fault
+               exc_page_fault
+               do_user_addr_fault
+               handle_mm_fault
+               __handle_mm_fault
+               handle_pte_fault
+               do_fault
+               do_read_fault
+               filemap_map_pages
+               next_uptodate_page
+
+     6.17%     0.00%             0  java             ld-linux-x86-64.so.2  [.] _dl_relocate_object
+            |
+            ---_dl_relocate_object
+               asm_exc_page_fault
+               exc_page_fault
+               do_user_addr_fault
+               handle_mm_fault
+               __handle_mm_fault
+               handle_pte_fault
+               do_fault
+               do_read_fault
+               filemap_map_pages
+               next_uptodate_page
+
+     6.17%     0.00%             0  java             [kernel.kallsyms]     [k] exc_page_fault
+            |
+            ---exc_page_fault
+               do_user_addr_fault
+               handle_mm_fault
+               __handle_mm_fault
+               handle_pte_fault
+               do_fault
+               do_read_fault
+               filemap_map_pages
+               next_uptodate_page
+
+     6.17%     0.00%             0  java             [kernel.kallsyms]     [k] do_user_addr_fault
+            |
+            ---do_user_addr_fault
+               handle_mm_fault
+               __handle_mm_fault
+               handle_pte_fault
+               do_fault
+               do_read_fault
+               filemap_map_pages
+               next_uptodate_page
+
+     6.17%     0.00%             0  java             [kernel.kallsyms]     [k] handle_mm_fault
+            |
+            ---handle_mm_fault
+               __handle_mm_fault
+               handle_pte_fault
+               do_fault
+               do_read_fault
+               filemap_map_pages
+               next_uptodate_page
+
+     6.17%     0.00%             0  java             [kernel.kallsyms]     [k] __handle_mm_fault
+            |
+            ---__handle_mm_fault
+               handle_pte_fault
+               do_fault
+               do_read_fault
+               filemap_map_pages
+               next_uptodate_page
+
+     6.17%     0.00%             0  java             [kernel.kallsyms]     [k] handle_pte_fault
+            |
+            ---handle_pte_fault
+               do_fault
+               do_read_fault
+               filemap_map_pages
+               next_uptodate_page
+
+     6.17%     0.00%             0  java             [kernel.kallsyms]     [k] do_fault
+            |
+            ---do_fault
+               do_read_fault
+               filemap_map_pages
+               next_uptodate_page
+
+     6.17%     0.00%             0  java             [kernel.kallsyms]     [k] do_read_fault
+            |
+            ---do_read_fault
+               filemap_map_pages
+               next_uptodate_page
+
+     6.17%     0.00%             0  java             [kernel.kallsyms]     [k] filemap_map_pages
+            |
+            ---filemap_map_pages
+               next_uptodate_page
+
+     3.00%     0.00%             0  java             [JIT] tid 2585494     [.] 0x00007f1eec9875c0
+            |
+            ---0x7f1eec9875c0
+
+     2.99%     2.99%             1  java             [JIT] tid 2585494     [.] 0x00007f1eec9875ba
+            |
+            ---start_thread
+               ThreadJavaMain
+               JavaMain
+               jni_CallStaticVoidMethod
+               jni_invoke_static
+               JavaCalls::call_helper
+               0x7f1eec977cc9
+               0x7f1eec9802a5
+               0x7f1eec980260
+               0x7f1eec980260
+               0x7f1eec980260
+               0x7f1eec9875c0
+
+     2.72%     2.72%             1  java             [JIT] tid 2585494     [.] 0x00007f1eed14b89e
+            |
+            ---0x7f1eed14b8a1
+
+     2.72%     0.00%             0  java             [JIT] tid 2585494     [.] 0x00007f1eed14b8a1
+            |
+            ---0x7f1eed14b8a1
+
+     2.26%     2.26%             1  java             [JIT] tid 2585494     [.] 0x00007f1eed14b8c9
+            |
+            ---0x7f1eed14b8cd
+
+     2.26%     0.00%             0  java             [JIT] tid 2585494     [.] 0x00007f1eed14b8cd
+            |
+            ---0x7f1eed14b8cd
+
+     1.99%     1.99%             1  java             [JIT] tid 2585494     [.] 0x00007f1eec988369
+            |
+            ---start_thread
+               ThreadJavaMain
+               JavaMain
+               jni_CallStaticVoidMethod
+               jni_invoke_static
+               JavaCalls::call_helper
+               0x7f1eec977cc9
+               0x7f1eec9802a5
+               0x7f1eec980260
+               0x7f1eec980260
+               0x7f1eec980260
+               0x7f1eec98836c
+
+     1.99%     0.00%             0  java             [JIT] tid 2585494     [.] 0x00007f1eec98836c
+            |
+            ---0x7f1eec98836c
+
+     1.98%     1.98%             1  java             [JIT] tid 2585494     [.] 0x00007f1eec98694c
+            |
+            ---start_thread
+               ThreadJavaMain
+               JavaMain
+               jni_CallStaticVoidMethod
+               jni_invoke_static
+               JavaCalls::call_helper
+               0x7f1eec977cc9
+               0x7f1eec9802a5
+               0x7f1eec989129
+
+     1.98%     0.00%             0  java             [JIT] tid 2585494     [.] 0x00007f1eec989129
+            |
+            ---0x7f1eec989129
+
+     1.40%     0.00%             0  java             libjvm.so             [.] thread_native_entry
+            |
+            ---thread_native_entry
+               |          
+                --1.20%--Thread::record_stack_base_and_size
+                          |          
+                           --0.99%--os::current_stack_base
+
+     1.20%     0.60%             3  java             libjvm.so             [.] os::current_stack_base
+            |          
+            |--0.60%--start_thread
+            |          thread_native_entry
+            |          
+             --0.60%--os::current_stack_base
+
+     1.20%     0.00%             0  java             libjvm.so             [.] Thread::record_stack_base_and_size
+            |
+            ---Thread::record_stack_base_and_size
+               |          
+                --0.99%--os::current_stack_base
+
+     0.86%     0.00%             0  java             [kernel.kallsyms]     [k] entry_SYSCALL_64_after_hwframe
+            |
+            ---entry_SYSCALL_64_after_hwframe
+               do_syscall_64
+
+     0.86%     0.00%             0  java             [kernel.kallsyms]     [k] do_syscall_64
+            |
+            ---do_syscall_64
+
+     0.55%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] entry_SYSCALL_64_after_hwframe
+            |
+            ---entry_SYSCALL_64_after_hwframe
+               do_syscall_64
+               x64_sys_call
+               |          
+                --0.55%--__x64_sys_madvise
+                          do_madvise.part.0
+                          zap_page_range
+                          unmap_single_vma
+                          unmap_page_range
+
+     0.55%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] do_syscall_64
+            |
+            ---do_syscall_64
+               x64_sys_call
+               |          
+                --0.55%--__x64_sys_madvise
+                          do_madvise.part.0
+                          zap_page_range
+                          unmap_single_vma
+                          unmap_page_range
+
+     0.55%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] x64_sys_call
+            |
+            ---x64_sys_call
+               |          
+                --0.55%--__x64_sys_madvise
+                          do_madvise.part.0
+                          zap_page_range
+                          unmap_single_vma
+                          unmap_page_range
+
+     0.55%     0.55%             1  G1 Main Marker   [kernel.kallsyms]     [k] unmap_page_range
+            |
+            ---__madvise
+               entry_SYSCALL_64_after_hwframe
+               do_syscall_64
+               x64_sys_call
+               __x64_sys_madvise
+               do_madvise.part.0
+               zap_page_range
+               unmap_single_vma
+               unmap_page_range
+
+     0.55%     0.00%             0  G1 Main Marker   libc.so.6             [.] __madvise
+            |
+            ---__madvise
+               entry_SYSCALL_64_after_hwframe
+               do_syscall_64
+               x64_sys_call
+               __x64_sys_madvise
+               do_madvise.part.0
+               zap_page_range
+               unmap_single_vma
+               unmap_page_range
+
+     0.55%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] __x64_sys_madvise
+            |
+            ---__x64_sys_madvise
+               do_madvise.part.0
+               zap_page_range
+               unmap_single_vma
+               unmap_page_range
+
+     0.55%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] do_madvise.part.0
+            |
+            ---do_madvise.part.0
+               zap_page_range
+               unmap_single_vma
+               unmap_page_range
+
+     0.55%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] zap_page_range
+            |
+            ---zap_page_range
+               unmap_single_vma
+               unmap_page_range
+
+     0.55%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] unmap_single_vma
+            |
+            ---unmap_single_vma
+               unmap_page_range
+
+     0.53%     0.53%             1  java             libc.so.6             [.] _int_free
+            |
+            ---0xa5
+               _int_free
+
+     0.53%     0.00%             0  java             [unknown]             [.] 0x00000000000000a5
+            |
+            ---0xa5
+               _int_free
+
+     0.42%     0.00%             3  java             [unknown]             [.] 0000000000000000
+     0.42%     0.42%             2  java             libc.so.6             [.] __getpagesize
+     0.40%     0.40%             2  java             [kernel.kallsyms]     [k] syscall_return_via_sysret
+     0.40%     0.40%             2  java             libc.so.6             [.] __GI___pthread_self
+     0.26%     0.00%             0  java             [kernel.kallsyms]     [k] x64_sys_call
+     0.22%     0.22%             1  java             [kernel.kallsyms]     [k] __audit_syscall_entry
+     0.22%     0.00%             0  java             [kernel.kallsyms]     [k] syscall_enter_from_user_mode
+     0.21%     0.21%             1  java             libc.so.6             [.] 0x00000000000283b4
+     0.21%     0.00%             0  java             [unknown]             [.] 0x0000000000000089
+     0.21%     0.00%             0  java             libc.so.6             [.] realloc
+     0.21%     0.21%             1  java             libjvm.so             [.] current_stack_region
+     0.20%     0.20%             1  java             libjvm.so             [.] pthread_getattr_np@plt
+     0.20%     0.00%             0  java             libc.so.6             [.] pthread_getattr_np@@GLIBC_2.32
+     0.20%     0.20%             1  java             [kernel.kallsyms]     [k] sigprocmask
+     0.20%     0.00%             0  java             [kernel.kallsyms]     [k] __x64_sys_rt_sigprocmask
+     0.19%     0.19%             1  java             [kernel.kallsyms]     [k] __x64_sys_rseq
+     0.19%     0.00%             0  java             [kernel.kallsyms]     [k] exit_to_user_mode_prepare
+     0.19%     0.00%             0  java             [kernel.kallsyms]     [k] exit_to_user_mode_loop
+     0.19%     0.19%             1  java             [kernel.kallsyms]     [k] __get_user_8
+     0.19%     0.00%             0  java             [kernel.kallsyms]     [k] syscall_exit_to_user_mode
+     0.19%     0.00%             0  java             [kernel.kallsyms]     [k] __rseq_handle_notify_resume
+     0.19%     0.00%             0  java             [kernel.kallsyms]     [k] rseq_ip_fixup
+     0.18%     0.18%             1  java             [kernel.kallsyms]     [k] entry_SYSCALL_64
+     0.06%     0.06%             1  java             [kernel.kallsyms]     [k] flush_signal_handlers
+     0.06%     0.00%             0  java             [unknown]             [k] 0x00007f6526f4108b
+     0.06%     0.00%             0  java             [kernel.kallsyms]     [k] __x64_sys_execve
+     0.06%     0.00%             0  java             [kernel.kallsyms]     [k] do_execveat_common.isra.0
+     0.06%     0.00%             0  java             [kernel.kallsyms]     [k] bprm_execve
+     0.06%     0.00%             0  java             [kernel.kallsyms]     [k] bprm_execve.part.0
+     0.06%     0.00%             0  java             [kernel.kallsyms]     [k] exec_binprm
+     0.06%     0.00%             0  java             [kernel.kallsyms]     [k] search_binary_handler
+     0.06%     0.00%             0  java             [kernel.kallsyms]     [k] load_elf_binary
+     0.06%     0.00%             0  java             [kernel.kallsyms]     [k] begin_new_exec
+     0.02%     0.00%            54  java             [kernel.kallsyms]     [k] native_write_msr
+     0.02%     0.00%             0  java             [kernel.kallsyms]     [k] finish_task_switch.isra.0
+     0.02%     0.00%             0  java             [kernel.kallsyms]     [k] __perf_event_task_sched_in
+     0.02%     0.00%             0  java             [kernel.kallsyms]     [k] x86_pmu_enable
+     0.02%     0.00%             0  java             [kernel.kallsyms]     [k] intel_pmu_enable_all
+     0.02%     0.02%            18  java             [kernel.kallsyms]     [k] native_sched_clock
+     0.01%     0.00%             0  java             libc.so.6             [.] clone3
+     0.01%     0.00%             0  java             [kernel.kallsyms]     [k] ret_from_fork
+     0.01%     0.00%             0  java             [kernel.kallsyms]     [k] schedule_tail
+     0.01%     0.00%             0  java             [kernel.kallsyms]     [k] schedule
+     0.01%     0.00%             0  java             [kernel.kallsyms]     [k] __schedule
+     0.01%     0.00%             0  java             [kernel.kallsyms]     [k] asm_sysvec_reschedule_ipi
+     0.01%     0.00%             0  java             [kernel.kallsyms]     [k] sysvec_reschedule_ipi
+     0.01%     0.00%             0  java             [kernel.kallsyms]     [k] irqentry_exit
+     0.01%     0.00%             0  java             [kernel.kallsyms]     [k] irqentry_exit_to_user_mode
+     0.00%     0.00%             3  G1 Main Marker   [kernel.kallsyms]     [k] native_write_msr
+     0.00%     0.00%             0  G1 Main Marker   [unknown]             [k] 0x0000000000000001
+     0.00%     0.00%             0  G1 Main Marker   libc.so.6             [.] __GI___futex_abstimed_wait_cancelable64
+     0.00%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] __x64_sys_futex
+     0.00%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] do_futex
+     0.00%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] futex_wait
+     0.00%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] futex_wait_queue_me
+     0.00%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] schedule
+     0.00%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] __schedule
+     0.00%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] finish_task_switch.isra.0
+     0.00%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] __perf_event_task_sched_in
+     0.00%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] x86_pmu_enable
+     0.00%     0.00%             0  G1 Main Marker   [kernel.kallsyms]     [k] intel_pmu_enable_all
+     0.00%     0.00%             1  G1 Main Marker   [kernel.kallsyms]     [k] nmi_handle
+     0.00%     0.00%             0  java             libc.so.6             [.] __GI___futex_abstimed_wait_cancelable64
+     0.00%     0.00%             0  java             [kernel.kallsyms]     [k] __x64_sys_futex
+     0.00%     0.00%             0  java             [kernel.kallsyms]     [k] do_futex
+     0.00%     0.00%             0  java             [kernel.kallsyms]     [k] futex_wait
+     0.00%     0.00%             0  java             [kernel.kallsyms]     [k] futex_wait_queue_me
+     0.00%     0.00%             1  java             [kernel.kallsyms]     [k] nmi_handle
+     0.00%     0.00%             3  perf-exec        [kernel.kallsyms]     [k] native_write_msr
+     0.00%     0.00%             0  perf-exec        [unknown]             [k] 0x00007f6526f4108b
+     0.00%     0.00%             0  perf-exec        [kernel.kallsyms]     [k] entry_SYSCALL_64_after_hwframe
+     0.00%     0.00%             0  perf-exec        [kernel.kallsyms]     [k] do_syscall_64
+     0.00%     0.00%             0  perf-exec        [kernel.kallsyms]     [k] x64_sys_call
+     0.00%     0.00%             0  perf-exec        [kernel.kallsyms]     [k] __x64_sys_execve
+     0.00%     0.00%             0  perf-exec        [kernel.kallsyms]     [k] do_execveat_common.isra.0
+     0.00%     0.00%             0  perf-exec        [kernel.kallsyms]     [k] bprm_execve
+     0.00%     0.00%             0  perf-exec        [kernel.kallsyms]     [k] bprm_execve.part.0
+     0.00%     0.00%             0  perf-exec        [kernel.kallsyms]     [k] exec_binprm
+     0.00%     0.00%             0  perf-exec        [kernel.kallsyms]     [k] search_binary_handler
+     0.00%     0.00%             0  perf-exec        [kernel.kallsyms]     [k] load_elf_binary
+     0.00%     0.00%             0  perf-exec        [kernel.kallsyms]     [k] begin_new_exec
+     0.00%     0.00%             0  perf-exec        [kernel.kallsyms]     [k] perf_event_exec
+     0.00%     0.00%             0  perf-exec        [kernel.kallsyms]     [k] ctx_resched
+     0.00%     0.00%             0  perf-exec        [kernel.kallsyms]     [k] x86_pmu_enable
+     0.00%     0.00%             0  perf-exec        [kernel.kallsyms]     [k] intel_pmu_enable_all
+     0.00%     0.00%             1  perf-exec        [kernel.kallsyms]     [k] perf_event_nmi_handler
 
 
 #

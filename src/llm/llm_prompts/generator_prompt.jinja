@@ -1,0 +1,41 @@
+You are tasked with optimizing the following code to improve its performance. This involves reducing latency, reducing CPU cycles, minimizing memory access, and optimizing I/O operations. Please follow these steps and guidelines:
+
+Task Instructions:
+- Analyze the code: Examine the provided code in detail.
+- Analyze the optimization patterns:
+    - The provided optimization patterns were deemed relevant to the code, consider them when generating optimization strategies.
+- Identify optimization opportunities, determine where you can:
+    - Reduce or eliminate nested loops to lower computational overhead.
+    - Select more efficient data structures to minimize memory access and improve performance.
+    - Apply dynamic programming or memoization to avoid redundant calculations and reduce CPU usage where applicable.
+    - Implement specialized algorithms if they can significantly improve performance.
+    - Optimize I/O operations to reduce their impact on overall performance.
+- Suggest optimization strategies: Propose multiple methods to improve performance. For each method:
+    - Provide a detailed explanation of how the optimization improves performance.
+    - Discuss the trade-offs in terms of complexity, maintainability, and performance gains.
+- Choose the most effective optimization: After evaluating each proposed strategy, select the approach that yields the best balance of performance, readability, and maintainability.
+- Implement the chosen optimization: Rewrite the code with the chosen optimization strategies, ensuring:
+    - The optimized code produces the same output as the original code for all valid inputs.
+- Output Requirements:
+    - Begin with a step-by-step analysis of the original code and identify inefficiencies.
+    - Outline each proposed optimization strategy in detail, including the reasoning behind it and its potential impact performance.
+    - Implement the best optimization strategies directly into the code.
+    - Ensure the final code is efficient, correct in terms of functionality, and maintains same output formatting.
+
+Here is the code to optimize, follow the instruction to provide the optimized code WHILE STRICTLY MAINTAINING IT'S FUNCTIONAL EQUIVALENCE:
+{{ code }}
+
+{% if ast %}
+Here is the AST of the source code:
+{{ ast }}
+{% endif %}
+
+{% if flame_report %}
+Here is a textual representation of the flame graph for the current source code:
+{{ flame_report }}
+{% endif %}
+
+{% if optimization_patterns %}
+Here are some relevant optimization patterns:
+{{ optimization_patterns }}
+{% endif %}

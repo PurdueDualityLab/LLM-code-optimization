@@ -11,7 +11,7 @@ import json
 logger = Logger("logs", sys.argv[2]).logger
 
 class LLMAgent:
-    def __init__(self, api_key, genai_api_key, model, use_genai_studio, system_message="You are a helpful assistant."):
+    def __init__(self, openai_api_key, genai_api_key, model, use_genai_studio, system_message="You are a helpful assistant."):
         if not model:
             raise ValueError("A model must be specified when creating a LLM Agent.")
         self.model = model
@@ -21,8 +21,12 @@ class LLMAgent:
         self.genai_api_key = genai_api_key
 
         if self.is_openai_model():
-            self.client = OpenAI(api_key=api_key)
-        elif not use_genai_studio:
+            self.client=OpenAI(api_key=openai_api_key)
+        elif use_genai_studio:
+            self.client=OpenAI(
+                base_url="https://genai.rcac.purdue.edu/api",
+                api_key=genai_api_key)
+        else:
             try:
                 subprocess.run(["ollama", "pull", model], check=True)
             except Exception as e:
@@ -36,24 +40,10 @@ class LLMAgent:
     
     def generate_response(self, response_format=BaseModel):
         try:
-            if self.use_genai_studio:
-                url = "https://genai.rcac.purdue.edu/api/chat/completions"
-                headers = {
-                    "Authorization": f"Bearer {self.genai_api_key}",
-                    "Content-Type": "application/json"
-                }
-                body = {
-                    "model": self.model,
-                    "messages": self.memory,
-                }
-
-                response = requests.post(url, headers=headers, json=body).text
-                response = json.loads(response)
-                content = response['choices'][0]['message']['content']
-            elif (self.is_openai_model()):
+            if self.is_openai_model() or self.use_genai_studio:
                 response = self.client.beta.chat.completions.parse(
                     model = self.model,
-                     messages = self.memory,
+                    messages = self.memory,
                     response_format=response_format
                 )
                 content = response.choices[0].message.content
@@ -82,59 +72,3 @@ class LLMAgent:
     
     def is_genai_studio(self):
         return self.use_genai_studio
-
-class OpenAIAssistant:
-    def __init__(self, api_key: str, name: str, instructions: str, model: str = "gpt-4o"):
-        self.api_key = api_key
-        self.name = name
-        self.instructions = instructions
-        self.model = model
-        self.current_thread = None
-
-        # Create the assistant
-        self.client = OpenAI(api_key=self.api_key)
-        self.assistant = self.client.beta.assistants.create(
-            name=self.name,
-            instructions=self.instructions,
-            model=self.model
-        )
-
-    def create_thread(self):
-        thread = self.client.beta.threads.create()
-        self.current_thread = thread
-        return thread.id
-
-    def get_current_thread_id(self):
-        return self.current_thread.id
-
-    def create_run(self, user_input: str, thread_id: int, output_format=None):
-        if output_format is not None:
-            response_format = response_format={
-                    'type': 'json_schema',
-                    'json_schema': 
-                        {
-                            "name":"whocares", 
-                            "schema": output_format.model_json_schema()
-                        }
-                }
-        else:
-            response_format = None
-        # Create and poll a run
-        run = self.client.beta.threads.runs.create_and_poll(
-            thread_id=thread_id,
-            assistant_id=self.assistant.id,
-            instructions=user_input,
-            response_format=response_format
-        )
-
-        # Poll until the run is completed
-        while run.status != 'completed':
-            time.sleep(2)  # Wait for 2 seconds before retrieving again
-            run = self.client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
-
-        # Retrieve the message history
-        messages = self.client.beta.threads.messages.list(thread_id=thread_id)
-        # Extract the final code or content
-        output = messages.data[0].content[0].text.value
-
-        return output

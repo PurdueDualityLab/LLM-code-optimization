@@ -7,8 +7,8 @@ You are a code optimization expert. Evaluate the following current code snippet 
 - Identify potential inefficiencies in terms of time complexity (e.g., algorithm choice) and space complexity (e.g., memory usage).
 - Highlight any specific patterns or functions that are likely to consume excessive computational resources.
   
-3. **Comparison to Best Optimized Code**:
-- Compare the current code with the best optimized code (lowest latency) provided. Highlight key differences that contribute to code efficiency, such as:
+3. **Comparison to Original Code**:
+- Compare the current code with the original code. Highlight key differences that contribute to code efficiency, such as:
     - Use of more efficient data structures or algorithms.
     - Modifications that reduce resource-intensive operations.
     - Opportunities to utilize hardware more efficiently (e.g., parallelism, vectorization, etc.).
@@ -21,3 +21,21 @@ You are a code optimization expert. Evaluate the following current code snippet 
 5. **Best Practices**:
 - Suggest best practices and coding patterns for efficient code, particularly focusing on areas where the current code deviates from these principles.
 - Point out potential areas where resource could be saved, such as reducing CPU-bound tasks, optimizing memory usage, or minimizing I/O operations.
+
+Here is the original code snippet:
+
+{{ original_source_code }}
+Average runtime in ms: {{ original_avg_runtime }}
+
+Here is the code snippiets that you are tasked to optimize:
+
+{{ current_source_code }}
+
+Average speedup: {{ current_avg_runtime }}
+
+{% if flame_report %}
+Here is a textual representation of the flame graph for the current source code:
+{{ flame_report }}
+{% endif %}
+
+Please respond in natural language (English) with actionable suggestions for improving the current code's performance.

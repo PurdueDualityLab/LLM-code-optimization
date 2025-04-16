@@ -5,33 +5,39 @@ from scripts.read_pattern_cat import get_patterns
 import json
 import sys
 import os
+from jinja2 import Environment, FileSystemLoader
 
 logger = Logger("logs", sys.argv[2]).logger
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
-energy_patterns = f"{USER_PREFIX}/pattern_catalog/energy_patterns.xlsx"
-with open(f"{USER_PREFIX}/src/llm/llm_prompts/advisor_prompt.txt", "r") as file:
-    advisor_prompt = file.read()
 
-def filter_patterns(llm_assistant, source_code):
+env = Environment(loader=FileSystemLoader(f"{USER_PREFIX}/src/llm/llm_prompts"))
+energy_patterns = f"{USER_PREFIX}/pattern_catalog/energy_patterns.xlsx"
+#with open(f"{USER_PREFIX}/src/llm/llm_prompts/advisor_prompt.txt", "r") as file:
+#    advisor_prompt = file.read()
+
+def filter_patterns(llm_assistant, code):
     class Pattern(BaseModel):
         pattern_name: str
         pattern_description: str
         pattern_example: str
+        rank: str
+        reasoning: str
 
     class PatternSelection(BaseModel):
         patterns: list[Pattern]
 
-    # get patterns from pattern catalog
-    # patterns is in JSON format
     patterns = get_patterns(file_path=energy_patterns)
 
-    # update prompt with patterns & source code
-    updated_prompt = advisor_prompt.replace('{patterns}', patterns).replace('{source_code}', source_code)
+    template = env.get_template("advisor_prompt.jinja")
+    data = {
+        "code": code,
+        "patterns": patterns,
+    }
+    prompt = template.render(data)
 
-    # inference with LLM
     logger.info(f"filter patterns: Advisor LLM filtering patterns ....")
-    llm_assistant.add_to_memory("user", updated_prompt)
+    llm_assistant.add_to_memory("user", prompt)
     if llm_assistant.generate_response(response_format=PatternSelection) != 1:
         return -1
     response = llm_assistant.get_last_msg()
@@ -39,18 +45,20 @@ def filter_patterns(llm_assistant, source_code):
         return -1
     logger.info(response)
 
-    # format response
     try:
         if (llm_assistant.is_openai_model()):
             content_dict = json.loads(response["content"])
             patterns = "\n".join(
-                f"{entry['pattern_name']}:\nDescription:{entry['pattern_description']}\nExample:{entry['pattern_example']}"
+                f"{entry['pattern_name']}:\nDescription:{entry['pattern_description']}\nExample:{entry['pattern_example']}\nRank:{entry['rank']}\nReasoning:{entry['reasoning']}"
                 for entry in content_dict["patterns"]
             )
         else:
-            #TODO Need to fix patterns assignment below.
-            patterns = [entry.pattern_name for entry in PatternSelection.model_validate_json(response["content"]).patterns]
-        return patterns
+            patterns = "\n".join(
+                 f"Pattern Name:{entry['pattern_name']}:\nDescription:{entry['pattern_description']}\nExample:{entry['pattern_example']}\nRank:{entry['rank']}\nReasoning:{entry['reasoning']}"
+                 for entry in PatternSelection.model_validate_json(response["content"]).patterns
+            )
     except json.JSONDecodeError as e:
         logger.error(f"Failed to decode JSON: {e}")
         return
+
+    return patterns

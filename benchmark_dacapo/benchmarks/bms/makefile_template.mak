@@ -1,22 +1,13 @@
-BENCHMARK ?= fop
-TEST_GROUP ?= pdf
-TEST_CLASS ?= PDFNumsArray
+TEST ?= org.biojava.nbio.core.sequence.JoiningSequenceReaderTest
 
 compile:
-ifeq ($(BENCHMARK),fop)
-	sudo mvn compile -q
-endif
+	sudo mvn compile -q	
 
 measure:
-ifeq ($(BENCHMARK),fop)
+	sudo mvn test -Dtest=$(TEST)
 	sudo modprobe msr
-	sudo /home/hpeng/E2COOL/RAPL/main "mvn surefire:test -Dtest=org.apache.fop.$(TEST_GROUP).$(TEST_CLASS)TestCase" java fop_$(TEST_GROUP)_$(TEST_CLASS)
-	sudo chmod -R 777 /home/hpeng/E2COOL/src/runtime_logs/java.csv
-endif
+	sudo ${USER_PREFIX}/RAPL/main "sudo mvn surefire:test -Dtest=$(TEST)" java $(TEST)
+	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
 
 test:
-ifeq ($(BENCHMARK),fop)
-	sudo mvn surefire:test -Dtest=org.apache.fop.$(TEST_GROUP).$(TEST_CLASS)TestCase
-endif
-
-	
+	sudo mvn test -Dtest=$(TEST)
