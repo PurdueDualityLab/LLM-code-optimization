@@ -159,6 +159,10 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                     last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast)
                 reoptimize_lastly_flag = 0
             
+            # error handling
+            if last_optimized_code == None:
+                continue
+            
             # code post_process
             last_optimized_code = benchmark_obj.post_process(last_optimized_code)
 
@@ -248,6 +252,12 @@ def ablation_script_level_1_and_2(benchmark, num_programs, application_name, mod
         else:
             logger.info(f"Optimizing {program} with only source code")
             optimized_code = llm_optimize(code=original_code, llm_assistant=generator)
+            
+         # error handling
+        if optimized_code == None:
+            logger.error("Error in optimized file")
+            results[program] = "Unable to produce functional equivalent programs."
+            continue
         
         # code post_process
         optimized_code = benchmark_obj.post_process(optimized_code)
