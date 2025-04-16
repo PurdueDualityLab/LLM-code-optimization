@@ -12,6 +12,7 @@ from energy_language_benchmark import get_valid_energy_language_programs, Energy
 from pie_benchmark import get_valid_pie_programs, PIEBenchmark
 from scimark_benchmark import get_valid_scimark_programs, SciMarkBenchmark
 from dacapo_benchmark import get_valid_dacapo_classes, DaCapoBenchmark
+from collections import defaultdict
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
@@ -210,15 +211,7 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         generator.clear_memory()
         evaluator.clear_memory()
 
-    try:
-        results_dir
-    except NameError:
-        results_dir = f"{USER_PREFIX}/results"
-
-    if not os.path.exists(results_dir):
-        os.makedirs(results_dir)
-    with open(f"{results_dir}/results.txt", "w+") as file:
-        json.dump(results, file, indent=4)
+    evaluation_summary(results, results_dir)
         
 def ablation_script_level_1_and_2(benchmark, num_programs, application_name, model, use_genai_studio, ablation):
     #create LLM agent
@@ -243,11 +236,11 @@ def ablation_script_level_1_and_2(benchmark, num_programs, application_name, mod
         # create direct if not exist
         if not os.path.exists(f"{USER_PREFIX}/results/ablation"):
             os.makedirs(f"{USER_PREFIX}/results/ablation")
-        if not os.path.exists(f"{USER_PREFIX}/results/ablation/level1"):
-            os.makedirs(f"{USER_PREFIX}/results/ablation/level1")
-        results_dir = f"{USER_PREFIX}/results/ablation/level1"
+        if not os.path.exists(f"{USER_PREFIX}/results/ablation/level_{ablation}"):
+            os.makedirs(f"{USER_PREFIX}/results/ablation/level_{ablation}")
+        results_dir = f"{USER_PREFIX}/results/ablation/level_{ablation}"
         
-        if ablation == 1:
+        if ablation == 2:
             logger.info(f"Optimizing {program} with ast and flamegraph")
             ast = benchmark_obj.pre_process(original_code)
             flame_report = benchmark_obj.dynamic_analysis(optimized=False)
@@ -271,7 +264,10 @@ def ablation_script_level_1_and_2(benchmark, num_programs, application_name, mod
             energy_data = benchmark_obj.get_energy_data()
             evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
             results[program] = write_result(energy_data, program, evaluator_feedback_data, results_dir)
+    
+    evaluation_summary(results, results_dir)
 
+def evaluation_summary(results, results_dir):
     try:
         results_dir
     except NameError:
@@ -281,6 +277,59 @@ def ablation_script_level_1_and_2(benchmark, num_programs, application_name, mod
         os.makedirs(results_dir)
     with open(f"{results_dir}/results.txt", "w+") as file:
         json.dump(results, file, indent=4)
+        
+    # final evaluation result
+    total_programs = len(results)
+    valid_programs = {k: v for k, v in results.items() if isinstance(v, dict)}
+    num_correct = len(valid_programs)
+    
+    # Initialize containers for aggregation
+    metrics = defaultdict(list)
+    metrics_above_1_1 = defaultdict(int)
+    
+    all_metrics = [
+        "energy_improvement", "runtime_improvement", "cpu_cycles_improvement",
+        "peak_memory_improvement", "throughput_improvement", "mflops_improvement",
+        "loc_improvement"
+    ]
+    
+    # Process each program (including incorrect ones)
+    for program, result in results.items():
+        if isinstance(result, dict):  # functionally correct
+            for metric in all_metrics:
+                value = result.get(metric)
+                if value is None:
+                    continue
+                if value >= 1.1:
+                    metrics_above_1_1[metric] += 1
+                metrics[metric].append(max(value, 1.0))  # cap at 1
+        else:  # non-functional, count as 1
+            for metric in all_metrics:
+                metrics[metric].append(1.0)  # not above 1.1, so don't increment count
+    
+    # Compute statistics
+    correctness_percent = 100 * num_correct / total_programs
+    
+    percent_above_1_1 = {
+        metric: 100 * count / total_programs
+        for metric, count in metrics_above_1_1.items()
+    }
+    
+    avg_improvement = {
+        metric: sum(values) / len(values)
+        for metric, values in metrics.items()
+    }
+    
+    # Write to .txt file
+    output_path = f"{results_dir}/optimization_summary.txt"
+    with open(output_path, "w") as f:
+        f.write(f"Correctness: {correctness_percent:.2f}%\n\n")
+        f.write("% of programs with ≥1.1 improvement (out of all programs):\n")
+        for metric, percent in percent_above_1_1.items():
+            f.write(f"  {metric}: {percent:.2f}%\n")
+        f.write("\nAverage improvement (capping values < 1 as 1):\n")
+        for metric, avg in avg_improvement.items():
+            f.write(f"  {metric}: {avg:.3f}\n")
 
 def main():
     args=parse_arguments()
