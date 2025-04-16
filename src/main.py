@@ -10,22 +10,24 @@ from llm.generator_llm import llm_optimize, handle_compilation_error
 from llm.evaluator_llm import evaluator_llm
 from energy_language_benchmark import get_valid_energy_language_programs, EnergyLanguageBenchmark
 from pie_benchmark import get_valid_pie_programs, PIEBenchmark
-from llm.advisor_llm import rank_patterns
+from llm.advisor_llm import get_applicable_patterns
 from scimark_benchmark import get_valid_scimark_programs, SciMarkBenchmark
 from dacapo_benchmark import get_valid_dacapo_classes, DaCapoBenchmark
 
 import pprint
+import logging
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
 openai_key = os.getenv('API_KEY')
 genai_api_key = os.getenv('GenAI_API_KEY')
 logger = Logger("logs", sys.argv[2]).logger
+#logger.setLevel(logging.CRITICAL + 1) # uncomment this to supress logging
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="LLM-Code-Optimization")
     parser.add_argument("--benchmark", type=str, default="EnergyLanguage", choices=["EnergyLanguage", "PIE", "SciMark", "Dacapobench", "Android"], help="dataset used for experiment")
-    parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "o3-mini", "deepseek-r1:671b","deepseek-r1:70b", "qwen2.5-coder:32b", "llama3.3:70b-instruct-q4_K_M", "codellama:70b"], help="llm used for inference")
+    parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "o3-mini", "deepseek-r1:671b","deepseek-r1:70b", "qwen2.5-coder:32b", "llama3.3:70b-instruct-q4_K_M", "codellama:70b", "llama3.2"], help="llm used for inference")
     parser.add_argument("--self_optimization_step", type=int, default=5, help="number of LLM self-optimization step")
     parser.add_argument("--num_programs", type=int, default=5, help="For PIE only, number of programs from the benchmark to test")
     parser.add_argument("--application_name", type=str, default="fop", choices=["fop", "cassandra", "h2", "h2o", "Kafka", "Luindex", "Lusearch", "Spring", "Tomact", "Tradebeans", "Tradesoap", "Xalan"], help="For Dacapobench only, name of the application from the benchmark to test")
@@ -102,7 +104,12 @@ def master_script(benchmark, num_programs, application_name, model, use_genai_st
     results = {}
     
     for program in get_valid_programs(benchmark, num_programs, application_name):
-        # corresponds to rank
+        # clear LLM memory for next program
+        generator.clear_memory()
+        evaluator.clear_memory()
+        advisor.clear_memory()
+
+        # corresponds to rank of current optimization pattern being processes
         k_iter = 1
 
         if benchmark == "EnergyLanguage":
@@ -132,11 +139,15 @@ def master_script(benchmark, num_programs, application_name, model, use_genai_st
         last_optimized_code = original_code
         total_output_difference = 0
 
-        # set k_max to the number of patterns you want to execute
-        # for running K-Top accuracy test, set this to the number of patterns provided
-        k_max = 5
+        # for this program, getting patterns deemed as applicable by advisor LLM
+        k_patterns = get_applicable_patterns(llm_assistant=advisor, source_code=original_code)
+        # for this program, number of applicable patterns
+        k_total = len(k_patterns.get("patterns"))
+        # checking function get_applicable_patterns output
+        print(f"k_total for program {program} is: {k_total}")
+        print(f"patterns for program {program} are: {json.dumps(k_patterns)}")
 
-        pattern_dict = rank_patterns(llm_assistant=advisor, source_code=original_code)
+        continue # uncomment this if you wish to see how many patterns are deemed applicable for a program without performing optimization.
         gen_content_dict = {}
 
         total_compilation_failure = 0
@@ -144,11 +155,11 @@ def master_script(benchmark, num_programs, application_name, model, use_genai_st
         results_dir = f"{USER_PREFIX}/results/{benchmark}"
         
         while True:
-            if k_iter > k_max:
+            if k_iter > k_total:
                 break
             
             # get pattern for this iteration
-            current_pattern_dict = select_pattern_from_dict(pattern_dict=pattern_dict, rank=k_iter)
+            current_pattern_dict = select_pattern_from_dict(pattern_dict=k_patterns, rank=k_iter)
             current_pattern_str = json.dumps(current_pattern_dict)
             logger.info(f"Evaluating pattern: {current_pattern_str}")
 
@@ -245,7 +256,6 @@ def master_script(benchmark, num_programs, application_name, model, use_genai_st
             #file.write(json.dumps(top_k_accuracy_res))
             file.write(formatted_res)
             
-        
         # clear dictionary for next program
         results.clear()
 

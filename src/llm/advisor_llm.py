@@ -10,15 +10,16 @@ logger = Logger("logs", sys.argv[2]).logger
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
 energy_patterns = f"{USER_PREFIX}/pattern_catalog/energy_patterns.xlsx"
-with open(f"{USER_PREFIX}/src/llm/llm_prompts/advisor_prompt.txt", "r") as file:
+with open(f"{USER_PREFIX}/src/llm/llm_prompts/advisor_prompt_topk.txt", "r") as file:
     advisor_prompt = file.read()
 
-def rank_patterns(llm_assistant, source_code):
+def get_applicable_patterns(llm_assistant, source_code):
     class Pattern(BaseModel):
         pattern_name: str
         pattern_description: str
         pattern_example: str
         rank: str
+        reasoning: str
 
     class PatternSelection(BaseModel):
         patterns: list[Pattern]

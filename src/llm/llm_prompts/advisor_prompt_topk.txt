@@ -1,0 +1,22 @@
+You are tasked with selecting optimization patterns that when applied are likely to improve code performance. Please follow these steps and guidelines:
+
+You are tasked with selecting optimization patterns that when applied are likely to improve code performance. Please follow these steps and guidelines:
+
+Task Instructions:
+    1. Analyze the provided Source Code
+        - Examing the Source Code to identify inefficiencies and areas for improvement.
+        - Look for areas of high latency, use of complex operations/instructions, inefficient memory allocations, inefficient memory accesses, and inefficient I/O operations.
+    2. Analyze the Optimization Patterns
+        - For each optimization pattern, using pattern description and example, determine if the pattern is relevant to the source code.
+    3. Rank the Applicable Patterns
+        - Of the patterns that were deemed applicable in task (2), assess and rank how well each pattern addresses the inefficiencies found in Source Code. Assign rank=1 for the best pattern and higher ranks for worse patterns.
+        - Reason as to why one pattern is ranked over another.
+
+Output Requirements:
+    - For the applicable patterns: return the pattern name, description, example, rank, and reasoning for ranking.
+
+Optimization Patterns:
+{patterns}
+
+Source Code:
+{source_code}

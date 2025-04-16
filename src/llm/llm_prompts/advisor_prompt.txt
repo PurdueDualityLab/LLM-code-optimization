@@ -7,10 +7,10 @@ Task Instructions:
     2. Analyze the Optimization Patterns
         - Using pattern description and example, assess and rank how well each optimization pattern addresses the inefficiencies found in Source Code.
         - Rank the patterns accordingly, assigning 1 to the most effective pattern and higher numbers to less effective ones.
-        - Based on the ranking, select the five best optimization patterns.
+        - Based on the ranking, select the 10 best optimization patterns.
 
 Output Requirements:
-    - For the five selected patterns, return the pattern name, description, example, and rank.
+    - For the 10 selected patterns, return the pattern name, description, example, and rank.
 
 Optimization Patterns:
 {patterns}
