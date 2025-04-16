@@ -46,7 +46,7 @@ def filter_patterns(llm_assistant, code):
     logger.info(response)
 
     try:
-        if (llm_assistant.is_openai_model()):
+        if llm_assistant.is_openai_model() or llm_assistant.is_genai_studio():
             content_dict = json.loads(response["content"])
             patterns = "\n".join(
                 f"{entry['pattern_name']}:\nDescription:{entry['pattern_description']}\nExample:{entry['pattern_example']}\nRank:{entry['rank']}\nReasoning:{entry['reasoning']}"
