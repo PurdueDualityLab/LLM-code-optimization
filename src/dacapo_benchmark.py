@@ -26,6 +26,13 @@ biojava_root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/biojava/build
 pmd_root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/pmd/build/pmd-core"
 pmd_src_dir = f"{pmd_root_dir}/src/main/java/net/sourceforge/pmd"
 
+graphchi_root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/graphchi/build"
+graphchi_src_dir = f"{graphchi_root_dir}/src/main/java/edu/cmu/graphchi"
+
+
+
+
+
 class DaCapoBenchmark(Benchmark):
     def __init__(self, test_method, test_class, test_namespace, test_group, unit_tests, benchmark_name, method_level):
         # ex. test_class = PDFNumsArray, test_namespace = pdf, test_group = core, benchmark_name = fop
@@ -62,6 +69,12 @@ class DaCapoBenchmark(Benchmark):
                 source_path = f"{pmd_src_dir}/{self.namespace_name}/{self.class_name}.java"
             else:
                 source_path = f"{pmd_src_dir}/{self.class_name}.java"
+        elif self.program == 'graphchi':
+            if self.namespace_name and self.namespace_name != "":
+                source_path = f"{graphchi_src_dir}/{self.namespace_name}/{self.class_name}.java"
+            else:
+                source_path = f"{graphchi_src_dir}/{self.class_name}.java"
+
 
         if self.method_level:
             compile_java_project()
@@ -111,6 +124,8 @@ class DaCapoBenchmark(Benchmark):
             os.chdir(f"{biojava_root_dir}/biojava-{folder_name}/")
         elif self.program == 'pmd':
             os.chdir(f"{pmd_root_dir}/")
+        elif self.program == 'graphchi':
+            os.chdir(f"{graphchi_root_dir}/")
 
         try:
             result = subprocess.run(["make", "compile", f"BENCHMARK={self.program}"], check=True, capture_output=True, text=True)
@@ -160,6 +175,12 @@ class DaCapoBenchmark(Benchmark):
                 destination_path = f"{pmd_src_dir}/{self.namespace_name}/{self.class_name}.java"
             else:
                 destination_path = f"{pmd_src_dir}/{self.class_name}.java"
+        elif self.program == 'graphchi':
+
+            if self.namespace_name and self.namespace_name != "":
+                destination_path = f"{graphchi_src_dir}/{self.namespace_name}/{self.class_name}.java"
+            else:
+                destination_path = f"{graphchi_src_dir}/{self.class_name}.java"
         
         # save optimized code to optimized_java.txt first with the format { method_body }
         # then replace the method body with the optimized code
@@ -195,6 +216,8 @@ class DaCapoBenchmark(Benchmark):
             os.chdir(f"{biojava_root_dir}/biojava-{folder_name}")
         elif self.program == 'pmd':
             os.chdir(f"{fop_root_dir}")
+        elif self.program == 'graphchi':
+            os.chdir(f"{graphchi_root_dir}")
 
         try:
             result = subprocess.run(
@@ -226,6 +249,8 @@ class DaCapoBenchmark(Benchmark):
             os.chdir(f"{biojava_root_dir}/biojava-{folder_name}")
         elif self.program == 'pmd':
             os.chdir(f"{pmd_root_dir}")
+        elif self.program == 'graphchi':
+            os.chdir(f"{graphchi_root_dir}")
 
         for test in self.unit_tests:
             try:
@@ -292,6 +317,8 @@ class DaCapoBenchmark(Benchmark):
             os.chdir(f"{biojava_root_dir}/biojava-{folder_name}")
         elif self.program == 'pmd':
             os.chdir(f"{pmd_root_dir}")
+        elif self.program == 'graphchi':
+            os.chdir(f"{graphchi_root_dir}")
 
         try:
             result = subprocess.run(["make", "measure", f"BENCHMARK={self.program}", f"TEST={self.unit_tests[0]}"], check=True, capture_output=True, text=True, timeout=120)
@@ -442,6 +469,11 @@ def get_valid_dacapo_classes(application_name):
             test_group = "test_group"
             root_path = f"{spring_root_dir}/src/test/java/org/springframework/samples/petclinic"
             unit_test_class_name = f"{test_class}Tests"
+        elif application_name == "graphchi":
+            test_namespace = '/'.join(parts[3:-1])
+            test_group = "test_group"
+            root_path = f"{graphchi_root_dir}/src/test/java/edu/cmu/graphchi"
+            unit_test_class_name = f"Test{test_class}"
 
         unit_tests = find_unit_test(root_path, unit_test_class_name, test_class)
 
@@ -469,6 +501,11 @@ def setup_makefile(application_name):
     elif application_name == 'pmd':
         folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{application_name}/build"
         subfolders = [f.path for f in os.scandir(folder_path) if f.is_dir() and f.name.startswith('pmd-')]
+    elif application_name == 'graphchi':
+        folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{application_name}"
+        subfolders = [f.path for f in os.scandir(folder_path) if f.is_dir() and f.name == 'build']
+    
+    
 
     for subfolder in subfolders:
         print(subfolder)
