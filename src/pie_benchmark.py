@@ -194,7 +194,7 @@ class PIEBenchmark(Benchmark):
         # Find the required benchmark elements
         self.evaluator_feedback_data = self._extract_content(self.energy_data)
 
-    def generate_flame_report(self, optimized):
+    def generate_flame_report(self, code):
         # Needed for makefiles
         os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}")
 
@@ -203,15 +203,40 @@ class PIEBenchmark(Benchmark):
         test_case_folder = f"{USER_PREFIX}/benchmark_pie/{problem_id}/test_cases"
         input_files = sorted(glob.glob(f"{test_case_folder}/input.*.txt"))        
         input_file = input_files[0]
+        
+        source_code_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}/flamegraph_{self.program}"
+        with open(source_code_path, 'w') as file:
+            file.write(code)
+            
+        # compile the code
+        try: 
+            result = subprocess.run(
+                ["make", "compile_flame_graph"], 
+                check=True,
+                capture_output=True,
+                text=True
+            )
+            logger.info(f"Compile flame_graph code successfully.\n")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Compile flame_graph code failed: {e.stdout + e.stderr}\n")
+            return
 
-        if optimized:
-            logger.info(f"Generating flame report for optimized program with input file: {input_file}")
-            result = subprocess.run(["make", "generate_flame_report_optimized"], stdin=open(input_file, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
-            flame_report_file = open(f"{USER_PREFIX}/benchmark_pie/{problem_id}/flame_report_optimized.txt", 'r')
-        else:
-            logger.info(f"Generating flame report for original program with input file: {input_file}")
-            result = subprocess.run(["make", "generate_flame_report"], stdin=open(input_file, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
-            flame_report_file = open(f"{USER_PREFIX}/benchmark_pie/{problem_id}/flame_report.txt", 'r')
+        logger.info(f"Generating flame report for original program with input file: {input_file}")
+        
+        try: 
+            result_flamegraph = subprocess.run(
+                ["make", "generate_flame_report"],
+                stdin=open(input_file, 'r'),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                encoding='latin-1'
+            )
+            logger.info(f"Generate flame_graph successfully.\n")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Generate flame_graph failed: {e.stdout + e.stderr}\n")
+        
+        flame_report_file = open(f"{USER_PREFIX}/benchmark_pie/{problem_id}/flame_report.txt", 'r')
         
         flame_report = flame_report_file.read()
         self.evaluator_feedback_data["flame_report"] = flame_report
@@ -227,8 +252,8 @@ class PIEBenchmark(Benchmark):
     def static_analysis(self, optimized_code):
         return super().static_analysis(optimized_code)
 
-    def dynamic_analysis(self, optimized):
-        return super().dynamic_analysis(optimized)
+    def dynamic_analysis(self, code):
+        return super().dynamic_analysis(code)
 
     def _run_program(self, optimized, input_file):
         # Run the make command and capture the output in a variable

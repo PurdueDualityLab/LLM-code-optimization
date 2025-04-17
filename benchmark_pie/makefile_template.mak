@@ -25,12 +25,12 @@ run_optimized:
 	./optimized_${FILE_NAME}.gpp_run
 
 generate_flame_report:
-	sudo perf record -F 90000 -e cycles:u -g --call-graph dwarf -o original.data -- ./${FILE_NAME}.gpp_run < ./test_cases/input.0.txt
-	sudo perf report -i original.data -f -n --stdio --sort overhead > flame_report.txt
+	sudo perf record -F 90000 -e cycles:u -g --call-graph dwarf -o data -- ./flamegraph_${FILE_NAME}.gpp_run
+	sudo perf report -i data -f -n --stdio --sort overhead > flame_report.txt
 
-generate_flame_report_optimized:
-	sudo perf record -F 90000 -e cycles:u -g --call-graph dwarf -o optimized.data -- ./optimized_${FILE_NAME}.gpp_run < ./test_cases/input.0.txt
-	sudo perf report -i optimized.data -f -n --stdio --sort overhead > flame_report_optimized.txt
+compile_flame_graph:
+	/usr/bin/g++ -g -c -pipe -fomit-frame-pointer -march=native  -std=c++11 -fopenmp flamegraph_${FILE_NAME}.cpp -o flamegraph_${FILE_NAME}.cpp.o
+	/usr/bin/g++ -g flamegraph_${FILE_NAME}.cpp.o -o flamegraph_${FILE_NAME}.gpp_run -fopenmp  
 
 mem:
 	 /usr/bin/time -v  ./${FILE_NAME}.gpp_run

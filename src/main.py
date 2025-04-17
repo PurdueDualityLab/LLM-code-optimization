@@ -13,6 +13,7 @@ from pie_benchmark import get_valid_pie_programs, PIEBenchmark
 from scimark_benchmark import get_valid_scimark_programs, SciMarkBenchmark
 from dacapo_benchmark import get_valid_dacapo_classes, DaCapoBenchmark
 from collections import defaultdict
+import glob
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
@@ -40,6 +41,15 @@ def get_valid_programs(benchmark, num_programs, application_name):
     elif (benchmark == "PIE"):
         return get_valid_pie_programs(num_programs)
     elif (benchmark == "SciMark"):
+        # cleanup
+        txt_files = glob.glob(f"{USER_PREFIX}/benchmark_scimark/*/*.txt")
+        flamegraph_files = glob.glob(f"{USER_PREFIX}/benchmark_scimark/*/*Flamegraph.java")
+        all_files_to_remove = txt_files + flamegraph_files
+        for file_path in all_files_to_remove:
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                logger.error(f"Error removing {file_path}: {e}")
         return get_valid_scimark_programs()
     elif (benchmark == "Dacapobench"):
         return get_valid_dacapo_classes(application_name)
@@ -141,33 +151,27 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                     last_optimized_code = handle_compilation_error(error_message=compilation_error_message, llm_assistant=generator)
                 else:
                     ast = benchmark_obj.pre_process(last_optimized_code)
-                    if num_success_iteration == 0:
-                        flame_report = benchmark_obj.dynamic_analysis(optimized=False)
-                        last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report)
-                    else:
-                        last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast)
+                    flame_report = benchmark_obj.dynamic_analysis(code=last_optimized_code)
+                    last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report)
             else:
                 logger.info("re-optimizing from latest working optimization")
                 generator.clear_memory()
                 evaluator.clear_memory()
                 evaluator_feedback = ""
                 ast = benchmark_obj.pre_process(last_working_optimized_code)
-                if num_success_iteration == 0:
-                    flame_report = benchmark_obj.dynamic_analysis(optimized=False)    
-                    last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report)
-                else:
-                    last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast)
+                flame_report = benchmark_obj.dynamic_analysis(code=last_working_optimized_code) 
+                last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report)
                 reoptimize_lastly_flag = 0
             
-            # error handling
-            if last_optimized_code == None:
-                continue
-            
-            # code post_process
-            last_optimized_code = benchmark_obj.post_process(last_optimized_code)
+            # Error in LLM completion
+            if last_optimized_code is not None:       
+                # code post_process
+                last_optimized_code = benchmark_obj.post_process(last_optimized_code)
 
-            # static analysis
-            status = benchmark_obj.static_analysis(last_optimized_code)
+                # static analysis
+                status = benchmark_obj.static_analysis(last_optimized_code)
+            else:
+                status = Status.RUNTIME_ERROR_OR_TEST_FAILED
             
             # switch case of status
             if (status == Status.COMPILATION_ERROR):
@@ -196,7 +200,7 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                 total_compilation_failure = 0
 
                 # Perform dynamic analysis using flame graph
-                benchmark_obj.dynamic_analysis(optimized=True)
+                benchmark_obj.dynamic_analysis(last_optimized_code)
 
                 evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
                 
@@ -253,10 +257,10 @@ def ablation_script_level_1_and_2(benchmark, num_programs, application_name, mod
             logger.info(f"Optimizing {program} with only source code")
             optimized_code = llm_optimize(code=original_code, llm_assistant=generator)
             
-         # error handling
+         # Error in LLM completion
         if optimized_code == None:
-            logger.error("Error in optimized file")
-            results[program] = "Unable to produce functional equivalent programs."
+            logger.error("Error in LLM completion")
+            results[program] = "Error in LLM completion."
             continue
         
         # code post_process
@@ -321,13 +325,12 @@ def evaluation_summary(results, results_dir):
     correctness_percent = 100 * num_correct / total_programs
     
     percent_above_1_1 = {
-        metric: 100 * count / total_programs
-        for metric, count in metrics_above_1_1.items()
+        metric: 100 * metrics_above_1_1.get(metric, 0) / total_programs
+        for metric in all_metrics
     }
-    
     avg_improvement = {
-        metric: sum(values) / len(values)
-        for metric, values in metrics.items()
+        metric: sum(metrics[metric]) / len(metrics[metric])
+        for metric in all_metrics
     }
     
     # Write to .txt file
@@ -335,11 +338,15 @@ def evaluation_summary(results, results_dir):
     with open(output_path, "w") as f:
         f.write(f"Correctness: {correctness_percent:.2f}%\n\n")
         f.write("% of programs with ≥1.1 improvement (out of all programs):\n")
-        for metric, percent in percent_above_1_1.items():
+        for metric in all_metrics:
+            percent = percent_above_1_1.get(metric, 0.0)
             f.write(f"  {metric}: {percent:.2f}%\n")
         f.write("\nAverage improvement (capping values < 1 as 1):\n")
-        for metric, avg in avg_improvement.items():
+        for metric in all_metrics:
+            avg = avg_improvement.get(metric, 0.0)
             f.write(f"  {metric}: {avg:.3f}\n")
+    
+    logger.info(f"Evaluation summary written to {output_path}")
 
 def main():
     args=parse_arguments()

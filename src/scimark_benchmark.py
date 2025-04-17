@@ -90,8 +90,10 @@ class SciMarkBenchmark(Benchmark):
         return ast.create_ast(code)
 
     def post_process(self, code):
-        code = code.replace("```java", "")
-        code = code.replace("```", "")
+       # Extract code inside ```java ... ```
+        match = re.search(r'```java\s*(.*?)```', code, flags=re.DOTALL)
+        if match:
+            code = match.group(1)
         code = re.sub(r'//.*?$|/\*.*?\*/', '', code, flags=re.DOTALL | re.MULTILINE)
         code = re.sub(r'\bclass\s+\w+', f'class {self.program}Optimized', code)  # Change class name dynamically
         if not code.strip().startswith("package jnt.scimark2;"):
@@ -381,18 +383,34 @@ class SciMarkBenchmark(Benchmark):
         
         return benchmark_info
 
-    def generate_flame_report(self, optimized: bool):
+    def generate_flame_report(self, code):
         """
         Run two async-profiler sessions (alloc & cpu) on the SciMark class
         """
         # cd into the per-benchmark folder
         os.chdir(f"{USER_PREFIX}/benchmark_scimark/{self.program}")
+        
+        code = re.sub(r'\bclass\s+\w+', f'class {self.program}Flamegraph', code)  # Change class name dynamically
+        
+        # save code to file
+        with open(f"{self.program}Flamegraph.java", "w") as f:
+            f.write(code)
+        
+        main_class = f"jnt.scimark2.{self.program}Flamegraph"
+        
+        # compile the class
+        try: 
+            result = subprocess.run(
+                ["make", "compile"], 
+                check=True,
+                capture_output=True,
+                text=True
+            )
+            logger.info(f"Flamegraph code compile successfully.\n")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Flamegraph code compile failed: {e.stderr}\n")
+            return
 
-        main_class = (
-            f"jnt.scimark2.{self.program}Optimized"
-            if optimized
-            else f"jnt.scimark2.{self.program}"
-        )
         # path to the async-profiler native library
         prof_lib = os.path.join(
             USER_PREFIX, "async-profiler", "build", "lib", "libasyncProfiler.so"
@@ -439,6 +457,9 @@ class SciMarkBenchmark(Benchmark):
         except subprocess.CalledProcessError as e:
             logger.error(f"CPU profile failed:\n{e.stderr}")
             raise
+        
+        # clean up Flamegraph file
+        os.remove(f"{self.program}Flamegraph.java")
 
         # read them back
         with open("alloc_profile.txt", "r") as f:
@@ -450,14 +471,16 @@ class SciMarkBenchmark(Benchmark):
         self.evaluator_feedback_data["alloc_profile"] = alloc_profile
         self.evaluator_feedback_data["cpu_profile"] = cpu_profile
 
-        return {
+        profile = {
             "alloc_profile": alloc_profile,
             "cpu_profile": cpu_profile
         }
+        
+        return profile["cpu_profile"]
 
-    def dynamic_analysis(self, optimized: bool):
-        logger.info(f"Generating async-profiler profiles (optimized={optimized})")
-        return self.generate_flame_report(optimized)
+    def dynamic_analysis(self, code):
+        logger.info(f"Generating async-profiler profiles")
+        return super().dynamic_analysis(code)
 
 def get_valid_scimark_programs():
     valid_programs = [
