@@ -19,3 +19,16 @@ Task Instructions:
     - Outline each proposed optimization strategy in detail, including the reasoning behind it and its potential impact performance.
     - Implement the best optimization strategies directly into the code.
     - Ensure the final code is efficient, correct in terms of functionality, and maintains same output formatting.
+
+Here is the code to optimize, follow the instruction to provide the optimized code WHILE STRICTLY MAINTAINING IT'S FUNCTIONAL EQUIVALENCE:
+{{ code }}
+
+{% if ast %}
+Here is the AST of the source code:
+{{ ast }}
+{% endif %}
+
+{% if flame_report %}
+Here is a textual representation of the flame graph for the current source code:
+{{ flame_report }}
+{% endif %}

@@ -381,6 +381,84 @@ class SciMarkBenchmark(Benchmark):
         
         return benchmark_info
 
+    def generate_flame_report(self, optimized: bool):
+        """
+        Run two async-profiler sessions (alloc & cpu) on the SciMark class
+        """
+        # cd into the per-benchmark folder
+        os.chdir(f"{USER_PREFIX}/benchmark_scimark/{self.program}")
+
+        main_class = (
+            f"jnt.scimark2.{self.program}Optimized"
+            if optimized
+            else f"jnt.scimark2.{self.program}"
+        )
+        # path to the async-profiler native library
+        prof_lib = os.path.join(
+            USER_PREFIX, "async-profiler", "build", "lib", "libasyncProfiler.so"
+        )
+
+        # 1 allocation profile
+        alloc_cmd = [
+            "java",
+            "-cp", ".",     
+            f"-agentpath:{prof_lib}=start,event=alloc,flat=10,file=alloc_profile.txt",
+            main_class,
+        ]
+        logger.info(f"Running alloc profile: {' '.join(alloc_cmd)}")
+        try:
+            subprocess.run(
+                alloc_cmd,
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=300,
+            )
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Allocation profile failed:\n{e.stderr}")
+            raise
+        
+        # 2) CPU profile
+        cpu_cmd = [
+            "java",
+            "-cp", ".",
+            f"-agentpath:{prof_lib}=start,event=cpu,flat=10,file=cpu_profile.txt",
+            main_class,
+        ]
+        logger.info(f"Running cpu profile: {' '.join(cpu_cmd)}")
+        try:
+            subprocess.run(
+                cpu_cmd,
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=300,
+            )
+        except subprocess.CalledProcessError as e:
+            logger.error(f"CPU profile failed:\n{e.stderr}")
+            raise
+
+        # read them back
+        with open("alloc_profile.txt", "r") as f:
+            alloc_profile = f.read()
+        with open("cpu_profile.txt", "r") as f:
+            cpu_profile = f.read()
+
+        # stash into our feedback map
+        self.evaluator_feedback_data["alloc_profile"] = alloc_profile
+        self.evaluator_feedback_data["cpu_profile"] = cpu_profile
+
+        return {
+            "alloc_profile": alloc_profile,
+            "cpu_profile": cpu_profile
+        }
+
+    def dynamic_analysis(self, optimized: bool):
+        logger.info(f"Generating async-profiler profiles (optimized={optimized})")
+        return self.generate_flame_report(optimized)
+
 def get_valid_scimark_programs():
     valid_programs = [
         "FFT",

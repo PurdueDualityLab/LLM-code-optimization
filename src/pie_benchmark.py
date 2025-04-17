@@ -216,8 +216,8 @@ class PIEBenchmark(Benchmark):
         flame_report = flame_report_file.read()
         self.evaluator_feedback_data["flame_report"] = flame_report
         flame_report_file.close()
+        return flame_report
         
-
     def get_energy_data(self):
         return super().get_energy_data()
     

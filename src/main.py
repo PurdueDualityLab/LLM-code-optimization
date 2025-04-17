@@ -12,6 +12,7 @@ from energy_language_benchmark import get_valid_energy_language_programs, Energy
 from pie_benchmark import get_valid_pie_programs, PIEBenchmark
 from scimark_benchmark import get_valid_scimark_programs, SciMarkBenchmark
 from dacapo_benchmark import get_valid_dacapo_classes, DaCapoBenchmark
+from collections import defaultdict
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
@@ -27,7 +28,8 @@ def parse_arguments():
     parser.add_argument("--num_programs", type=int, default=5, help="For PIE only, number of programs from the benchmark to test")
     parser.add_argument("--application_name", type=str, default="fop", choices=["biojava", "fop", "cassandra", "h2", "h2o", "Kafka", "Luindex", "Lusearch", "spring", "Tomact", "Tradebeans", "Tradesoap", "Xalan", "pmd"], help="For Dacapobench only, name of the application from the benchmark to test")
     parser.add_argument("--genai_studio", type=bool, default=False, help="Flag to indicate if genai_studio is used to inference open-source llms")
-    parser.add_argument("--method_level", type=bool, default=True, help="Flag to indicate if method level optimization is used")
+    parser.add_argument("--method_level", type=bool, default=True, help="Flag to indicate if method level optimization is used for dacapo")
+    parser.add_argument("--ablation", type=int, default=0, choices=[0, 1, 2, 3, 4], help="ablation study level: 0 indicates no ablation, 1 indicates generator with source code and basic prompt, 2 adds ast and flamegraph, 3 adds advisor, 4 adds feedback without evaluator")
 
     args = parser.parse_args()
     return args
@@ -157,6 +159,10 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                     last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast)
                 reoptimize_lastly_flag = 0
             
+            # error handling
+            if last_optimized_code == None:
+                continue
+            
             # code post_process
             last_optimized_code = benchmark_obj.post_process(last_optimized_code)
 
@@ -209,6 +215,69 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         generator.clear_memory()
         evaluator.clear_memory()
 
+    evaluation_summary(results, results_dir)
+        
+def ablation_script_level_1_and_2(benchmark, num_programs, application_name, model, use_genai_studio, ablation):
+    #create LLM agent
+    generator = LLMAgent(openai_api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
+    
+    results = {}
+    
+    for program in get_valid_programs(benchmark, num_programs, application_name):  
+        benchmark_obj = PIEBenchmark(program)
+
+        if benchmark_obj.get_original_code() is None:
+            results[program] = "Unable to find original code"
+            continue
+
+        original_code_compiles = benchmark_obj.set_original_energy()
+        if not original_code_compiles:
+            results[program] = "Unable to compile original code or timeout"
+            continue
+        
+        original_code = benchmark_obj.get_original_code()
+
+        # create direct if not exist
+        if not os.path.exists(f"{USER_PREFIX}/results/ablation"):
+            os.makedirs(f"{USER_PREFIX}/results/ablation")
+        if not os.path.exists(f"{USER_PREFIX}/results/ablation/level_{ablation}"):
+            os.makedirs(f"{USER_PREFIX}/results/ablation/level_{ablation}")
+        results_dir = f"{USER_PREFIX}/results/ablation/level_{ablation}"
+        
+        if ablation == 2:
+            logger.info(f"Optimizing {program} with ast and flamegraph")
+            ast = benchmark_obj.pre_process(original_code)
+            flame_report = benchmark_obj.dynamic_analysis(optimized=False)
+            optimized_code = llm_optimize(code=original_code, llm_assistant=generator, ast=ast, flame_report=flame_report)
+        else:
+            logger.info(f"Optimizing {program} with only source code")
+            optimized_code = llm_optimize(code=original_code, llm_assistant=generator)
+            
+         # error handling
+        if optimized_code == None:
+            logger.error("Error in optimized file")
+            results[program] = "Unable to produce functional equivalent programs."
+            continue
+        
+        # code post_process
+        optimized_code = benchmark_obj.post_process(optimized_code)
+
+        # static analysis
+        status = benchmark_obj.static_analysis(optimized_code)
+
+        # switch case of status
+        if (status == Status.COMPILATION_ERROR or status == Status.RUNTIME_ERROR_OR_TEST_FAILED):
+            logger.error("Error in optimized file")
+            results[program] = "Unable to produce functional equivalent programs."
+        else:
+            logger.info("Optimization Complete, writing results to file.....")
+            energy_data = benchmark_obj.get_energy_data()
+            evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
+            results[program] = write_result(energy_data, program, evaluator_feedback_data, results_dir)
+    
+    evaluation_summary(results, results_dir)
+
+def evaluation_summary(results, results_dir):
     try:
         results_dir
     except NameError:
@@ -218,6 +287,59 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         os.makedirs(results_dir)
     with open(f"{results_dir}/results.txt", "w+") as file:
         json.dump(results, file, indent=4)
+        
+    # final evaluation result
+    total_programs = len(results)
+    valid_programs = {k: v for k, v in results.items() if isinstance(v, dict)}
+    num_correct = len(valid_programs)
+    
+    # Initialize containers for aggregation
+    metrics = defaultdict(list)
+    metrics_above_1_1 = defaultdict(int)
+    
+    all_metrics = [
+        "energy_improvement", "runtime_improvement", "cpu_cycles_improvement",
+        "peak_memory_improvement", "throughput_improvement", "mflops_improvement",
+        "loc_improvement"
+    ]
+    
+    # Process each program (including incorrect ones)
+    for program, result in results.items():
+        if isinstance(result, dict):  # functionally correct
+            for metric in all_metrics:
+                value = result.get(metric)
+                if value is None:
+                    continue
+                if value >= 1.1:
+                    metrics_above_1_1[metric] += 1
+                metrics[metric].append(max(value, 1.0))  # cap at 1
+        else:  # non-functional, count as 1
+            for metric in all_metrics:
+                metrics[metric].append(1.0)  # not above 1.1, so don't increment count
+    
+    # Compute statistics
+    correctness_percent = 100 * num_correct / total_programs
+    
+    percent_above_1_1 = {
+        metric: 100 * count / total_programs
+        for metric, count in metrics_above_1_1.items()
+    }
+    
+    avg_improvement = {
+        metric: sum(values) / len(values)
+        for metric, values in metrics.items()
+    }
+    
+    # Write to .txt file
+    output_path = f"{results_dir}/optimization_summary.txt"
+    with open(output_path, "w") as f:
+        f.write(f"Correctness: {correctness_percent:.2f}%\n\n")
+        f.write("% of programs with ≥1.1 improvement (out of all programs):\n")
+        for metric, percent in percent_above_1_1.items():
+            f.write(f"  {metric}: {percent:.2f}%\n")
+        f.write("\nAverage improvement (capping values < 1 as 1):\n")
+        for metric, avg in avg_improvement.items():
+            f.write(f"  {metric}: {avg:.3f}\n")
 
 def main():
     args=parse_arguments()
@@ -229,8 +351,12 @@ def main():
     use_genai_studio = args.genai_studio
     application_name = args.application_name
     method_level = args.method_level
-    #run benchmark
-    master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio, method_level)
+    ablation = args.ablation
+    
+    if ablation == 0:
+        master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio, method_level)
+    elif ablation == 1 or ablation == 2:
+        ablation_script_level_1_and_2(benchmark, num_programs, application_name, model, use_genai_studio, ablation)      
 
 if __name__ == "__main__":
     main()
