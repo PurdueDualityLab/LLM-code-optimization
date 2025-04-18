@@ -24,12 +24,12 @@ logger = Logger("logs", sys.argv[2]).logger
 def parse_arguments():
     parser = argparse.ArgumentParser(description="LLM-Code-Optimization")
     parser.add_argument("--benchmark", type=str, default="EnergyLanguage", choices=["EnergyLanguage", "PIE", "SciMark", "Dacapobench", "Android"], help="dataset used for experiment")
-    parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "o3-mini", "deepseek-r1:32b","deepseek-r1:70b", "qwen2.5-coder:32b", "llama3.3:70b", "codellama:70b"], help="llm used for inference")
+    parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "o3-mini", "deepseek-r1:32b","deepseek-r1:70b", "qwen2.5:72b", "llama3.3:70b", "codellama:latest"], help="llm used for inference")
     parser.add_argument("--self_optimization_step", type=int, default=5, help="number of LLM self-optimization step")
     parser.add_argument("--num_programs", type=int, default=5, help="For PIE only, number of programs from the benchmark to test")
     parser.add_argument("--application_name", type=str, default="fop", choices=["biojava", "fop", "cassandra", "h2", "h2o", "Kafka", "Luindex", "Lusearch", "spring", "Tomact", "Tradebeans", "Tradesoap", "Xalan", "pmd"], help="For Dacapobench only, name of the application from the benchmark to test")
     parser.add_argument("--genai_studio", type=bool, default=False, help="Flag to indicate if genai_studio is used to inference open-source llms")
-    parser.add_argument("--method_level", type=bool, default=True, help="Flag to indicate if method level optimization is used for dacapo")
+    parser.add_argument("--method_level", type=bool, default=False, help="Flag to indicate if method level optimization is used")
     parser.add_argument("--ablation", type=int, default=0, choices=[0, 1, 2, 3, 4], help="ablation study level: 0 indicates no ablation, 1 indicates generator with source code and basic prompt, 2 adds ast and flamegraph, 3 adds advisor, 4 adds feedback without evaluator")
 
     args = parser.parse_args()
@@ -89,14 +89,16 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
     evaluator = LLMAgent(openai_api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
 
     results = {}
-    
+        
     for program in get_valid_programs(benchmark, num_programs, application_name):  
         if benchmark == "EnergyLanguage":
             benchmark_obj = EnergyLanguageBenchmark(program)
         elif benchmark == "PIE":
             benchmark_obj = PIEBenchmark(program)
         elif benchmark == "SciMark":
-            benchmark_obj = SciMarkBenchmark(program)
+            target_program = program[0]
+            target_method = program[1]
+            benchmark_obj = SciMarkBenchmark(target_program, target_method, method_level)
         elif benchmark == "Dacapobench":
             #program is a tuple of (test_method, test_class, test_namespace, test_group)
             test_method = program[0]
@@ -151,7 +153,7 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                     last_optimized_code = handle_compilation_error(error_message=compilation_error_message, llm_assistant=generator)
                 else:
                     ast = benchmark_obj.pre_process(last_optimized_code)
-                    flame_report = benchmark_obj.dynamic_analysis(code=last_optimized_code)
+                    flame_report = benchmark_obj.dynamic_analysis(code=last_optimized_code) if benchmark == "PIE" or not method_level else None
                     last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report)
             else:
                 logger.info("re-optimizing from latest working optimization")
@@ -159,7 +161,7 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                 evaluator.clear_memory()
                 evaluator_feedback = ""
                 ast = benchmark_obj.pre_process(last_working_optimized_code)
-                flame_report = benchmark_obj.dynamic_analysis(code=last_working_optimized_code) 
+                flame_report = benchmark_obj.dynamic_analysis(code=last_working_optimized_code) if benchmark == "PIE" or not method_level else None
                 last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report)
                 reoptimize_lastly_flag = 0
             
@@ -200,7 +202,8 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                 total_compilation_failure = 0
 
                 # Perform dynamic analysis using flame graph
-                benchmark_obj.dynamic_analysis(last_optimized_code)
+                if benchmark == "PIE" or not method_level:
+                    benchmark_obj.dynamic_analysis(last_optimized_code)
 
                 evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
                 
@@ -359,7 +362,7 @@ def main():
     application_name = args.application_name
     method_level = args.method_level
     ablation = args.ablation
-    
+        
     if ablation == 0:
         master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio, method_level)
     elif ablation == 1 or ablation == 2:

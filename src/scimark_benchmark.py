@@ -8,13 +8,15 @@ import re
 from abstract_syntax_trees.java_ast import JavaAST
 import csv
 import math
+from flamegraph_profiling import get_hotspots
+from java_method_profiling import replace_method_body, get_method_source_code, compile_java_project
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
 logger = Logger("logs", sys.argv[2]).logger
 
 class SciMarkBenchmark(Benchmark):
-    def __init__(self, program):
+    def __init__(self, program, method_name, method_level):
         self.program = program
         self.compilation_error = None
         self.energy_data = {}
@@ -22,6 +24,8 @@ class SciMarkBenchmark(Benchmark):
         self.expect_test_output = None
         self.original_code = None
         self.optimization_iteration = 0
+        self.method_level = method_level
+        self.method_name = method_name
         self.set_original_code()
     
     # Copy the original code to the optimized code (because we only measure the optimized code)
@@ -29,8 +33,13 @@ class SciMarkBenchmark(Benchmark):
         command = f"cp {USER_PREFIX}/benchmark_scimark/{self.program}/{self.program}OptimizedOriginal {USER_PREFIX}/benchmark_scimark/{self.program}/{self.program}Optimized.java"
         subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         source_path = f"{USER_PREFIX}/benchmark_scimark/{self.program}/{self.program}Optimized.java"
-        with open(source_path, "r") as file:
-            self.original_code = file.read()
+        
+        if self.method_level:
+            compile_java_project()
+            self.original_code = get_method_source_code(source_path, self.method_name)
+        else:
+            with open(source_path, "r") as file:
+                self.original_code = file.read()
         
     def get_original_code(self):
         return self.original_code
@@ -103,8 +112,36 @@ class SciMarkBenchmark(Benchmark):
     def compile(self, optimized_code):
         logger.info(f"llm_optimize: : writing optimized code to benchmark/{self.program}/{self.program}Optimized.java")
         destination_path = f"{USER_PREFIX}/benchmark_scimark/{self.program}/{self.program}Optimized.java"
-        with open(destination_path, "w") as file:
-            file.write(optimized_code)
+        
+        # save optimized code to optimized_java.txt first with the format { method_body }
+        # then replace the method body with the optimized code
+        def extract_block_only(optimized_code: str) -> str:
+            # remove class declaration if any:
+            optimized_code = re.sub(r'^\s*class\s+\w+\s*{(.*)}\s*$', r'\1', optimized_code, flags=re.DOTALL | re.MULTILINE)
+            start = optimized_code.find("{")
+            end = optimized_code.rfind("}")
+            if start == -1 or end == -1 or start > end:
+                logger.error("Could not locate complete block braces in the method source.")
+                raise ValueError("Could not locate complete block braces in the method source.")
+            return optimized_code[start:end+1]
+        
+        if self.method_level:
+            # remove method signature from optimized code
+            try:
+                optimized_code = extract_block_only(optimized_code)
+            except ValueError as e:
+                logger.error(f"Error extracting block from optimized code: {e}")
+                return False
+            with open(f"{USER_PREFIX}/src/runtime_logs/optimized_java.txt", "w") as file:
+                file.write(optimized_code)
+            logger.info(f"optimized_code: {optimized_code}")
+            replace_successfully = replace_method_body(destination_path, self.method_name)
+            if not replace_successfully:
+                self.compilation_error = "Please provide Java code in the original method format"
+                return False
+        else:
+            with open(destination_path, "w") as file:
+                file.write(optimized_code)
 
         os.chdir(f"{USER_PREFIX}/benchmark_scimark/{self.program}")
         try: 
@@ -391,7 +428,8 @@ class SciMarkBenchmark(Benchmark):
         os.chdir(f"{USER_PREFIX}/benchmark_scimark/{self.program}")
         
         code = re.sub(r'\bclass\s+\w+', f'class {self.program}Flamegraph', code)  # Change class name dynamically
-        
+        code = re.sub(rf'\bpublic\s+{self.program}Optimized\b', f'public {self.program}Flamegraph', code)  # Update public class declaration
+
         # save code to file
         with open(f"{self.program}Flamegraph.java", "w") as f:
             f.write(code)
@@ -484,10 +522,40 @@ class SciMarkBenchmark(Benchmark):
 
 def get_valid_scimark_programs():
     valid_programs = [
-        "FFT",
-        "LU",
-        "MonteCarlo",
-        "SOR",
+        # "FFT",
+        # "LU",
+        # "MonteCarlo",
+        # "SOR",
         "SparseCompRow"
     ]
-    return valid_programs
+    
+    transformed_data = []
+    
+    for program in valid_programs:
+        # compile
+        os.chdir(f"{USER_PREFIX}/benchmark_scimark/{program}")
+        
+        command = f"cp {USER_PREFIX}/benchmark_scimark/{program}/{program}OptimizedOriginal {USER_PREFIX}/benchmark_scimark/{program}/{program}Optimized.java"
+        subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    
+        try: 
+            compile_result = subprocess.run(
+                ["make", "compile"], 
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=120
+            )
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Original code compile failed: {e}\n")
+            continue
+        
+        hotspot = get_hotspots("SciMark", program, 1)
+        method_name = hotspot[0][0]
+        parts = method_name.split('/')
+        test_class, test_method = parts[-1].split('.')  # Split the last part into class and method
+        logger.info(f"Method name: {test_method}")
+        
+        transformed_data.append((program, test_method))
+    logger.info(f"Valid programs and method: {transformed_data}")   
+    return transformed_data

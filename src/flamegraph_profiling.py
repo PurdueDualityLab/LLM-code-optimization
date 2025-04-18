@@ -9,15 +9,33 @@ load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
 logger = Logger("logs", sys.argv[2]).logger
 
-def get_hotspots(application_name, top_K):
+def get_hotspots(benchmark_name, application_name, top_K):
     """Run the Java application with async-profiler. Need to manually run ant build command first."""
     try:        
-        logger.info("Running application {application_name} with async-profiler...")
-        profiler_cmd = [
-            "java",
-            f"-agentpath:{USER_PREFIX}/async-profiler/build/lib/libasyncProfiler.so=start,event=cpu,file=profile.txt,collapsed",
-            "-jar", "/home/hpeng/E2COOL/benchmark_dacapo/benchmarks/dacapo-evaluation-git-unknown${git.dirty}.jar", application_name
-        ]
+        logger.info(f"Running application {application_name} with async-profiler...")
+        
+        # path to the async-profiler native library
+        prof_lib = os.path.join(
+            USER_PREFIX, "async-profiler", "build", "lib", "libasyncProfiler.so"
+        )
+        
+        if benchmark_name == "Dacapo":
+            profiler_cmd = [
+                "java",
+                f"-agentpath:{prof_lib}=start,event=cpu,file=profile.txt,collapsed",
+                "-jar", "{USER_PREFIX}/benchmark_dacapo/benchmarks/dacapo-evaluation-git-unknown${git.dirty}.jar", application_name
+            ]
+        elif benchmark_name == "SciMark":
+            os.chdir(f"{USER_PREFIX}/benchmark_scimark/{application_name}")     
+            main_class = f"jnt.scimark2.{application_name}"
+            profiler_cmd = [
+                "java",
+                "-cp", ".",
+                f"-agentpath:{prof_lib}=start,event=cpu,file=profile.txt,collapsed",
+                main_class,
+            ]
+        else:
+            raise ValueError(f"Unknown benchmark name: {benchmark_name}")
         subprocess.run(profiler_cmd, check=True)
     except subprocess.CalledProcessError as e:
         logger.error(f"Error during async-profiler execution: {e}")
@@ -149,7 +167,7 @@ def aggregate_by_rightmost_method(marker, top_n):
 
 def main():
     # Example usage
-    results = get_hotspots("spring", 50)
+    results = get_hotspots("SciMark", "LU", 1)
     print(f"results length: {len(results)}")
     for method, total in results:
         print(f"{method} {total}")
@@ -166,7 +184,7 @@ def extract_package(file_path):
                 if match:
                     return match.group(1)
     except Exception as e:
-        print(f"Error reading {file_path}: {e}")
+        logger.error(f"Error reading {file_path}: {e}")
     return None
 
 def contains_uncommented_test(file_path):

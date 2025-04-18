@@ -1,0 +1,22 @@
+{
+    "0": [
+        "// Executes the Successive Over-Relaxation (SOR) algorithm.\npublic static void execute(double omega, double[][] G, long num_iterations) {\n    int M = G.length;\n    int N = G[0].length;\n    double omega_over_four = omega * 0.25;\n    double one_minus_omega = 1.0 - omega;\n    // Update interior points for each iteration.\n    int Mm1 = M - 1;\n    int Nm1 = N - 1;\n    for (long p = 0; p < num_iterations; p++) {\n        for (int i = 1; i < Mm1; i++) {\n            double[] Gi = G[i];\n            double[] Gim1 = G[i - 1];\n            double[] Gip1 = G[i + 1];\n            for (int j = 1; j < Nm1; j++) {\n                Gi[j] = omega_over_four * (Gim1[j] + Gip1[j] + Gi[j - 1] + Gi[j + 1]) + one_minus_omega * Gi[j];\n            }\n        }\n    }\n}",
+        101.622,
+        2.202,
+        6604827384.6,
+        45752.8,
+        0.454,
+        1874.47,
+        20
+    ],
+    "1": [
+        "package jnt.scimark2;\npublic static void execute(double omega, double[][] G, long num_iterations) {\n    int M = G.length;\n    int N = G[0].length;\n    double omega_over_four = omega * 0.25;\n    double one_minus_omega = 1.0 - omega;\n    int Mm1 = M - 1;\n    int Nm1 = N - 1;\n     \n    for (long p = 0; p < num_iterations; p++) {\n        for (int i = 1; i < Mm1; i++) {\n            double[] Gi = G[i];\n            double[] Gim1 = G[i - 1];\n            double[] Gip1 = G[i + 1];\n\n            for (int j = 1; j < Nm1; j++) {\n                double oldGiJ = Gi[j];\n                double newValue = omega_over_four * (Gim1[j] + Gip1[j] + Gi[j - 1] + Gi[j + 1]);\n                Gi[j] = newValue + one_minus_omega * oldGiJ;\n            }\n        }\n    }\n}\n",
+        0.994,
+        1.006,
+        1.0053399009901045,
+        0.9991439552760308,
+        1.0057665198237886,
+        0.9980581177612872,
+        23
+    ]
+}
