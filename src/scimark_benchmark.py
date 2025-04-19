@@ -259,7 +259,12 @@ class SciMarkBenchmark(Benchmark):
     def _compare_outputs(self, optimized_output):
         optimized_output = self._process_output_content(optimized_output)
 
-        optimized_output_float = float(optimized_output)
+        try:
+            optimized_output_float = float(optimized_output)
+        except ValueError:
+            logger.error(f"Cannot convert optimized output to float: {optimized_output}")
+            return False
+        
         expect_test_output_float = float(self.expect_test_output)
         
         if self.program == "FFT":
@@ -336,6 +341,10 @@ class SciMarkBenchmark(Benchmark):
                     cpu_cycles = row[3]
                     peak_memory = row[4]
                     benchmark_data.append((benchmark_name, energy, latency, cpu_cycles, peak_memory))
+                    
+        if benchmark_data == []:
+            logger.error("No data in the benchmark data")
+            return None, None, None, None, None
 
         #Find average energy usage and average runtime
         avg_energy = 0
@@ -522,10 +531,10 @@ class SciMarkBenchmark(Benchmark):
 
 def get_valid_scimark_programs():
     valid_programs = [
-        # "FFT",
-        # "LU",
-        # "MonteCarlo",
-        # "SOR",
+        "FFT",
+        "LU",
+        "MonteCarlo",
+        "SOR",
         "SparseCompRow"
     ]
     

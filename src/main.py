@@ -230,16 +230,26 @@ def ablation_script_level_1_and_2(benchmark, num_programs, application_name, mod
     
     results = {}
     
-    for program in get_valid_programs(benchmark, num_programs, application_name):  
-        benchmark_obj = PIEBenchmark(program)
+    for program in get_valid_programs(benchmark, num_programs, application_name):
+        if benchmark == "PIE":
+            benchmark_obj = PIEBenchmark(program)
+        elif benchmark == "SciMark":
+            target_program = program[0]
+            target_method = program[1]
+            benchmark_obj = SciMarkBenchmark(target_program, target_method, method_level=False)
+        else:
+            logger.error("Invalid benchmark for ablation study")
+            break
+        
+        folder_name = program[0] if isinstance(program, tuple) else program
 
         if benchmark_obj.get_original_code() is None:
-            results[program] = "Unable to find original code"
+            results[folder_name] = "Unable to find original code"
             continue
 
         original_code_compiles = benchmark_obj.set_original_energy()
         if not original_code_compiles:
-            results[program] = "Unable to compile original code or timeout"
+            results[folder_name] = "Unable to compile original code or timeout"
             continue
         
         original_code = benchmark_obj.get_original_code()
@@ -254,16 +264,16 @@ def ablation_script_level_1_and_2(benchmark, num_programs, application_name, mod
         if ablation == 2:
             logger.info(f"Optimizing {program} with ast and flamegraph")
             ast = benchmark_obj.pre_process(original_code)
-            flame_report = benchmark_obj.dynamic_analysis(optimized=False)
+            flame_report = benchmark_obj.dynamic_analysis(original_code)
             optimized_code = llm_optimize(code=original_code, llm_assistant=generator, ast=ast, flame_report=flame_report)
         else:
             logger.info(f"Optimizing {program} with only source code")
             optimized_code = llm_optimize(code=original_code, llm_assistant=generator)
             
          # Error in LLM completion
-        if optimized_code == None:
+        if optimized_code is None:
             logger.error("Error in LLM completion")
-            results[program] = "Error in LLM completion."
+            results[folder_name] = "Error in LLM completion."
             continue
         
         # code post_process
@@ -275,12 +285,12 @@ def ablation_script_level_1_and_2(benchmark, num_programs, application_name, mod
         # switch case of status
         if (status == Status.COMPILATION_ERROR or status == Status.RUNTIME_ERROR_OR_TEST_FAILED):
             logger.error("Error in optimized file")
-            results[program] = "Unable to produce functional equivalent programs."
+            results[folder_name] = "Unable to produce functional equivalent programs."
         else:
             logger.info("Optimization Complete, writing results to file.....")
             energy_data = benchmark_obj.get_energy_data()
             evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
-            results[program] = write_result(energy_data, program, evaluator_feedback_data, results_dir)
+            results[folder_name] = write_result(energy_data, folder_name, evaluator_feedback_data, results_dir)
     
     evaluation_summary(results, results_dir)
 
