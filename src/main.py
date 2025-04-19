@@ -201,10 +201,6 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                 total_output_difference = 0
                 total_compilation_failure = 0
 
-                # Perform dynamic analysis using flame graph
-                if benchmark == "PIE" or not method_level:
-                    benchmark_obj.dynamic_analysis(last_optimized_code)
-
                 evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
                 
                 if num_success_iteration == self_optimization_step:
@@ -212,6 +208,11 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                     energy_data = benchmark_obj.get_energy_data()
                     results[folder_name] = write_result(energy_data, folder_name, evaluator_feedback_data, results_dir)
                     break
+                
+                # Perform dynamic analysis using flame graph
+                if benchmark == "PIE" or not method_level:
+                    benchmark_obj.dynamic_analysis(last_optimized_code)
+                    evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
 
                 # getting feedback from the evaluator
                 logger.info("Regression test success, getting evaluator feedback")
