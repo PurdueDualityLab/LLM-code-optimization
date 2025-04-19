@@ -39,7 +39,7 @@ def get_valid_programs(benchmark, num_programs, application_name):
     if (benchmark == "EnergyLanguage"):
         return get_valid_energy_language_programs()
     elif (benchmark == "PIE"):
-        return get_valid_pie_programs(num_programs)
+        return get_valid_pie_programs()
     elif (benchmark == "SciMark"):
         # cleanup
         txt_files = glob.glob(f"{USER_PREFIX}/benchmark_scimark/*/*.txt")

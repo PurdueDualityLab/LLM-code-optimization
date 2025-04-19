@@ -200,9 +200,9 @@ class PIEBenchmark(Benchmark):
 
         #Generate flame report using test case #0
         problem_id = self.program.split('_')[0]
-        test_case_folder = f"{USER_PREFIX}/benchmark_pie/{problem_id}/test_cases"
-        input_files = sorted(glob.glob(f"{test_case_folder}/input.*.txt"))        
-        input_file = input_files[0]
+        # test_case_folder = f"{USER_PREFIX}/benchmark_pie/{problem_id}/test_cases"
+        # input_files = sorted(glob.glob(f"{test_case_folder}/input.*.txt"))        
+        # input_file = input_files[0]
         
         source_code_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}/flamegraph_{self.program}"
         with open(source_code_path, 'w') as file:
@@ -211,30 +211,29 @@ class PIEBenchmark(Benchmark):
         # compile the code
         try: 
             result = subprocess.run(
-                ["make", "compile_flame_graph"], 
+                ["make", "compile_code_for_flame_report"], 
                 check=True,
                 capture_output=True,
                 text=True
             )
-            logger.info(f"Compile flame_graph code successfully.\n")
+            logger.info(f"Compiled code used for flame report successfully.\n")
         except subprocess.CalledProcessError as e:
-            logger.error(f"Compile flame_graph code failed: {e.stdout + e.stderr}\n")
+            logger.error(f"Compiling code used for flame report failed: {e.stdout + e.stderr}\n")
             return
 
-        logger.info(f"Generating flame report for original program with input file: {input_file}")
+        logger.info(f"Generating flame report for original program across all test cases")
         
         try: 
-            result_flamegraph = subprocess.run(
+            result_flame_report = subprocess.run(
                 ["make", "generate_flame_report"],
-                stdin=open(input_file, 'r'),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
                 encoding='latin-1'
             )
-            logger.info(f"Generate flame_graph successfully.\n")
+            logger.info(f"Generate flame_report successfully.\n")
         except subprocess.CalledProcessError as e:
-            logger.error(f"Generate flame_graph failed: {e.stdout + e.stderr}\n")
+            logger.error(f"Generate flame_report failed: {e.stdout + e.stderr}\n")
         
         flame_report_file = open(f"{USER_PREFIX}/benchmark_pie/{problem_id}/flame_report.txt", 'r')
         
@@ -432,22 +431,27 @@ class PIEBenchmark(Benchmark):
         
         return benchmark_info
 
-def get_valid_pie_programs(num_programs):
+def get_valid_pie_programs():
     slow_fast_pairs = []
     selected_problem_ids = set()
     source_code = []
-    invalid_problem_id = ["p02587"] #timeout
+
+    #Read list of valid programs from config file
+    config_file = open(f"{USER_PREFIX}/benchmark_pie/valid_test_programs.txt", "r")
+    valid_program_ids = config_file.readlines()
+    valid_program_ids = [program_id.strip() for program_id in valid_program_ids]
+    config_file.close()
 
     #Extract the first 5 unique problems from the validation set
-    file = open(f"{USER_PREFIX}/benchmark_pie/val.jsonl", "r")
+    file = open(f"{USER_PREFIX}/benchmark_pie/test.jsonl", "r")
     for line in file:
         json_line = json.loads(line)
-        if json_line["problem_id"] not in selected_problem_ids and len(selected_problem_ids) != num_programs and json_line["problem_id"] not in invalid_problem_id and float(json_line["src_agg_runtime"]) >= 0.1:
+        if json_line["problem_id"] in valid_program_ids and json_line["problem_id"] not in selected_problem_ids:
             selected_problem_ids.add(json_line["problem_id"])
             slow_fast_pairs.append(json_line)
             src_code = json_line["src_code"].replace("\n\n", "\n")
             source_code.append(src_code)
-        if len(selected_problem_ids) == num_programs:
+        if len(selected_problem_ids) == len(valid_program_ids):
             break
     file.close()
 
@@ -485,3 +489,13 @@ def setup_benchmarks(valid_programs, source_code):
         makefile_template = open(f"{folder_path}/Makefile", "w")
         makefile_template.write(makefile_content)
         makefile_template.close()
+ 
+        #Create bash script for each problem to run through all test cases
+        bash_script_template = open(f"{USER_PREFIX}/benchmark_pie/bash_script_template.sh", "r")
+        bash_script_content = bash_script_template.read()
+        bash_script_content = bash_script_content.replace("${EXE_NAME}", f"flamegraph_{program.split('.')[0]}.gpp_run")
+        bash_script_template.close()
+        bash_script = open(f"{folder_path}/run_all_test_cases.sh", "w")
+        bash_script.write(bash_script_content)
+        bash_script.close()
+
