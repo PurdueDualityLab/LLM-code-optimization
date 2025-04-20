@@ -25,7 +25,6 @@ run_optimized:
 	./optimized_${FILE_NAME}.gpp_run
 
 generate_flame_report:
-	chmod +x ./run_all_test_cases.sh
 	sudo perf record -F 90000 -e cycles:u -g --call-graph dwarf -o data -- ./run_all_test_cases.sh
 	sudo perf report -i data -f -n --stdio --sort overhead > flame_report.txt
 
