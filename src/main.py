@@ -35,7 +35,7 @@ def parse_arguments():
     args = parser.parse_args()
     return args
 
-def get_valid_programs(benchmark, num_programs, application_name):
+def get_valid_programs(benchmark, num_programs, application_name, method_level):
     if (benchmark == "EnergyLanguage"):
         return get_valid_energy_language_programs()
     elif (benchmark == "PIE"):
@@ -52,7 +52,17 @@ def get_valid_programs(benchmark, num_programs, application_name):
                 logger.error(f"Error removing {file_path}: {e}")
         return get_valid_scimark_programs()
     elif (benchmark == "Dacapobench"):
-        return get_valid_dacapo_classes(application_name)
+        programs = get_valid_dacapo_classes(application_name)
+        if not method_level:
+            unique_classes = set()
+            filtered_programs = []
+            for prog in programs:
+                if prog[1] not in unique_classes:  # prog[1] is test_class
+                    unique_classes.add(prog[1])
+                    filtered_programs.append(prog)
+                    logger.info(f"filtered program: {prog}")
+            programs = filtered_programs
+        return programs
     else:
         return []
     
@@ -89,8 +99,10 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
     evaluator = LLMAgent(openai_api_key=openai_key, genai_api_key=genai_api_key, model=model, use_genai_studio=use_genai_studio, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
 
     results = {}
+    
+    results_dir = f"{USER_PREFIX}/results/{benchmark}"
         
-    for program in get_valid_programs(benchmark, num_programs, application_name):  
+    for program in get_valid_programs(benchmark, num_programs, application_name, method_level):  
         if benchmark == "EnergyLanguage":
             benchmark_obj = EnergyLanguageBenchmark(program)
         elif benchmark == "PIE":
@@ -133,12 +145,13 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         num_success_iteration = 0
         total_output_difference = 0
         total_compilation_failure = 0
-
-        results_dir = f"{USER_PREFIX}/results/{benchmark}"
        
         while True:
             if total_output_difference == 3 or total_compilation_failure == 2:
                 logger.error("Unable to produce functional equivalent programs.")
+                if benchmark == "Dacapobench":
+                    # restore the last_working_optimized_code
+                    benchmark_obj.restore_last_working_optimized_code(last_working_optimized_code)
                 if num_success_iteration == 0:
                     results[folder_name] = "Unable to produce functional equivalent programs."
                 else:
@@ -153,9 +166,12 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                     compilation_error_message = benchmark_obj.get_compilation_error()
                     last_optimized_code = handle_compilation_error(error_message=compilation_error_message, llm_assistant=generator)
                 else:
-                    ast = benchmark_obj.pre_process(last_optimized_code)
-                    flame_report = benchmark_obj.dynamic_analysis(code=last_optimized_code) if benchmark == "PIE" or not method_level else None
-                    last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report)
+                    if evaluator_feedback is not None and evaluator_feedback != "":
+                        last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback)
+                    else:
+                        ast = benchmark_obj.pre_process(last_optimized_code)
+                        flame_report = benchmark_obj.dynamic_analysis(code=last_optimized_code) if benchmark == "PIE" or not method_level else None
+                        last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report)
             else:
                 logger.info("re-optimizing from latest working optimization")
                 generator.clear_memory()

@@ -150,9 +150,8 @@ class DaCapoBenchmark(Benchmark):
         code = code.replace("```", "")
         filtered_code = self.remove_java_comments(code)
         return filtered_code
-
-    def compile(self, optimized_code):
-        #write optimized code to file
+    
+    def _get_destination_path_of_source_code(self):
         if self.program == 'fop':
             if self.namespace_name and self.namespace_name != "":
                 destination_path = f"{fop_src_dir}/{self.namespace_name}/{self.class_name}.java"
@@ -177,6 +176,11 @@ class DaCapoBenchmark(Benchmark):
                 destination_path = f"{graphchi_src_dir}/{self.namespace_name}/{self.class_name}.java"
             else:
                 destination_path = f"{graphchi_src_dir}/{self.class_name}.java"
+        return destination_path
+
+    def compile(self, optimized_code):
+        #write optimized code to file
+        destination_path = self._get_destination_path_of_source_code()
         
         # save optimized code to optimized_java.txt first with the format { method_body }
         # then replace the method body with the optimized code
@@ -430,6 +434,11 @@ class DaCapoBenchmark(Benchmark):
         }
         
         return benchmark_info
+    
+    def restore_last_working_optimized_code(self, code):
+        destination_path = self._get_destination_path_of_source_code()
+        with open(destination_path, "w") as file:
+            file.write(code)
 
 def get_valid_dacapo_classes(application_name):
     hotspots = get_hotspots("Dacapo", application_name, top_K=50)
