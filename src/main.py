@@ -116,11 +116,12 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         if benchmark_obj.get_original_code() is None:
             results[folder_name] = "Unable to find original code"
             continue
-
+        
+        # TODO: Change the error message shown by logger - currently it is misleading since code may compile but actually RAPL causes the error
         original_code_compiles = benchmark_obj.set_original_energy()
         if not original_code_compiles:
-            logger.error(f"Unable to compile original code for {program}")
-            results[folder_name] = "Unable to compile original code or timeout"
+            logger.error(f"Unable to compile or measure energy of the original code for {program}")
+            results[folder_name] = "Unable to compile or measure energy of the original code or timeout"
             continue
         
         compilation_errors = 0

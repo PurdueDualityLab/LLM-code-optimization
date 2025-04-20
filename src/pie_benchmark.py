@@ -498,4 +498,5 @@ def setup_benchmarks(valid_programs, source_code):
         bash_script = open(f"{folder_path}/run_all_test_cases.sh", "w")
         bash_script.write(bash_script_content)
         bash_script.close()
+        os.chmod(f"{folder_path}/run_all_test_cases.sh", 0o755)
 

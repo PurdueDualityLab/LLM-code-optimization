@@ -25,7 +25,7 @@ def llm_optimize(code, llm_assistant, evaluator_feedback=None, ast=None, flame_r
         selected_strategy: str
         final_code: str
         
-    logger.info(f"flamegraph: {flame_report}")
+    # logger.info(f"flamegraph: {flame_report}")
 
     if not evaluator_feedback or evaluator_feedback == "":
         template = env.get_template("generator_prompt.jinja")
@@ -47,7 +47,7 @@ def llm_optimize(code, llm_assistant, evaluator_feedback=None, ast=None, flame_r
 
     logger.info(f"llm_optimize: Generator LLM Optimizing ....")
 
-    logger.info(f"Generator prompt: {prompt}")
+    # logger.info(f"Generator prompt: {prompt}")
 
     llm_assistant.add_to_memory("user", prompt)
     llm_assistant.generate_response(OptimizationReasoning)
