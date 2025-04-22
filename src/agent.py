@@ -1,14 +1,12 @@
 from openai import OpenAI
-import time
 import subprocess
 from utils import Logger
 import sys
 from ollama import Client
 from pydantic import BaseModel
-import requests
-import json
 
 logger = Logger("logs", sys.argv[2]).logger
+counter = 0
 
 class LLMAgent:
     def __init__(self, openai_api_key, genai_api_key, model, use_genai_studio, system_message="You are a helpful assistant."):
@@ -39,6 +37,7 @@ class LLMAgent:
         self.memory.append({"role": role, "content": content})
     
     def generate_response(self, response_format=BaseModel):
+        counter+=1
         try:
             if self.is_openai_model() or self.use_genai_studio:
                 response = self.client.beta.chat.completions.parse(
@@ -72,3 +71,6 @@ class LLMAgent:
     
     def is_genai_studio(self):
         return self.use_genai_studio
+
+def get_num_steps():
+    return counter

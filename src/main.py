@@ -4,7 +4,7 @@ import os
 import sys
 from utils import Logger
 import argparse
-from agent import LLMAgent
+from agent import LLMAgent, get_num_steps
 from status import Status
 from llm.generator_llm import llm_optimize, handle_compilation_error
 from llm.evaluator_llm import evaluator_llm
@@ -14,6 +14,7 @@ from scimark_benchmark import get_valid_scimark_programs, SciMarkBenchmark
 from dacapo_benchmark import get_valid_dacapo_classes, DaCapoBenchmark
 from collections import defaultdict
 import glob
+import time
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
@@ -390,11 +391,21 @@ def main():
     application_name = args.application_name
     method_level = args.method_level
     ablation = args.ablation
+    
+    start_time = time.time()
         
     if ablation == 0:
         master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio, method_level)
     elif ablation == 1 or ablation == 2:
         ablation_script_level_1_and_2(benchmark, num_programs, application_name, model, use_genai_studio, ablation)      
 
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    num_steps = get_num_steps()
+    logger.info(f"Total time taken: {elapsed_time:.2f} seconds")
+    logger.info(f"Total steps taken: {num_steps}")
+    with open(f"{USER_PREFIX}/results/system.txt", "w") as f:
+        f.write(f"Total steps taken: {num_steps}\n")
+        f.write(f"Total time taken: {elapsed_time:.2f} seconds\n")
 if __name__ == "__main__":
     main()
