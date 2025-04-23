@@ -4,7 +4,7 @@ import os
 import sys
 from utils import Logger
 import argparse
-from agent import LLMAgent, get_num_steps
+from agent import LLMAgent
 from status import Status
 from llm.generator_llm import llm_optimize, handle_compilation_error
 from llm.evaluator_llm import evaluator_llm
@@ -40,7 +40,7 @@ def get_valid_programs(benchmark, num_programs, application_name, method_level):
     if (benchmark == "EnergyLanguage"):
         return get_valid_energy_language_programs()
     elif (benchmark == "PIE"):
-        return get_valid_pie_programs()
+        return get_valid_pie_programs(num_programs)
     elif (benchmark == "SciMark"):
         # cleanup
         txt_files = glob.glob(f"{USER_PREFIX}/benchmark_scimark/*/*.txt")
@@ -103,7 +103,8 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
     
     results_dir = f"{USER_PREFIX}/results/{benchmark}"
         
-    for program in get_valid_programs(benchmark, num_programs, application_name, method_level):  
+    for program in get_valid_programs(benchmark, num_programs, application_name, method_level):
+        start_time = time.time()
         if benchmark == "EnergyLanguage":
             benchmark_obj = EnergyLanguageBenchmark(program)
         elif benchmark == "PIE":
@@ -240,7 +241,16 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         # clearing LLM memory
         generator.clear_memory()
         evaluator.clear_memory()
-
+        
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        num_steps = LLMAgent.get_global_counter()
+        LLMAgent.rest_global_counter()
+        logger.info(f"Total time taken: {elapsed_time:.2f} seconds")
+        logger.info(f"Total steps taken: {num_steps}")
+        with open(f"{USER_PREFIX}/results/system_{folder_name}.txt", "w") as f:
+            f.write(f"Total steps taken: {num_steps}\n")
+            f.write(f"Total time taken: {elapsed_time:.2f} seconds\n")
     evaluation_summary(results, results_dir)
         
 def ablation_script_level_1_and_2(benchmark, num_programs, application_name, model, use_genai_studio, ablation):
@@ -249,7 +259,7 @@ def ablation_script_level_1_and_2(benchmark, num_programs, application_name, mod
     
     results = {}
     
-    for program in get_valid_programs(benchmark, num_programs, application_name):
+    for program in get_valid_programs(benchmark, num_programs, application_name, method_level=False):
         if benchmark == "PIE":
             benchmark_obj = PIEBenchmark(program)
         elif benchmark == "SciMark":
@@ -392,20 +402,22 @@ def main():
     method_level = args.method_level
     ablation = args.ablation
     
-    start_time = time.time()
+    if benchmark == "Dacapobench":
+        start_time = time.time()
         
     if ablation == 0:
         master_script(benchmark, num_programs, application_name, model, self_optimization_step, use_genai_studio, method_level)
     elif ablation == 1 or ablation == 2:
         ablation_script_level_1_and_2(benchmark, num_programs, application_name, model, use_genai_studio, ablation)      
 
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    num_steps = get_num_steps()
-    logger.info(f"Total time taken: {elapsed_time:.2f} seconds")
-    logger.info(f"Total steps taken: {num_steps}")
-    with open(f"{USER_PREFIX}/results/system.txt", "w") as f:
-        f.write(f"Total steps taken: {num_steps}\n")
-        f.write(f"Total time taken: {elapsed_time:.2f} seconds\n")
+    if benchmark == "Dacapobench":
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        num_steps = LLMAgent.get_global_counter()
+        logger.info(f"Total time taken: {elapsed_time:.2f} seconds")
+        logger.info(f"Total steps taken: {num_steps}")
+        with open(f"{USER_PREFIX}/results/system_{application_name}.txt", "w") as f:
+            f.write(f"Total steps taken: {num_steps}\n")
+            f.write(f"Total time taken: {elapsed_time:.2f} seconds\n")
 if __name__ == "__main__":
     main()
