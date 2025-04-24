@@ -55,11 +55,17 @@ def get_valid_programs(benchmark, num_programs, application_name, method_level):
     elif (benchmark == "Dacapobench"):
         programs = get_valid_dacapo_classes(application_name)
         if not method_level:
+            class_methods_map = {}
+            for prog in programs:
+                test_class = prog[1]  # prog[1] is the test_class
+                class_methods_map.setdefault(test_class, set()).add(prog[0])
+        
             unique_classes = set()
             filtered_programs = []
             for prog in programs:
                 if prog[1] not in unique_classes:  # prog[1] is test_class
                     unique_classes.add(prog[1])
+                    prog.append(class_methods_map.get(prog[1]))  # prog[0] is test_method
                     filtered_programs.append(prog)
                     logger.info(f"filtered program: {prog}")
             programs = filtered_programs
@@ -114,13 +120,14 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
             target_method = program[1]
             benchmark_obj = SciMarkBenchmark(target_program, target_method, method_level)
         elif benchmark == "Dacapobench":
-            #program is a tuple of (test_method, test_class, test_namespace, test_group)
+            #program is a tuple of (test_method, test_class, test_namespace, test_group, unit_tests)
             test_method = program[0]
             test_class = program[1]
             test_namespace = program[2]
             test_group = program[3]
             unit_tests = program[4]
-            benchmark_obj = DaCapoBenchmark(test_method, test_class, test_namespace, test_group, unit_tests, application_name, method_level)
+            methods_list = program[5] if not method_level else None
+            benchmark_obj = DaCapoBenchmark(test_method, test_class, test_namespace, test_group, unit_tests, application_name, method_level, methods_list)
         else:
             logger.error("Invalid benchmark")
             break

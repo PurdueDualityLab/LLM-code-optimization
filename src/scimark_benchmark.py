@@ -113,25 +113,7 @@ class SciMarkBenchmark(Benchmark):
         logger.info(f"llm_optimize: : writing optimized code to benchmark/{self.program}/{self.program}Optimized.java")
         destination_path = f"{USER_PREFIX}/benchmark_scimark/{self.program}/{self.program}Optimized.java"
         
-        # save optimized code to optimized_java.txt first with the format { method_body }
-        # then replace the method body with the optimized code
-        def extract_block_only(optimized_code: str) -> str:
-            # remove class declaration if any:
-            optimized_code = re.sub(r'^\s*class\s+\w+\s*{(.*)}\s*$', r'\1', optimized_code, flags=re.DOTALL | re.MULTILINE)
-            start = optimized_code.find("{")
-            end = optimized_code.rfind("}")
-            if start == -1 or end == -1 or start > end:
-                logger.error("Could not locate complete block braces in the method source.")
-                raise ValueError("Could not locate complete block braces in the method source.")
-            return optimized_code[start:end+1]
-        
         if self.method_level:
-            # remove method signature from optimized code
-            try:
-                optimized_code = extract_block_only(optimized_code)
-            except ValueError as e:
-                logger.error(f"Error extracting block from optimized code: {e}")
-                return False
             with open(f"{USER_PREFIX}/src/runtime_logs/optimized_java.txt", "w") as file:
                 file.write(optimized_code)
             logger.info(f"optimized_code: {optimized_code}")

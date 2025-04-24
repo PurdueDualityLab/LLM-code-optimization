@@ -30,7 +30,7 @@ graphchi_root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/graphchi/bui
 graphchi_src_dir = f"{graphchi_root_dir}/src/main/java/edu/cmu/graphchi"
 
 class DaCapoBenchmark(Benchmark):
-    def __init__(self, test_method, test_class, test_namespace, test_group, unit_tests, benchmark_name, method_level):
+    def __init__(self, test_method, test_class, test_namespace, test_group, unit_tests, benchmark_name, method_level, methods_list):
         # ex. test_class = PDFNumsArray, test_namespace = pdf, test_group = core, benchmark_name = fop
         self.method_name = test_method
         self.class_name = test_class
@@ -44,6 +44,7 @@ class DaCapoBenchmark(Benchmark):
         self.original_code = None
         self.optimization_iteration = 0
         self.method_level = method_level
+        self.methods_list = methods_list
         self.set_original_code()
         
     def set_original_code(self):
@@ -70,7 +71,6 @@ class DaCapoBenchmark(Benchmark):
                 source_path = f"{graphchi_src_dir}/{self.namespace_name}/{self.class_name}.java"
             else:
                 source_path = f"{graphchi_src_dir}/{self.class_name}.java"
-
 
         if self.method_level:
             compile_java_project()
@@ -435,6 +435,12 @@ class DaCapoBenchmark(Benchmark):
         
         return benchmark_info
     
+    def generate_flame_report(self, code):
+        return self.methods_list
+    
+    def dynamic_analysis(self, code):
+        return super().dynamic_analysis(code)
+    
     def restore_last_working_optimized_code(self, code):
         destination_path = self._get_destination_path_of_source_code()
         with open(destination_path, "w") as file:
@@ -507,8 +513,6 @@ def setup_makefile(application_name):
     elif application_name == 'graphchi':
         folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{application_name}"
         subfolders = [f.path for f in os.scandir(folder_path) if f.is_dir() and f.name == 'build']
-    
-    
 
     for subfolder in subfolders:
         logger.info(subfolder)
