@@ -6,7 +6,13 @@ include ../../.env
 
 
 JAVAC = javac
-JAVA = java
+JAVA = java -server \
+  -XX:+AggressiveOpts \
+  -XX:+UseSuperWord \
+  -XX:+TieredCompilation \
+  -XX:TieredStopAtLevel=4 \
+  -XX:MaxInlineSize=100 \
+  -XX:FreqInlineSize=100
 JFLAGS = -d . 
 
 SRCS = *.java  
@@ -62,3 +68,14 @@ clean:
 
 # ctimer
 # java -agentpath:/home/leoDeng/SciMark/E2COOL/async-profiler/build/lib/libasyncProfiler.so=start,event=ctimer,flat=10,file=ctimer_profile.txt jnt/scimark2/FFT
+
+# flamegraph
+# java -agentpath:/home/leoDeng/SciMark/E2COOL/async-profiler/build/lib/libasyncProfiler.so=start,event=cpu,flamegraph,file=flamegraph_profile.html jnt/scimark2/FFT
+# java -agentpath:/path/to/async-profiler/build/lib/libasyncProfiler.so=start,event=cpu,flat=10,file=cpu_profile.txt jnt/scimark2/FFT
+# java -agentpath:/home/leoDeng/SciMark/E2COOL/async-profiler/build/lib/libasyncProfiler.so=start,event=cpu,flat=10,file=cpu_profile.txt jnt/scimark2/FFT
+
+# java -agentpath:/path/to/async-profiler/build/lib/libasyncProfiler.so=start,event=cpu,collapsed,file=collapsed_profile.txt jnt/scimark2/FFT
+# java -agentpath:/home/leoDeng/SciMark/E2COOL/async-profiler/build/lib/libasyncProfiler.so=start,event=cpu,collapsed,file=collapsed_profile.txt jnt/scimark2/FFT
+
+# cache miss
+# java -agentpath:/home/leoDeng/SciMark/E2COOL/async-profiler/build/lib/libasyncProfiler.so=start,event=cache-misses,flat=10,file=cache_miss_profile.txt jnt/scimark2/FFT
