@@ -8,13 +8,15 @@ import re
 from abstract_syntax_trees.java_ast import JavaAST
 import csv
 import math
+from flamegraph_profiling import get_hotspots
+from java_method_profiling import replace_method_body, get_method_source_code, compile_java_project
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
 logger = Logger("logs", sys.argv[2]).logger
 
 class SciMarkBenchmark(Benchmark):
-    def __init__(self, program):
+    def __init__(self, program, method_name, method_level):
         self.program = program
         self.compilation_error = None
         self.energy_data = {}
@@ -22,6 +24,8 @@ class SciMarkBenchmark(Benchmark):
         self.expect_test_output = None
         self.original_code = None
         self.optimization_iteration = 0
+        self.method_level = method_level
+        self.method_name = method_name
         self.set_original_code()
     
     # Copy the original code to the optimized code (because we only measure the optimized code)
@@ -29,8 +33,13 @@ class SciMarkBenchmark(Benchmark):
         command = f"cp {USER_PREFIX}/benchmark_scimark/{self.program}/{self.program}OptimizedOriginal {USER_PREFIX}/benchmark_scimark/{self.program}/{self.program}Optimized.java"
         subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         source_path = f"{USER_PREFIX}/benchmark_scimark/{self.program}/{self.program}Optimized.java"
-        with open(source_path, "r") as file:
-            self.original_code = file.read()
+        
+        if self.method_level:
+            compile_java_project()
+            self.original_code = get_method_source_code(source_path, self.method_name)
+        else:
+            with open(source_path, "r") as file:
+                self.original_code = file.read()
         
     def get_original_code(self):
         return self.original_code
@@ -90,8 +99,10 @@ class SciMarkBenchmark(Benchmark):
         return ast.create_ast(code)
 
     def post_process(self, code):
-        code = code.replace("```java", "")
-        code = code.replace("```", "")
+       # Extract code inside ```java ... ```
+        match = re.search(r'```java\s*(.*?)```', code, flags=re.DOTALL)
+        if match:
+            code = match.group(1)
         code = re.sub(r'//.*?$|/\*.*?\*/', '', code, flags=re.DOTALL | re.MULTILINE)
         code = re.sub(r'\bclass\s+\w+', f'class {self.program}Optimized', code)  # Change class name dynamically
         if not code.strip().startswith("package jnt.scimark2;"):
@@ -101,8 +112,18 @@ class SciMarkBenchmark(Benchmark):
     def compile(self, optimized_code):
         logger.info(f"llm_optimize: : writing optimized code to benchmark/{self.program}/{self.program}Optimized.java")
         destination_path = f"{USER_PREFIX}/benchmark_scimark/{self.program}/{self.program}Optimized.java"
-        with open(destination_path, "w") as file:
-            file.write(optimized_code)
+        
+        if self.method_level:
+            with open(f"{USER_PREFIX}/src/runtime_logs/optimized_java.txt", "w") as file:
+                file.write(optimized_code)
+            logger.info(f"optimized_code: {optimized_code}")
+            replace_successfully = replace_method_body(destination_path, self.method_name)
+            if not replace_successfully:
+                self.compilation_error = "Please provide Java code in the original method format"
+                return False
+        else:
+            with open(destination_path, "w") as file:
+                file.write(optimized_code)
 
         os.chdir(f"{USER_PREFIX}/benchmark_scimark/{self.program}")
         try: 
@@ -220,7 +241,12 @@ class SciMarkBenchmark(Benchmark):
     def _compare_outputs(self, optimized_output):
         optimized_output = self._process_output_content(optimized_output)
 
-        optimized_output_float = float(optimized_output)
+        try:
+            optimized_output_float = float(optimized_output)
+        except ValueError:
+            logger.error(f"Cannot convert optimized output to float: {optimized_output}")
+            return False
+        
         expect_test_output_float = float(self.expect_test_output)
         
         if self.program == "FFT":
@@ -297,6 +323,10 @@ class SciMarkBenchmark(Benchmark):
                     cpu_cycles = row[3]
                     peak_memory = row[4]
                     benchmark_data.append((benchmark_name, energy, latency, cpu_cycles, peak_memory))
+                    
+        if benchmark_data == []:
+            logger.error("No data in the benchmark data")
+            return None, None, None, None, None
 
         #Find average energy usage and average runtime
         avg_energy = 0
@@ -381,18 +411,35 @@ class SciMarkBenchmark(Benchmark):
         
         return benchmark_info
 
-    def generate_flame_report(self, optimized: bool):
+    def generate_flame_report(self, code):
         """
         Run two async-profiler sessions (alloc & cpu) on the SciMark class
         """
         # cd into the per-benchmark folder
         os.chdir(f"{USER_PREFIX}/benchmark_scimark/{self.program}")
+        
+        code = re.sub(r'\bclass\s+\w+', f'class {self.program}Flamegraph', code)  # Change class name dynamically
+        code = re.sub(rf'\bpublic\s+{self.program}Optimized\b', f'public {self.program}Flamegraph', code)  # Update public class declaration
 
-        main_class = (
-            f"jnt.scimark2.{self.program}Optimized"
-            if optimized
-            else f"jnt.scimark2.{self.program}"
-        )
+        # save code to file
+        with open(f"{self.program}Flamegraph.java", "w") as f:
+            f.write(code)
+        
+        main_class = f"jnt.scimark2.{self.program}Flamegraph"
+        
+        # compile the class
+        try: 
+            result = subprocess.run(
+                ["make", "compile"], 
+                check=True,
+                capture_output=True,
+                text=True
+            )
+            logger.info(f"Flamegraph code compile successfully.\n")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Flamegraph code compile failed: {e.stderr}\n")
+            return
+
         # path to the async-profiler native library
         prof_lib = os.path.join(
             USER_PREFIX, "async-profiler", "build", "lib", "libasyncProfiler.so"
@@ -439,6 +486,9 @@ class SciMarkBenchmark(Benchmark):
         except subprocess.CalledProcessError as e:
             logger.error(f"CPU profile failed:\n{e.stderr}")
             raise
+        
+        # clean up Flamegraph file
+        os.remove(f"{self.program}Flamegraph.java")
 
         # read them back
         with open("alloc_profile.txt", "r") as f:
@@ -450,14 +500,16 @@ class SciMarkBenchmark(Benchmark):
         self.evaluator_feedback_data["alloc_profile"] = alloc_profile
         self.evaluator_feedback_data["cpu_profile"] = cpu_profile
 
-        return {
+        profile = {
             "alloc_profile": alloc_profile,
             "cpu_profile": cpu_profile
         }
+        
+        return profile["cpu_profile"]
 
-    def dynamic_analysis(self, optimized: bool):
-        logger.info(f"Generating async-profiler profiles (optimized={optimized})")
-        return self.generate_flame_report(optimized)
+    def dynamic_analysis(self, code):
+        logger.info(f"Generating async-profiler profiles")
+        return super().dynamic_analysis(code)
 
 def get_valid_scimark_programs():
     valid_programs = [
@@ -467,4 +519,34 @@ def get_valid_scimark_programs():
         "SOR",
         "SparseCompRow"
     ]
-    return valid_programs
+    
+    transformed_data = []
+    
+    for program in valid_programs:
+        # compile
+        os.chdir(f"{USER_PREFIX}/benchmark_scimark/{program}")
+        
+        command = f"cp {USER_PREFIX}/benchmark_scimark/{program}/{program}OptimizedOriginal {USER_PREFIX}/benchmark_scimark/{program}/{program}Optimized.java"
+        subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    
+        try: 
+            compile_result = subprocess.run(
+                ["make", "compile"], 
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=120
+            )
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Original code compile failed: {e}\n")
+            continue
+        
+        hotspot = get_hotspots("SciMark", program, 1)
+        method_name = hotspot[0][0]
+        parts = method_name.split('/')
+        test_class, test_method = parts[-1].split('.')  # Split the last part into class and method
+        logger.info(f"Method name: {test_method}")
+        
+        transformed_data.append((program, test_method))
+    logger.info(f"Valid programs and method: {transformed_data}")   
+    return transformed_data

@@ -53,5 +53,5 @@ To set up the pipeline for energy-efficient code optimization, follow these step
     ```
     To use GenAI studio to inference open-source models
     ```bash
-    make run ARGS="--benchmark PIE --llm llama3.3:70b-instruct-q4_K_M --self_optimization_step 2 --num_programs 2 --genai_studio True"
+    make run ARGS="--benchmark PIE --llm llama3.3:70b --self_optimization_step 2 --num_programs 2 --genai_studio True"
     ```

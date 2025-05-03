@@ -16,14 +16,15 @@ JAVA = java -server \
 JFLAGS = -d . 
 
 SRCS = *.java  
-RANDOM_SRC = ../Random.java
 BENCHMARK_CLASS = jnt/scimark2/FFTBenchmark
 
 MAIN_CLASS = jnt/scimark2/FFT
 OPTIMIZED_CLASS = jnt.scimark2.FFTOptimized
 
 compile:
-	$(JAVAC) $(JFLAGS) $(SRCS) $(RANDOM_SRC)
+	rm -rf *.class
+	rm -rf jnt/
+	$(JAVAC) $(JFLAGS) $(SRCS) ../Random.java ../Stopwatch.java
 
 run:
 	@$(JAVA) $(MAIN_CLASS)
@@ -46,9 +47,6 @@ measure_mflops:
 
 measure_mflops_optimized:
 	@$(JAVA) $(BENCHMARK_CLASS) true
-
-clean:
-	rm -rf *.class
 
 # cpu profile
 # java -agentpath:/home/leoDeng/SciMark/E2COOL/async-profiler/build/lib/libasyncProfiler.so=start,event=cpu,flat=10,file=cpu_profile.txt jnt/scimark2/FFT

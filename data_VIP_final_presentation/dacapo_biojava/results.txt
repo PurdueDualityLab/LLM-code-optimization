@@ -1,0 +1,58 @@
+{
+    "SequenceMixin": {
+        "energy_improvement": 1.012,
+        "runtime_improvement": 1.013,
+        "cpu_cycles_improvement": 1.0133190078707892,
+        "peak_memory_improvement": 0.9815835461755613,
+        "throughput_improvement": 1.0138095238095237,
+        "mflops_improvement": null,
+        "loc_improvement": 1.177
+    },
+    "AminoAcidCompoundSet": {
+        "energy_improvement": 1.01,
+        "runtime_improvement": 1.0,
+        "cpu_cycles_improvement": 1.000334357285471,
+        "peak_memory_improvement": 0.9974503488996241,
+        "throughput_improvement": 0.999797385620915,
+        "mflops_improvement": null,
+        "loc_improvement": 1.114
+    },
+    "PeptidePropertiesImpl": "Unable to produce functional equivalent programs.",
+    "Utils": {
+        "energy_improvement": 0.98,
+        "runtime_improvement": 0.999,
+        "cpu_cycles_improvement": 0.9987474537079589,
+        "peak_memory_improvement": 1.019744008714597,
+        "throughput_improvement": 0.9985300429184548,
+        "mflops_improvement": null,
+        "loc_improvement": 1.667
+    },
+    "FastaReader": "Unable to produce functional equivalent programs.",
+    "CommandPrompt": {
+        "energy_improvement": 0.741,
+        "runtime_improvement": 0.735,
+        "cpu_cycles_improvement": 0.7351666431792176,
+        "peak_memory_improvement": 0.7590491626148028,
+        "throughput_improvement": 0.9769378881987577,
+        "mflops_improvement": null,
+        "loc_improvement": 0.896
+    },
+    "AminoAcidCompound": {
+        "energy_improvement": 0.99,
+        "runtime_improvement": 1.012,
+        "cpu_cycles_improvement": 1.0120011662664492,
+        "peak_memory_improvement": 0.9835325365205844,
+        "throughput_improvement": 1.0128872017353578,
+        "mflops_improvement": null,
+        "loc_improvement": 1.169
+    },
+    "AbstractSequence": {
+        "energy_improvement": 1.039,
+        "runtime_improvement": 1.028,
+        "cpu_cycles_improvement": 1.0277866182092388,
+        "peak_memory_improvement": 0.9986462704751591,
+        "throughput_improvement": 1.028632743362832,
+        "mflops_improvement": null,
+        "loc_improvement": 1.252
+    }
+}

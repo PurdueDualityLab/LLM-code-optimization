@@ -1,9 +1,0 @@
---- Execution profile ---
-Total samples       : 1264
-deoptimization      : 84 (6.65%)
-
-       bytes  percent  samples  top
-  ----------  -------  -------  ---
-     4894880   99.96%     1240  malloc_hook
-        1216    0.02%        8  calloc_hook
-         512    0.01%       16  realloc_hook

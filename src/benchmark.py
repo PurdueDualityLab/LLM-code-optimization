@@ -61,7 +61,7 @@ class Benchmark:
         pass
 
     @abstractmethod
-    def generate_flame_report(self, optimized):
+    def generate_flame_report(self, code):
         """
         Generate aggregated flame report across all test cases
         """
@@ -84,5 +84,5 @@ class Benchmark:
         self.optimization_iteration += 1
         return Status.PERFORMANCE_IMPROVED     
 
-    def dynamic_analysis(self, optimized):
-        return self.generate_flame_report(optimized)
+    def dynamic_analysis(self, code):
+        return self.generate_flame_report(code)

@@ -29,7 +29,7 @@ def evaluator_llm(evaluator_feedback_data, llm_assistant):
     else:
         flame_report = ""
     
-    logger.info(f"flamegraph: {flame_report}")
+    # logger.info(f"flamegraph: {flame_report}")
         
     template = env.get_template("evaluator_prompt.jinja")
     data = {
@@ -41,7 +41,7 @@ def evaluator_llm(evaluator_feedback_data, llm_assistant):
     }
     
     prompt = template.render(data)
-    logger.info(f"Prompt: {prompt}")
+    # logger.info(f"Prompt: {prompt}")
 
     llm_assistant.add_to_memory("user", prompt)
     llm_assistant.generate_response(response_format=Feedback)
