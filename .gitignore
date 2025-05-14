@@ -14,3 +14,4 @@ results/
 src/runtime_logs/optimized_java.txt
 src/java_code_extraction/target
 benchmark_scimark/*/jnt/
+benchmark_human_eval/[0-9]

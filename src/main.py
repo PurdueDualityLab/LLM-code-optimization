@@ -12,6 +12,7 @@ from energy_language_benchmark import get_valid_energy_language_programs, Energy
 from pie_benchmark import get_valid_pie_programs, PIEBenchmark
 from scimark_benchmark import get_valid_scimark_programs, SciMarkBenchmark
 from dacapo_benchmark import get_valid_dacapo_classes, DaCapoBenchmark
+from humaneval_benchmark import get_valid_humaneval_programs, HumanEvalBenchmark
 from collections import defaultdict
 import glob
 import time
@@ -24,7 +25,7 @@ logger = Logger("logs", sys.argv[2]).logger
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="LLM-Code-Optimization")
-    parser.add_argument("--benchmark", type=str, default="EnergyLanguage", choices=["EnergyLanguage", "PIE", "SciMark", "Dacapobench", "Android"], help="dataset used for experiment")
+    parser.add_argument("--benchmark", type=str, default="EnergyLanguage", choices=["EnergyLanguage", "PIE", "SciMark", "Dacapobench", "HumanEval"], help="dataset used for experiment")
     parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "o3-mini", "deepseek-r1:32b","deepseek-r1:70b", "qwen2.5:72b", "llama3.3:70b", "codellama:latest"], help="llm used for inference")
     parser.add_argument("--self_optimization_step", type=int, default=5, help="number of LLM self-optimization step")
     parser.add_argument("--num_programs", type=int, default=5, help="For PIE only, number of programs from the benchmark to test")
@@ -41,6 +42,8 @@ def get_valid_programs(benchmark, num_programs, application_name, method_level):
         return get_valid_energy_language_programs()
     elif (benchmark == "PIE"):
         return get_valid_pie_programs(num_programs)
+    elif (benchmark == "HumanEval"):
+        return get_valid_humaneval_programs(num_programs)
     elif (benchmark == "SciMark"):
         # cleanup
         txt_files = glob.glob(f"{USER_PREFIX}/benchmark_scimark/*/*.txt")
@@ -115,6 +118,12 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
             benchmark_obj = EnergyLanguageBenchmark(program)
         elif benchmark == "PIE":
             benchmark_obj = PIEBenchmark(program)
+        elif benchmark == "HumanEval":
+            id = program[0]
+            function_code = program[1]
+            stress_test = program[2]
+            test_code = program[3]
+            benchmark_obj = HumanEvalBenchmark(id, function_code, stress_test, test_code)
         elif benchmark == "SciMark":
             target_program = program[0]
             target_method = program[1]
@@ -133,6 +142,8 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
             break
 
         folder_name = program[1] if isinstance(program, tuple) else program
+        if benchmark == "HumanEval": 
+            folder_name = program[0]
 
         if benchmark_obj.get_original_code() is None:
             results[folder_name] = "Unable to find original code"
@@ -252,13 +263,14 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         end_time = time.time()
         elapsed_time = end_time - start_time
         num_steps = LLMAgent.get_global_counter()
-        LLMAgent.rest_global_counter()
+        if benchmark != "Dacapobench":
+            LLMAgent.reset_global_counter()
         logger.info(f"Total time taken: {elapsed_time:.2f} seconds")
         logger.info(f"Total steps taken: {num_steps}")
-        with open(f"{USER_PREFIX}/results/system_{folder_name}.txt", "w") as f:
+        with open(f"{USER_PREFIX}/results/{benchmark}/system_{folder_name}.txt", "w") as f:
             f.write(f"Total steps taken: {num_steps}\n")
             f.write(f"Total time taken: {elapsed_time:.2f} seconds\n")
-    evaluation_summary(results, results_dir)
+    evaluation_summary(benchmark, results, results_dir)
         
 def ablation_script_level_1_and_2(benchmark, num_programs, application_name, model, use_genai_studio, ablation):
     #create LLM agent
@@ -328,9 +340,9 @@ def ablation_script_level_1_and_2(benchmark, num_programs, application_name, mod
             evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
             results[folder_name] = write_result(energy_data, folder_name, evaluator_feedback_data, results_dir)
     
-    evaluation_summary(results, results_dir)
+    evaluation_summary(benchmark, results, results_dir)
 
-def evaluation_summary(results, results_dir):
+def evaluation_summary(benchmark, results, results_dir):
     try:
         results_dir
     except NameError:
@@ -350,11 +362,18 @@ def evaluation_summary(results, results_dir):
     metrics = defaultdict(list)
     metrics_above_1_1 = defaultdict(int)
     
-    all_metrics = [
+    if benchmark == "SciMark":
+        all_metrics = [
         "energy_improvement", "runtime_improvement", "cpu_cycles_improvement",
         "peak_memory_improvement", "throughput_improvement", "mflops_improvement",
         "loc_improvement"
     ]
+    else:
+        all_metrics = [
+            "energy_improvement", "runtime_improvement", "cpu_cycles_improvement",
+            "peak_memory_improvement", "throughput_improvement",
+            "loc_improvement"
+        ]
     
     # Process each program (including incorrect ones)
     for program, result in results.items():
@@ -423,7 +442,7 @@ def main():
         num_steps = LLMAgent.get_global_counter()
         logger.info(f"Total time taken: {elapsed_time:.2f} seconds")
         logger.info(f"Total steps taken: {num_steps}")
-        with open(f"{USER_PREFIX}/results/system_{application_name}.txt", "w") as f:
+        with open(f"{USER_PREFIX}/results/{benchmark}/system_{application_name}.txt", "w") as f:
             f.write(f"Total steps taken: {num_steps}\n")
             f.write(f"Total time taken: {elapsed_time:.2f} seconds\n")
 if __name__ == "__main__":

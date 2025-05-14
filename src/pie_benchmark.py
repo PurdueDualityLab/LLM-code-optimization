@@ -100,8 +100,7 @@ class PIEBenchmark(Benchmark):
 
     def post_process(self, code):
         # Remove code block delimiters
-        code = code.replace("```cpp", "")
-        code = code.replace("```", "")
+        code = code.replace("```cpp", "").replace("```", "")
         # Remove all comments
         code = re.sub(r'//.*?$|/\*.*?\*/', '', code, flags=re.DOTALL | re.MULTILINE)
         return code
@@ -476,13 +475,14 @@ def get_valid_pie_programs(num_programs):
     all_programs.sort(key=lambda x: float(x["src_agg_runtime"]), reverse=True)
 
     # Select the top num_programs programs
-    selected_programs = all_programs[:20]
+    selected_programs = all_programs[:num_programs]
     
     # Extract program details
     for program in selected_programs:
         slow_fast_pairs.append(program)
         src_code = program["src_code"].replace("\n\n", "\n")
         source_code.append(src_code)
+        print(f"src_agg_runtime: {program['src_agg_runtime']}")
     
     #Return only the program names
     valid_programs = [f"{pair['problem_id']}_{pair['src_id']}_t{pair['tgt_id'][1:]}.cpp" for pair in slow_fast_pairs]

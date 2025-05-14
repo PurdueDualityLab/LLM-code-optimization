@@ -37,6 +37,7 @@ class LLMAgent:
         self.memory.append({"role": role, "content": content})
     
     def generate_response(self, response_format=BaseModel):
+        LLMAgent.global_counter +=1
         try:
             if self.is_openai_model() or self.use_genai_studio:
                 response = self.client.beta.chat.completions.parse(
@@ -77,5 +78,5 @@ class LLMAgent:
         return cls.global_counter
     
     @classmethod
-    def rest_global_counter(cls):
+    def reset_global_counter(cls):
         cls.global_counter = 0
