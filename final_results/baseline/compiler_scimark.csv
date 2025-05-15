@@ -1,0 +1,7 @@
+Id,Energy x,Latency x,CPU Cycles x,Memory x
+FFT,1.027,1.011,1.011,0.998
+LU,1.01,1.011,1.011,1.003
+MonteCarlo,0.49,0.512,0.512,1.007
+SOR,1.0,0.999,0.999,1.002
+SparseCompRow,1.032,1.027,1.027,1.0
+Average,0.912,0.912,0.912,1.002
