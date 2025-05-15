@@ -20,6 +20,7 @@ class HumanEvalBenchmark(Benchmark):
         self.stress_test = stress_test
         self.test_code = test_code
         self.compilation_error = None
+        self.runtime_error = None
         self.energy_data = {}
         self.evaluator_feedback_data = {}
         self.original_code = None
@@ -109,11 +110,13 @@ class HumanEvalBenchmark(Benchmark):
         try:
             subprocess.run(["make", "compile_optimized"], check=True, capture_output=True, text=True)
             subprocess.run(["make", "compile_stress_optimized"], check=True, capture_output=True, text=True)
-            return True
         except subprocess.CalledProcessError as e:
             self.compilation_error = e.stderr
             logger.error(f"Compile failed: {self.compilation_error}")
             return False
+        
+        self.compilation_error = None
+        return True
 
     def run_tests(self):
         # Needed for makefiles
@@ -122,12 +125,18 @@ class HumanEvalBenchmark(Benchmark):
         try:        
             logger.info(f"Running optimized program")
             result = subprocess.run(["make", "run_optimized"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1', timeout=120)
+        except subprocess.CalledProcessError as e:
+            self.runtime_error = e.stderr
+            logger.error(f"Run_Test failed: {self.runtime_error}")
+            return False
         except subprocess.TimeoutExpired:
             logger.error("Make run timeout")
-            return None
+            return False
 
         if result.returncode is None or result.returncode != 0:
             return False
+        
+        self.runtime_error = None
         return True
 
     def measure_energy(self, optimized_code):

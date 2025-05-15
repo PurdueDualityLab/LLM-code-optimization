@@ -19,6 +19,7 @@ class SciMarkBenchmark(Benchmark):
     def __init__(self, program, method_name, method_level):
         self.program = program
         self.compilation_error = None
+        self.runtime_error = None
         self.energy_data = {}
         self.evaluator_feedback_data = {}
         self.expect_test_output = None
@@ -138,10 +139,9 @@ class SciMarkBenchmark(Benchmark):
             self.compilation_error = e.stderr
             logger.error(f"Optimized code compile failed: {self.compilation_error}\n")
             return False
+        
+        self.compilation_error = None
         return True
-    
-    def get_compilation_error(self):
-        return super().get_compilation_error()  
 
     def run_tests(self):
         os.chdir(f"{USER_PREFIX}/benchmark_scimark/{self.program}")
@@ -158,6 +158,7 @@ class SciMarkBenchmark(Benchmark):
         if not self._compare_outputs(optimized_output):
             return False
         else:
+            self.runtime_error = None
             return True
 
     def measure_energy(self, optimized_code):            
@@ -218,6 +219,8 @@ class SciMarkBenchmark(Benchmark):
        
         # Check for runtime errors
         if result.returncode is not None and result.returncode != 0:
+            self.runtime_error = result.stderr
+            logger.error(f"Runtime error: {result.stderr}")
             return None
 
         # Filter out the unwanted lines
@@ -265,15 +268,15 @@ class SciMarkBenchmark(Benchmark):
                 logger.info(f"Output is within EPS threshold. Original output: {expect_test_output_float}, Optimized output: {optimized_output_float}")
                 return True
             else:
-                logger.error(f"Original program output: {self.expect_test_output}")
-                logger.error(f"Optimized program output: {optimized_output}")
+                logger.error(f"Original program output: {self.expect_test_output}, Optimized program output: {optimized_output}")
+                self.runtime_error = f"Original program output: {self.expect_test_output}, Optimized program output: {optimized_output}"
                 return False
         elif abs(optimized_output_float) <= EPS:
             logger.info(f"Output is within EPS threshold. Original output: {expect_test_output_float}, Optimized output: {optimized_output_float}")
             return True
         else:
-            logger.error(f"Original program output: {self.expect_test_output}")
-            logger.error(f"Optimized program output: {optimized_output}")
+            logger.error(f"Original program output: {self.expect_test_output}, Optimized program output: {optimized_output}")
+            self.runtime_error = f"Original program output: {self.expect_test_output}, Optimized program output: {optimized_output}"
             return False
 
     def _run_rapl(self, optimized):

@@ -4,7 +4,8 @@ from status import Status
 class Benchmark:
     def __init__(self, program):
         self.program = program
-        self.compilation_error = ""
+        self.compilation_error = None
+        self.runtime_error = None
         self.energy_data = {}
         self.evaluator_feedback_data = {}
         self.original_code = self.set_original_code()
@@ -45,6 +46,9 @@ class Benchmark:
 
     def get_compilation_error(self):
         return self.compilation_error
+    
+    def get_runtime_error(self):
+        return self.runtime_error
 
     @abstractmethod
     def run_tests(self):

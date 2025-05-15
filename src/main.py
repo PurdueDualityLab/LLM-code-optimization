@@ -6,7 +6,7 @@ from utils import Logger
 import argparse
 from agent import LLMAgent
 from status import Status
-from llm.generator_llm import llm_optimize, handle_compilation_error
+from llm.generator_llm import llm_optimize, handle_error
 from llm.evaluator_llm import evaluator_llm
 from energy_language_benchmark import get_valid_energy_language_programs, EnergyLanguageBenchmark
 from pie_benchmark import get_valid_pie_programs, PIEBenchmark
@@ -156,18 +156,17 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
             results[folder_name] = "Unable to compile or measure energy of the original code or timeout"
             continue
         
-        compilation_errors = 0
+        errors = 0
         reoptimize_lastly_flag = 0
         evaluator_feedback = ""
         original_code = benchmark_obj.get_original_code()
         last_working_optimized_code = original_code
         last_optimized_code = original_code
         num_success_iteration = 0
-        total_output_difference = 0
-        total_compilation_failure = 0
+        total_failure = 0
        
         while True:
-            if total_output_difference == 3 or total_compilation_failure == 2:
+            if total_failure == 2:
                 logger.error("Unable to produce functional equivalent programs.")
                 if benchmark == "Dacapobench":
                     # restore the last_working_optimized_code
@@ -182,9 +181,11 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
             # optimize code
             if reoptimize_lastly_flag == 0:
                 logger.info(f"Optimizing {program}, iteration {num_success_iteration}")
-                if compilation_errors > 0 and compilation_errors < 3:
-                    compilation_error_message = benchmark_obj.get_compilation_error()
-                    last_optimized_code = handle_compilation_error(error_message=compilation_error_message, llm_assistant=generator)
+                if errors > 0 and errors < 3:
+                    error_message = benchmark_obj.get_compilation_error()
+                    if error_message is None: 
+                        error_message = benchmark_obj.get_runtime_error()
+                    last_optimized_code = handle_error(error_message=error_message, llm_assistant=generator)
                 else:
                     if evaluator_feedback is not None and evaluator_feedback != "":
                         last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback)
@@ -213,30 +214,22 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                 status = Status.RUNTIME_ERROR_OR_TEST_FAILED
             
             # switch case of status
-            if (status == Status.COMPILATION_ERROR):
-                if compilation_errors == 3:
-                    logger.error("Could not compile optimized file after 3 attempts, will re-optimize from lastest working optimized file")
+            if (status == Status.COMPILATION_ERROR or status == Status.RUNTIME_ERROR_OR_TEST_FAILED):
+                if errors == 3:
+                    logger.error("Could not compile or run optimized file after 3 attempts, will re-optimize from lastest working optimized file")
                     reoptimize_lastly_flag = 1
-                    compilation_errors = 0
+                    errors = 0
                     evaluator_feedback = ""
-                    total_compilation_failure += 1
-                compilation_errors += 1
-                logger.error("Error in optimized file, re-optimizing")
-                continue
-            elif (status == Status.RUNTIME_ERROR_OR_TEST_FAILED):
-                logger.error("Output difference in optimized file, will re-optimize from lastest working optimized file")
-                reoptimize_lastly_flag = 1
-                evaluator_feedback = ""
-                compilation_errors = 0
-                total_output_difference += 1
+                    total_failure += 1
+                errors += 1
+                logger.error("Compile or runtime error in optimized file, re-optimizing")
                 continue
             else:
                 num_success_iteration += 1
-                compilation_errors = 0
+                errors = 0
                 # Copy lastest optimized code for logic error re-optimization
                 last_working_optimized_code = last_optimized_code
-                total_output_difference = 0
-                total_compilation_failure = 0
+                total_failure = 0
 
                 evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
                 
