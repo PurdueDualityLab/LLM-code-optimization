@@ -9,7 +9,7 @@ logger = Logger("logs", sys.argv[2]).logger
 
 class LLMAgent:
     global_counter = 0
-    def __init__(self, openai_api_key, genai_api_key, model, use_genai_studio, system_message="You are a helpful assistant."):
+    def __init__(self, openai_api_key, genai_api_key, model, use_genai_studio=False, system_message="You are a helpful assistant."):
         if not model:
             raise ValueError("A model must be specified when creating a LLM Agent.")
         self.model = model
