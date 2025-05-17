@@ -37,7 +37,12 @@ To set up the pipeline for energy-efficient code optimization, follow these step
     This should include:
     ```bash
     API_KEY=your_openai_api_key_here
-    USER_PREFIX=/path/to/E2COOL
+    USER_PREFIX=$(pwd)
+    ```
+    Then source your env with
+    ```bash
+    . .env
+    ```
 4. **Update RAPL/main.c write path**
     Change the path to language .csv file to match your absolute path
     ```bash

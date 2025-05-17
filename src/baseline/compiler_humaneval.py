@@ -7,9 +7,16 @@ import tempfile
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
-DATASET_DIR = os.path.join(USER_PREFIX, "benchmark_human_eval/dataset.json")
+DATASET_JSON_PATH = os.path.join(USER_PREFIX, "benchmark_human_eval/dataset.json")
 RAPL_TOOL = os.path.join(USER_PREFIX, "RAPL/main")
+
 RUNTIME_LOG = os.path.join(USER_PREFIX, "src/runtime_logs/c++.csv")
+# Check if the RAPL log file exists
+if not os.path.exists(RUNTIME_LOG):
+    os.makedirs(os.path.dirname(RUNTIME_LOG), exist_ok=True)
+    with open(RUNTIME_LOG, "w") as f:
+        f.write("")
+
 
 def compile_and_run(file_path, obj_file, bin_file, opt_level=""):
     compile_flags = f"-g {opt_level} -c -pipe -fomit-frame-pointer -march=native -std=c++11 -fopenmp"
@@ -53,20 +60,20 @@ def percent_improvement(before, after):
 
 def main():
     results = []
-    
-    with open(DATASET_DIR, "r") as f:
+
+    with open(DATASET_JSON_PATH, "r") as f:
         dataset = json.load(f)
 
     for entry in dataset:
         id = entry["task_id"]
         print(f"Processing: {id}")
-        
+
         # Create a temporary directory for compilation
         with tempfile.TemporaryDirectory() as tmpdir:
             cpp_file = os.path.join(tmpdir, "solution.cpp")
             obj_file = os.path.join(tmpdir, "solution.cpp.o")
             bin_file = os.path.join(tmpdir, "solution.gpp_run")
-            
+
             # Combine function and test code
             function_code = entry["function_code"]
             cpp_stress_test = entry["cpp_stress_test"]
@@ -98,7 +105,7 @@ def main():
         writer = csv.writer(f)
         writer.writerow(["Id", "Energy x", "Latency x", "CPU Cycles x", "Memory x"])
         writer.writerows(results)
-        
+
     # Compute average improvements across all entries
     if results:
         num_entries = len(results)
