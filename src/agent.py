@@ -5,7 +5,7 @@ import sys
 from ollama import Client
 from pydantic import BaseModel
 
-logger = Logger("logs", sys.argv[2]).logger
+logger = Logger("logs", sys.argv[2]).logger if len(sys.argv) > 2 else Logger("logs", "default").logger
 
 class LLMAgent:
     global_counter = 0
