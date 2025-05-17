@@ -4,22 +4,15 @@ include ../../.env
 # sudo update-alternatives --config java
 # sudo update-alternatives --config javac
 
-
 JAVAC = javac
-JAVA = java -server \
-  -XX:+AggressiveOpts \
-  -XX:+UseSuperWord \
-  -XX:+TieredCompilation \
-  -XX:TieredStopAtLevel=4 \
-  -XX:MaxInlineSize=100 \
-  -XX:FreqInlineSize=100
+JAVA = java
 JFLAGS = -d . 
 
 SRCS = *.java  
 BENCHMARK_CLASS = jnt/scimark2/FFTBenchmark
 
 MAIN_CLASS = jnt/scimark2/FFT
-OPTIMIZED_CLASS = jnt.scimark2.FFTOptimized
+OPTIMIZED_CLASS = -cp /home/hpeng/sootup-extractor/sootOutput:. com/example/FFT
 
 compile:
 	rm -rf *.class
@@ -39,7 +32,7 @@ measure:
 
 measure_optimized:
 	sudo modprobe msr
-	sudo ${USER_PREFIX}/RAPL/main "$(JAVA) $(OPTIMIZED_CLASS)" java FFTOptimized
+	sudo ${USER_PREFIX}/RAPL/main "$(JAVA) $(OPTIMIZED_CLASS)" java FFT_Soot
 	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
 
 measure_mflops:

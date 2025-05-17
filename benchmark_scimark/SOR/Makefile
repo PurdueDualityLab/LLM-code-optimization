@@ -6,13 +6,7 @@ include ../../.env
 
 
 JAVAC = javac
-JAVA = java -server \
-  -XX:+AggressiveOpts \
-  -XX:+UseSuperWord \
-  -XX:+TieredCompilation \
-  -XX:TieredStopAtLevel=4 \
-  -XX:MaxInlineSize=100 \
-  -XX:FreqInlineSize=100
+JAVA = java
 JFLAGS = -d . 
 
 SRCS = *.java

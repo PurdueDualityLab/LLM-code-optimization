@@ -6,20 +6,14 @@ include ../../.env
 
 
 JAVAC = javac
-JAVA = java -server \
-  -XX:+AggressiveOpts \
-  -XX:+UseSuperWord \
-  -XX:+TieredCompilation \
-  -XX:TieredStopAtLevel=4 \
-  -XX:MaxInlineSize=100 \
-  -XX:FreqInlineSize=100
+JAVA = java
 JFLAGS = -d . 
 
 SRCS = *.java  
 BENCHMARK_CLASS = jnt/scimark2/MonteCarloBenchmark	
 
 MAIN_CLASS = jnt/scimark2/MonteCarlo
-OPTIMIZED_CLASS = jnt.scimark2.MonteCarloOptimized
+OPTIMIZED_CLASS = -cp /home/hpeng/sootup-extractor/sootOutput:. com/example/MonteCarlo
 
 compile:
 	rm -rf *.class
@@ -39,7 +33,7 @@ measure:
 
 measure_optimized:
 	sudo modprobe msr
-	sudo ${USER_PREFIX}/RAPL/main "$(JAVA) $(OPTIMIZED_CLASS)" java MonteCarloOptimized
+	sudo ${USER_PREFIX}/RAPL/main "$(JAVA) $(OPTIMIZED_CLASS)" java MonteCarlo_soot
 	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
 
 measure_mflops:

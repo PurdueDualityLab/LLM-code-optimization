@@ -6,6 +6,8 @@ import time
 import json
 import re
 
+# script to construct the human_eval dataset for C++ with stress test
+
 def evaluate_cpp_solution(function_code: str, test_code: str):
     # Create a temporary directory for compilation
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -56,7 +58,7 @@ with open(test_dataset_file, "r") as f:
 
 # Loop through the dataset and evaluate each function
 count = 0
-for test_entry in test_dataset[8:9]:
+for test_entry in test_dataset:
     if "cpp_stress_test" in test_entry:
         function_code = test_entry["function_code"]
         test_code = test_entry["cpp_stress_test"]

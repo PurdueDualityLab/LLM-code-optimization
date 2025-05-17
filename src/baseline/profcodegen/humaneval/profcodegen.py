@@ -22,7 +22,7 @@ genai_api_key = os.getenv('GenAI_API_KEY')
 DATASET_DIR = os.path.join(USER_PREFIX, "benchmark_human_eval/dataset.json")
 RAPL_TOOL = os.path.join(USER_PREFIX, "RAPL/main")
 RUNTIME_LOG = os.path.join(USER_PREFIX, "src/runtime_logs/c++.csv")
-env = Environment(loader=FileSystemLoader(f"{USER_PREFIX}/src/baseline/profcodegen/prompt"))
+env = Environment(loader=FileSystemLoader(f"{USER_PREFIX}/src/baseline/profcodegen/humaneval/prompt"))
 
 llm = LLMAgent(openai_api_key=openai_key, genai_api_key=genai_api_key, model="gpt-4o", system_message="")
 
@@ -145,10 +145,28 @@ def get_most_expensive_unit_test(program: str, function_code: str, test_code: st
     logger.info(f"Most expensive unit test: {most_expensive_code_str}\n")
     return most_expensive_code_str
 
-def measure_performance(program: str, optimized: bool):
+def measure_performance(program: str, code: str, test: str, optimized: bool):
     log_file_path = f"{USER_PREFIX}/src/runtime_logs/c++.csv"
     open(log_file_path, "w").close()
+    
+    if optimized:
+        can_compile = compile(program, optimized_code=code, test_code=test)
+        if not can_compile:
+            logger.error(f"Compilation failed for final make measure")
+            return 0
+    else:
+        # Compile and run the original code
+        destination_path = f"{USER_PREFIX}/src/baseline/profcodegen/humaneval/{program}/{program}.cpp"
+        with open(destination_path, "w") as file:
+            file.write(f"{code}\n\n{test}")
 
+        os.chdir(f"{USER_PREFIX}/src/baseline/profcodegen/humaneval/{program}")
+        try:
+            subprocess.run(["make", "compile"], check=True, capture_output=True, text=True)
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Compile original code failed: {e.stderr}")
+            return 0
+        
     os.chdir(f"{USER_PREFIX}/src/baseline/profcodegen/humaneval/{program}")
 
     try:
@@ -174,6 +192,7 @@ def extract_metrics():
         return -1
 
     avg_latency = sum(values) / len(values)
+    logger.info(f"Average latency: {avg_latency}")
     return avg_latency
 
 def round_1(function_code: str):
@@ -236,14 +255,13 @@ def round_2(function_code, testcase: str):
     
     return function_code
 
-# --- Example usage ---
-if __name__ == "__main__":
+def main():
     logger.info(f"Running PerfCodeGen.")
     results = []
     with open(DATASET_DIR, "r") as f:
         dataset = json.load(f)
     
-    for entry in dataset[162:163]:
+    for entry in dataset[1:2]:
         id = entry["task_id"]
         logger.info(f"Processing: {id}")
         
@@ -292,7 +310,7 @@ if __name__ == "__main__":
         
         # round 2 optimization
         logger.info(f"Optimizing {id} round 2")
-        round_2_optimized_code = round_2(round_1_optimized_code, test_code)
+        round_2_optimized_code = round_2(round_1_optimized_code, most_expensive_unit_test)
         if round_2_optimized_code is None:
             logger.info(f"Error in round 2 llm completion for {id}")
             continue
@@ -310,11 +328,12 @@ if __name__ == "__main__":
             final_code = round_1_optimized_code
         
         # measure final performance
-        speedup = measure_performance(id, final_code)
-        results.append((id, speedup))
+        optimized_latency = measure_performance(id, final_code, test_code, optimized=True)
+        original_latency = measure_performance(id, function_code, test_code, optimized=False)
+        results.append((id, original_latency / optimized_latency))
         
     # Save results to CSV
-    with open("profcodegen_results.csv", "w") as f:
+    with open(f"{USER_PREFIX}/profcodegen_results.csv", "w") as f:
         writer = csv.writer(f)
         writer.writerow(["Id", "Speedup"])
         writer.writerows(results)
@@ -342,3 +361,6 @@ if __name__ == "__main__":
         folder_path = f"{USER_PREFIX}/src/baseline/profcodegen/humaneval/{id}"
         if os.path.exists(folder_path):
             os.system(f"rm -rf {folder_path}")
+            
+if __name__ == "__main__":
+    main()

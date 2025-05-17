@@ -1,57 +1,26 @@
 package jnt.scimark2;
 
 import java.util.Random;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveAction;
 
 public class SparseCompRowOptimized {
-    private static final ForkJoinPool forkJoinPool = new ForkJoinPool();
-
-    
-    public static void matmultParallel(double[] y, double[] val, int[] row,
-                                       int[] col, double[] x, long NUM_ITERATIONS) {
+    // Sparse matrix-vector multiply using compressed row storage.
+    public static void matmult(double[] y, double[] val, int[] row,
+                               int[] col, double[] x, long NUM_ITERATIONS) {
         int M = row.length - 1;
         for (long reps = 0; reps < NUM_ITERATIONS; reps++) {
-            forkJoinPool.invoke(new ParallelMatMultTask(y, val, row, col, x, 0, M));
-        }
-    }
-
-    private static class SparseCompRowOptimized extends RecursiveAction {
-        private final double[] y, val, x;
-        private final int[] row, col;
-        private final int start, end;
-
-        ParallelMatMultTask(double[] y, double[] val, int[] row, int[] col, double[] x, int start, int end) {
-            this.y = y;
-            this.val = val;
-            this.row = row;
-            this.col = col;
-            this.x = x;
-            this.start = start;
-            this.end = end;
-        }
-
-        @Override
-        protected void compute() {
-            if (end - start <= 10) { 
-                for (int r = start; r < end; r++) {
-                    double sum = 0.0;
-                    int rowStart = row[r];
-                    int rowEnd = row[r + 1];
-                    for (int i = rowStart; i < rowEnd; i++) {
-                        sum += x[col[i]] * val[i];
-                    }
-                    y[r] = sum;
+            for (int r = 0; r < M; r++) {
+                double sum = 0.0;
+                int rowStart = row[r];
+                int rowEnd = row[r + 1];
+                for (int i = rowStart; i < rowEnd; i++) {
+                    sum += x[col[i]] * val[i];
                 }
-            } else {
-                int mid = start + (end - start) / 2;
-                invokeAll(new ParallelMatMultTask(y, val, row, col, x, start, mid),
-                          new ParallelMatMultTask(y, val, row, col, x, mid, end));
+                y[r] = sum;
             }
         }
     }
 
-    
+    // Helper method to generate a random vector.
     private static double[] randomVector(int N, Random R) {
         double[] A = new double[N];
         for (int i = 0; i < N; i++) {
@@ -60,7 +29,7 @@ public class SparseCompRowOptimized {
         return A;
     }
 
-    
+    // Computes the sum of absolute differences between two vectors.
     private static double normabs(double[] a, double[] b) {
         double sum = 0.0;
         for (int i = 0; i < a.length; i++) {
@@ -70,19 +39,23 @@ public class SparseCompRowOptimized {
     }
 
     public static void main(String[] args) {
-        int N = 1000;
-        int nz = 10000;
-        long cycles = 524288;
+        // Parameters for the test.
+        int N = 1000;              // Size of the vector / number of rows.
+        int nz = 10000;            // Total number of nonzeros in the matrix.
+        long cycles = 524288;      // Fixed cycles
         double regressionThreshold = 1.0e-10;
-        long seed = 101010;
+        long seed = 101010;        
 
+        // Create random number generators.
         Random rand1 = new Random(seed);
         Random rand2 = new Random(seed + 1);
 
+        // Generate vector x.
         double[] x = randomVector(N, rand1);
 
-        int nr = nz / N;
-        int anz = nr * N;
+        // Build the sparse matrix in compressed row format.
+        int nr = nz / N;       // Average nonzeros per row.
+        int anz = nr * N;      // Actual number of nonzeros.
         double[] val = randomVector(anz, rand2);
         int[] col = new int[anz];
         int[] row = new int[N + 1];
@@ -90,18 +63,24 @@ public class SparseCompRowOptimized {
         for (int r = 0; r < N; r++) {
             int rowr = row[r];
             row[r + 1] = rowr + nr;
-            int step = Math.max(r / nr, 1);
+            int step = r / nr;
+            if (step < 1) step = 1;
             for (int i = 0; i < nr; i++) {
                 col[rowr + i] = i * step;
             }
         }
 
+        // Prepare output arrays.
         double[] yTest = new double[N];
         double[] yRef = new double[N];
 
-        matmultParallel(yTest, val, row, col, x, cycles);
-        matmultParallel(yRef, val, row, col, x, 1);
+        // Run the multiplication with a fixed number of cycles (simulate optimized run).
+        matmult(yTest, val, row, col, x, cycles);
 
+        // Run the multiplication with 1 iteration (reference run).
+        matmult(yRef, val, row, col, x, 1);
+
+        // Compare the two results.
         double difference = normabs(yTest, yRef);
 
         System.out.println(difference);
