@@ -10,8 +10,18 @@ USER_PREFIX = os.getenv('USER_PREFIX')
 RAPL_TOOL = os.path.join(USER_PREFIX, "RAPL/main")
 RUNTIME_LOG = os.path.join(USER_PREFIX, "src/runtime_logs/java.csv")
 
-# Path to Java main class, e.g., "jnt.scimark2.commandline"
-
+def run_mflops(jar_path, benchmark_class, jvm_flags=""):
+    java_cmd = f"java {jvm_flags} -cp {jar_path} {benchmark_class} false"
+    result = subprocess.run(java_cmd, shell=True, check=True, capture_output=True, text=True)
+    # Filter out the unwanted lines
+    mflops = "\n".join(
+        line for line in result.stdout.splitlines()
+        if not (line.startswith("make[") or line.startswith("./"))
+    )
+    mflops = float(mflops.split("make")[0])
+    print(f"MFLOPS: {mflops}")
+    return mflops
+    
 def run_java(jar_path, main_class, jvm_flags=""):
     # Clear runtime log
     with open(RUNTIME_LOG, "w") as f:
@@ -68,10 +78,12 @@ def main():
         # Use provided Java classpath or path to .jar or compiled classes
         java_path = os.path.join(USER_PREFIX, f"benchmark_scimark/{program}/")  # You must include this in your dataset.json
         main_class = f"jnt.scimark2.{program}"
+        benchmark_class = f"jnt.scimark2.{program}Benchmark"
 
         try:
             # Run without JIT optimization
             orig_metrics = run_java(java_path, main_class)
+            orig_mflops = run_mflops(java_path, benchmark_class)
 
             # Run with JIT optimization flags
             jit_flags = (
@@ -83,20 +95,22 @@ def main():
                 "-XX:FreqInlineSize=100 "
             )
             opt_metrics = run_java(java_path, main_class, jvm_flags=jit_flags)
+            opt_mflops = run_mflops(java_path, benchmark_class, jvm_flags=jit_flags)
+            mflops_improvement = round(opt_mflops / orig_mflops, 3)
 
             # Compute % improvement
-            improvement = percent_improvement(orig_metrics, opt_metrics)
+            improvement = percent_improvement(orig_metrics, opt_metrics)+ (mflops_improvement,)
             results.append((program, *improvement))
 
             print(f"{program}: Energy: {improvement[0]}x, Latency: {improvement[1]}x, "
-                  f"CPU Cycles: {improvement[2]}x, Memory: {improvement[3]}x")
+                  f"CPU Cycles: {improvement[2]}x, Memory: {improvement[3]}x, Mflops: {improvement[4]}x")
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed processing {program}: {e}")
 
     # Save to CSV
     with open("optimization_results.csv", "w") as f:
         writer = csv.writer(f)
-        writer.writerow(["Id", "Energy x", "Latency x", "CPU Cycles x", "Memory x"])
+        writer.writerow(["Id", "Energy x", "Latency x", "CPU Cycles x", "Memory x", "Mflops x"])
         writer.writerows(results)
 
     # Aggregate results
@@ -106,12 +120,14 @@ def main():
         sum_latency = sum(r[2] for r in results)
         sum_cpu = sum(r[3] for r in results)
         sum_memory = sum(r[4] for r in results)
+        sum_mflops = sum(r[5] for r in results)
 
         print("\n=== Average % Improvement Across All Entries ===")
         print(f"Energy: {round(sum_energy / num_entries, 3)}x")
         print(f"Latency: {round(sum_latency / num_entries, 3)}x")
         print(f"CPU Cycles: {round(sum_cpu / num_entries, 3)}x")
         print(f"Memory: {round(sum_memory / num_entries, 3)}x")
+        print(f"Mflops: {round(sum_mflops / num_entries, 3)}x")
     else:
         print("No valid results to aggregate.")
 
