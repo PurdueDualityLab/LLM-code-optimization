@@ -10,3 +10,5 @@ results/
 src/java_code_extraction/target
 benchmark_scimark/*/jnt/
 benchmark_human_eval/[0-9]
+**tmp**
+gccflags_final_config.*

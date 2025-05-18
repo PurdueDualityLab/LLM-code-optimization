@@ -1,0 +1,168 @@
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O2 -fno-align-jumps -fno-align-labels -falign-loops -fno-asynchronous-unwind-tables -fbranch-count-reg -fbranch-probabilities --param early-inlining-insns=45 --param gcse-cost-distance-ratio=90 --param iv-max-considered-uses=0
+Compile Result ID 0: time=0.9259998798370361, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.15610790252685547, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O2 -falign-functions -fno-align-jumps -falign-labels -fasynchronous-unwind-tables -fbranch-count-reg -fno-branch-probabilities --param early-inlining-insns=60 --param gcse-cost-distance-ratio=11 --param iv-max-considered-uses=84
+Compile Result ID 0: time=0.9478223323822021, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.17220282554626465, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O0 -fno-align-functions -falign-jumps -fno-branch-count-reg -fbranch-probabilities --param early-inlining-insns=43 --param gcse-cost-distance-ratio=6 --param iv-max-considered-uses=10
+Compile Result ID 0: time=0.8936889171600342, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.28961706161499023, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O3 -fno-align-functions -fno-align-jumps -falign-labels -fno-align-loops -fno-asynchronous-unwind-tables -fno-branch-count-reg --param early-inlining-insns=53 --param gcse-cost-distance-ratio=27 --param iv-max-considered-uses=99
+Compile Result ID 0: time=0.9182970523834229, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.07262086868286133, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O3 -fno-align-functions -falign-jumps -falign-labels -fno-align-loops -fno-asynchronous-unwind-tables -fno-branch-count-reg --param early-inlining-insns=53 --param gcse-cost-distance-ratio=27 --param iv-max-considered-uses=99
+Compile Result ID 0: time=0.9617540836334229, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.10943245887756348, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O3 -fno-align-functions -fno-align-jumps -falign-labels -fno-align-loops -fno-asynchronous-unwind-tables -fno-branch-count-reg -fno-branch-probabilities --param early-inlining-insns=53 --param gcse-cost-distance-ratio=59 --param iv-max-considered-uses=99
+Compile Result ID 0: time=0.9478063583374023, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.13010168075561523, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O2 -fno-align-functions -fno-align-jumps -falign-labels -fno-align-loops -fno-asynchronous-unwind-tables -fno-branch-count-reg --param early-inlining-insns=53 --param gcse-cost-distance-ratio=27 --param iv-max-considered-uses=49
+Compile Result ID 0: time=0.9375245571136475, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': inf, 'timeout': True, 'returncode': -9, 'stdout': b'', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O3 -fno-align-functions -fno-align-jumps -fno-align-loops -fno-branch-count-reg --param early-inlining-insns=53 --param gcse-cost-distance-ratio=27 --param iv-max-considered-uses=99
+Compile Result ID 0: time=0.9472510814666748, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.08337521553039551, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O3 -fno-align-labels -fno-align-loops -fno-branch-probabilities --param early-inlining-insns=36 --param gcse-cost-distance-ratio=19 --param iv-max-considered-uses=5
+Compile Result ID 0: time=0.9448492527008057, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.09105992317199707, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O3 -fno-align-labels -fno-align-loops -fno-asynchronous-unwind-tables -fbranch-probabilities --param early-inlining-insns=21 --param gcse-cost-distance-ratio=70 --param iv-max-considered-uses=18
+Compile Result ID 0: time=0.95694899559021, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.12297415733337402, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O3 -falign-functions -falign-jumps -fno-align-labels -fno-align-loops -fno-asynchronous-unwind-tables -fbranch-count-reg --param early-inlining-insns=16 --param gcse-cost-distance-ratio=33 --param iv-max-considered-uses=15
+Compile Result ID 0: time=0.9141192436218262, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.10808920860290527, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O2 -fno-align-labels -fbranch-count-reg --param early-inlining-insns=27 --param gcse-cost-distance-ratio=60 --param iv-max-considered-uses=65
+Compile Result ID 0: time=0.899498462677002, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': inf, 'timeout': True, 'returncode': -9, 'stdout': b'', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O0 -fno-align-functions -falign-labels -fno-align-loops -fno-branch-count-reg --param early-inlining-insns=40 --param gcse-cost-distance-ratio=70 --param iv-max-considered-uses=23
+Compile Result ID 0: time=0.8653769493103027, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': inf, 'timeout': True, 'returncode': -9, 'stdout': b'', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O3 -fno-align-functions -fno-align-labels -fno-align-loops -fasynchronous-unwind-tables -fno-branch-probabilities --param early-inlining-insns=64 --param gcse-cost-distance-ratio=11 --param iv-max-considered-uses=48
+Compile Result ID 0: time=0.9391806125640869, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.1334986686706543, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O2 -falign-functions -fno-align-jumps -fno-align-labels -fasynchronous-unwind-tables -fbranch-probabilities --param early-inlining-insns=18 --param gcse-cost-distance-ratio=24 --param iv-max-considered-uses=18
+Compile Result ID 0: time=0.9175803661346436, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': inf, 'timeout': True, 'returncode': -9, 'stdout': b'', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O3 -fno-align-functions -fno-align-jumps -falign-labels -fno-align-loops -fno-asynchronous-unwind-tables -fno-branch-count-reg --param early-inlining-insns=57 --param gcse-cost-distance-ratio=27 --param iv-max-considered-uses=73
+Compile Result ID 0: time=0.9788253307342529, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.13707971572875977, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O2 -fno-align-jumps -fno-asynchronous-unwind-tables --param early-inlining-insns=96 --param gcse-cost-distance-ratio=36 --param iv-max-considered-uses=84
+Compile Result ID 0: time=0.9088904857635498, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.15257549285888672, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O3 -fno-align-jumps -falign-labels -fno-align-loops -fasynchronous-unwind-tables -fbranch-count-reg -fno-branch-probabilities --param early-inlining-insns=10 --param gcse-cost-distance-ratio=45 --param iv-max-considered-uses=38
+Compile Result ID 0: time=0.9372303485870361, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.1071329116821289, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O3 -fno-align-jumps -falign-loops -fasynchronous-unwind-tables --param early-inlining-insns=12 --param gcse-cost-distance-ratio=56 --param iv-max-considered-uses=38
+Compile Result ID 0: time=0.9743802547454834, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.0975034236907959, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O2 -falign-functions -falign-jumps -falign-labels -falign-loops -fno-asynchronous-unwind-tables -fbranch-count-reg -fbranch-probabilities --param early-inlining-insns=8 --param gcse-cost-distance-ratio=61 --param iv-max-considered-uses=20
+Compile Result ID 0: time=0.9482367038726807, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': inf, 'timeout': True, 'returncode': -9, 'stdout': b'', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O2 -fno-align-functions -fno-align-jumps -falign-labels -fno-align-loops -fno-asynchronous-unwind-tables --param early-inlining-insns=70 --param gcse-cost-distance-ratio=32 --param iv-max-considered-uses=62
+Compile Result ID 0: time=0.9551224708557129, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.15994858741760254, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O3 -fno-align-jumps -falign-labels -fno-align-loops -fno-asynchronous-unwind-tables -fno-branch-count-reg --param early-inlining-insns=53 --param gcse-cost-distance-ratio=27 --param iv-max-considered-uses=97
+Compile Result ID 0: time=0.9398884773254395, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.1143791675567627, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O3 -fno-align-functions -fno-align-jumps -falign-labels -falign-loops -fno-asynchronous-unwind-tables -fno-branch-count-reg --param early-inlining-insns=53 --param gcse-cost-distance-ratio=33 --param iv-max-considered-uses=89
+Compile Result ID 0: time=0.9511055946350098, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.12076592445373535, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O3 -falign-functions -fno-align-jumps -fno-align-labels -falign-loops -fno-asynchronous-unwind-tables -fno-branch-count-reg -fbranch-probabilities --param early-inlining-insns=53 --param gcse-cost-distance-ratio=27 --param iv-max-considered-uses=99
+Compile Result ID 0: time=0.9422802925109863, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': inf, 'timeout': True, 'returncode': -9, 'stdout': b'', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O3 -fno-align-functions -falign-jumps -fno-align-labels -fno-align-loops -fbranch-count-reg --param early-inlining-insns=59 --param gcse-cost-distance-ratio=19 --param iv-max-considered-uses=74
+Compile Result ID 0: time=0.9462382793426514, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.12691593170166016, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O2 -fno-align-functions -fno-align-labels -fno-align-loops -fno-asynchronous-unwind-tables -fno-branch-count-reg -fno-branch-probabilities --param early-inlining-insns=48 --param gcse-cost-distance-ratio=16 --param iv-max-considered-uses=55
+Compile Result ID 0: time=0.9711422920227051, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.1566004753112793, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O2 -fno-align-functions -falign-labels -fno-align-loops -fasynchronous-unwind-tables -fno-branch-count-reg --param early-inlining-insns=46 --param gcse-cost-distance-ratio=48 --param iv-max-considered-uses=61
+Compile Result ID 0: time=0.9376556873321533, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.16465425491333008, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
+
+Compiling and Running Program
+Compile Command ID 0: g++ p03180.cpp -o ./tmp/program_0.bin -O3 -falign-functions -fno-align-jumps -falign-labels -falign-loops -fno-asynchronous-unwind-tables -fbranch-count-reg -fno-branch-probabilities --param early-inlining-insns=36 --param gcse-cost-distance-ratio=25 --param iv-max-considered-uses=59
+Compile Result ID 0: time=0.9502542018890381, timeout=False
+Run Command ID 0: ./tmp/program_0.bin < input.txt
+Run Result ID 0: {'time': 0.09143328666687012, 'timeout': False, 'returncode': 0, 'stdout': b'132\n', 'stderr': b''}
