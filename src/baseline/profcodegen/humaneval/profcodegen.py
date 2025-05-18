@@ -208,24 +208,24 @@ def round_1(function_code: str):
     class Optimization(BaseModel):
         code: str
     
-    # llm.add_to_memory("user", prompt)
-    # llm.generate_response(Optimization)
-    # response = llm.get_last_msg()
+    llm.add_to_memory("user", prompt)
+    llm.generate_response(Optimization)
+    response = llm.get_last_msg()
     
-    # try:
-    #     content_dict = json.loads(response["content"])
-    #     code = content_dict["code"]
-    # except json.JSONDecodeError as e:
-    #     logger.error(f"Failed to decode JSON: {e}")
-    #     return
+    try:
+        content_dict = json.loads(response["content"])
+        code = content_dict["code"]
+    except json.JSONDecodeError as e:
+        logger.error(f"Failed to decode JSON: {e}")
+        return
     
-    # if code == "":
-    #     logger.error("Error in llm completion")
-    #     return None
+    if code == "":
+        logger.error("Error in llm completion")
+        return None
     
-    return function_code
+    return code
 
-def round_2(function_code, testcase: str):
+def round_2(testcase: str):
     template = env.get_template("round_2.jinja")
     data = {
         "testcase": testcase
@@ -235,25 +235,25 @@ def round_2(function_code, testcase: str):
     logger.info(f"llm_optimize: Round 2 LLM Optimizing ....")
     logger.info(f"Round 2 prompt: {prompt}")
     
-    # class Optimization(BaseModel):
-    #     code: str
+    class Optimization(BaseModel):
+        code: str
     
-    # llm.add_to_memory("user", prompt)
-    # llm.generate_response(Optimization)
-    # response = llm.get_last_msg()
+    llm.add_to_memory("user", prompt)
+    llm.generate_response(Optimization)
+    response = llm.get_last_msg()
     
-    # try:
-    #     content_dict = json.loads(response["content"])
-    #     code = content_dict["code"]
-    # except json.JSONDecodeError as e:
-    #     logger.error(f"Failed to decode JSON: {e}")
-    #     return
+    try:
+        content_dict = json.loads(response["content"])
+        code = content_dict["code"]
+    except json.JSONDecodeError as e:
+        logger.error(f"Failed to decode JSON: {e}")
+        return
     
-    # if code == "":
-    #     logger.error("Error in llm completion")
-    #     return None
+    if code == "":
+        logger.error("Error in llm completion")
+        return None
     
-    return function_code
+    return code
 
 def main():
     logger.info(f"Running PerfCodeGen.")
@@ -264,6 +264,7 @@ def main():
     for entry in dataset[1:2]:
         id = entry["task_id"]
         logger.info(f"Processing: {id}")
+        llm.clear_memory()
         
         folder_path = f"{USER_PREFIX}/src/baseline/profcodegen/humaneval/{id}"
         if not os.path.exists(folder_path):
@@ -310,7 +311,7 @@ def main():
         
         # round 2 optimization
         logger.info(f"Optimizing {id} round 2")
-        round_2_optimized_code = round_2(round_1_optimized_code, most_expensive_unit_test)
+        round_2_optimized_code = round_2(most_expensive_unit_test)
         if round_2_optimized_code is None:
             logger.info(f"Error in round 2 llm completion for {id}")
             continue
