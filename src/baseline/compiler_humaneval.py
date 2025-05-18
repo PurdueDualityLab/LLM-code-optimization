@@ -20,11 +20,11 @@ if not os.path.exists(RUNTIME_LOG):
 
 def compile_and_run(file_path, obj_file, bin_file, opt_level=""):
     compile_flags = f"-g {opt_level} -c -pipe -fomit-frame-pointer -march=native -std=c++11 -fopenmp"
-    link_flags = f"-g {opt_level} -fopenmp -lssl -lcrypto"
+    link_flags = f"-g {opt_level} -fopenmp"
 
     # Compile
     subprocess.run(f"/usr/bin/g++ {compile_flags} {file_path} -o {obj_file}", shell=True, check=True)
-    subprocess.run(f"/usr/bin/g++ {link_flags} {obj_file} -o {bin_file}", shell=True, check=True)
+    subprocess.run(f"/usr/bin/g++ {link_flags} {obj_file} -o {bin_file} -lssl -lcrypto", shell=True, check=True)
 
     # Run with RAPL
     # clear c++.cvs first
