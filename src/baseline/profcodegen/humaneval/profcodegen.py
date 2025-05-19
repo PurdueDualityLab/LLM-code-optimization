@@ -12,6 +12,16 @@ import re
 import subprocess
 import csv
 from split_test_code import split_asserts
+import signal
+
+
+class TimeoutException(Exception):
+    pass
+
+def timeout_handler(signum, frame):
+    raise TimeoutException("post_process timed out")
+
+signal.signal(signal.SIGALRM, timeout_handler)
 
 logger = Logger("logs", "default").logger
 
@@ -26,22 +36,32 @@ env = Environment(loader=FileSystemLoader(f"{USER_PREFIX}/src/baseline/profcodeg
 
 llm = LLMAgent(openai_api_key=openai_key, genai_api_key=genai_api_key, model="gpt-4o", system_message="")
 
-def post_process(code):
-    code = code.replace("```cpp", "").replace("```", "")
-        
-    def remove_main_function(cpp_code: str) -> str:
-        # Regex pattern to match the main function (basic heuristic)
-        pattern = re.compile(
-            r'\bint\s+main\s*\([^)]*\)\s*{'
-            r'(?:[^{}]*|{[^{}]*})*'
-            r'}', 
-            re.DOTALL
-        )
+def post_process(code, timeout_sec=60):
+    logger.info(f"Post processing code")
+    signal.alarm(timeout_sec)  # Start timer
 
-        cleaned_code = re.sub(pattern, '', cpp_code)
-        return cleaned_code
-    code = remove_main_function(code)
-    return re.sub(r'//.*?$|/\*.*?\*/', '', code, flags=re.DOTALL | re.MULTILINE)
+    try:
+        if "```cpp" in code:
+            code = code.split("```cpp")[1].split("```")[0].strip()
+            
+        def remove_main_function(cpp_code: str) -> str:
+            # Regex pattern to match the main function (basic heuristic)
+            pattern = re.compile(
+                r'\bint\s+main\s*\([^)]*\)\s*{'
+                r'(?:[^{}]*|{[^{}]*})*'
+                r'}', 
+                re.DOTALL
+            )
+
+            cleaned_code = re.sub(pattern, '', cpp_code)
+            return cleaned_code
+        code = remove_main_function(code)
+        return re.sub(r'//.*?$|/\*.*?\*/', '', code, flags=re.DOTALL | re.MULTILINE)
+    except TimeoutException:
+        logger.error("Post process timed out")
+        return code
+    finally:
+        signal.alarm(0) 
 
 def compile(program, optimized_code, test_code):
     destination_path = f"{USER_PREFIX}/src/baseline/profcodegen/humaneval/{program}/optimized_{program}.cpp"
@@ -50,9 +70,12 @@ def compile(program, optimized_code, test_code):
 
     os.chdir(f"{USER_PREFIX}/src/baseline/profcodegen/humaneval/{program}")
     try:
-        subprocess.run(["make", "compile_optimized"], check=True, capture_output=True, text=True)
+        subprocess.run(["make", "compile_optimized"], check=True, capture_output=True, text=True, timeout=120)
     except subprocess.CalledProcessError as e:
         logger.error(f"Compile failed: {e.stderr}")
+        return False
+    except subprocess.TimeoutExpired:
+        logger.error("Compile timeout")
         return False
     
     return True
@@ -104,8 +127,8 @@ def get_most_expensive_unit_test(program: str, function_code: str, test_code: st
         try:
             cmd1 = ["/usr/bin/g++", "-g", "-c", "-pipe", "-fomit-frame-pointer", "-march=native", "-std=c++11", "-fopenmp", f"{program}.cpp", "-o", f"{program}.cpp.o"]
             cmd2 = ["/usr/bin/g++", "-g", f"{program}.cpp.o", "-o", f"{program}.gpp_run", "-fopenmp", "-lssl", "-lcrypto"]
-            subprocess.run(cmd1, check=True, capture_output=True, text=True)
-            subprocess.run(cmd2, check=True, capture_output=True, text=True)
+            subprocess.run(cmd1, check=True, capture_output=True, text=True, timeout=120)
+            subprocess.run(cmd2, check=True, capture_output=True, text=True, timeout=120)
             
             subprocess.run(["sudo", "modprobe", "msr"], check=True, capture_output=True, text=True, timeout=120)
             subprocess.run([
@@ -162,7 +185,10 @@ def measure_performance(program: str, code: str, test: str, optimized: bool):
 
         os.chdir(f"{USER_PREFIX}/src/baseline/profcodegen/humaneval/{program}")
         try:
-            subprocess.run(["make", "compile"], check=True, capture_output=True, text=True)
+            subprocess.run(["make", "compile"], check=True, capture_output=True, text=True, timeout=120)
+        except subprocess.TimeoutExpired as e:
+            logger.error(f"Compile original code timeout: {e}")
+            return 0
         except subprocess.CalledProcessError as e:
             logger.error(f"Compile original code failed: {e.stderr}")
             return 0
@@ -175,6 +201,9 @@ def measure_performance(program: str, code: str, test: str, optimized: bool):
         return extract_metrics()
     except subprocess.CalledProcessError as e:
         logger.error(f"Make measure failed: {e.stderr}")
+        return 0
+    except subprocess.TimeoutExpired as e:
+        logger.error(f"Make measure timeout: {e}")
         return 0
 
 def extract_metrics():
@@ -261,7 +290,7 @@ def main():
     with open(DATASET_DIR, "r") as f:
         dataset = json.load(f)
     
-    for entry in dataset[1:2]:
+    for entry in dataset:
         id = entry["task_id"]
         logger.info(f"Processing: {id}")
         llm.clear_memory()
@@ -276,6 +305,7 @@ def main():
         # Combine function and test code
         function_code = entry["function_code"]
         test_code = entry["test_code"]
+        stress_test_code = entry["cpp_stress_test"]
         
         #Create parameterized Makefile for each problem id folder
         makefile_template = open(f"{USER_PREFIX}/src/baseline/profcodegen/humaneval/makefile_template.mak", "r")
@@ -329,8 +359,8 @@ def main():
             final_code = round_1_optimized_code
         
         # measure final performance
-        optimized_latency = measure_performance(id, final_code, test_code, optimized=True)
-        original_latency = measure_performance(id, function_code, test_code, optimized=False)
+        optimized_latency = measure_performance(id, final_code, stress_test_code, optimized=True)
+        original_latency = measure_performance(id, function_code, stress_test_code, optimized=False)
         results.append((id, original_latency / optimized_latency))
         
     # Save results to CSV
@@ -344,7 +374,7 @@ def main():
         total = len(results)
         correct = sum(1 for _, s in results if s != -1)
         optimized = sum(1 for _, s in results if s >= 1.1)
-        speedups = [max(1, s) for _, s in results if s != -1]
+        speedups = [s for _, s in results if s != -1]
         avg_speedup = round(sum(speedups) / len(speedups), 3) if speedups else 0
 
         percent_correct = round(100 * correct / total, 2)

@@ -13,15 +13,9 @@ USER_PREFIX = os.getenv('USER_PREFIX')
 env = Environment(loader=FileSystemLoader(f"{USER_PREFIX}/src/llm/llm_prompts"))
 
 def llm_optimize(code, llm_assistant, evaluator_feedback=None, ast=None, flame_report=None):
-    class Strategy(BaseModel):
-        Strategy: str
-        Pros: str
-        Cons: str
-
     class OptimizationReasoning(BaseModel):
         analysis: str
         optimization_opportunities: str
-        strategies: list[Strategy] 
         selected_strategy: str
         final_code: str
         

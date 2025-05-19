@@ -81,8 +81,9 @@ class HumanEvalBenchmark(Benchmark):
         return ast.create_ast(source_code_path)
 
     def post_process(self, code):
-        code = code.replace("```cpp", "").replace("```", "")
-        
+        if "```cpp" in code:
+            code = code.split("```cpp")[1].split("```")[0].strip()
+     
         def remove_main_function(cpp_code: str) -> str:
             # Regex pattern to match the main function (basic heuristic)
             pattern = re.compile(

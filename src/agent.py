@@ -68,7 +68,7 @@ class LLMAgent:
         self.memory = [{"role": "system", "content": self.system_message}]
     
     def is_openai_model(self):
-        return self.model in ["gpt-4o", "o1", "o3-mini"]
+        return self.model in ["gpt-4o", "o1", "o3-mini", "gpt-4o-mini"]
     
     def is_genai_studio(self):
         return self.use_genai_studio

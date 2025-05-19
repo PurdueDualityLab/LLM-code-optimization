@@ -25,13 +25,15 @@ You are a code optimization expert. Evaluate the following current code snippet 
 Here is the original code snippet:
 
 {{ original_source_code }}
-Average runtime in ms: {{ original_avg_runtime }}
 
 Here is the code snippiets that you are tasked to optimize:
 
 {{ current_source_code }}
 
 Average speedup: {{ current_avg_runtime }}
+
+Here is the AST of the source code:
+{{ ast }}
 
 {% if flame_report %}
 Here is a textual representation of the flame graph for the current source code:

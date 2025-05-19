@@ -1,0 +1,31 @@
+{
+    "FFT": {
+        "energy_improvement": 1.076,
+        "runtime_improvement": 0.935,
+        "cpu_cycles_improvement": 0.9612545834365346,
+        "peak_memory_improvement": 0.9958974775579837,
+        "throughput_improvement": 0.9357996164908917,
+        "mflops_improvement": 0.9792177641309842,
+        "loc_improvement": 1.398
+    },
+    "LU": "Unable to produce functional equivalent programs.",
+    "MonteCarlo": "Unable to produce functional equivalent programs.",
+    "SOR": {
+        "energy_improvement": 1.003,
+        "runtime_improvement": 0.997,
+        "cpu_cycles_improvement": 1.000182290943943,
+        "peak_memory_improvement": 1.0037204590312832,
+        "throughput_improvement": 0.9972718204488777,
+        "mflops_improvement": 1.0174152153987168,
+        "loc_improvement": 1.053
+    },
+    "SparseCompRow": {
+        "energy_improvement": 1.081,
+        "runtime_improvement": 0.996,
+        "cpu_cycles_improvement": 0.9987972927191909,
+        "peak_memory_improvement": 0.9969018993469345,
+        "throughput_improvement": 0.9977414634146342,
+        "mflops_improvement": 1.0098809119437868,
+        "loc_improvement": 1.011
+    }
+}

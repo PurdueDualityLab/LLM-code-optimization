@@ -15,7 +15,7 @@ env = Environment(loader=FileSystemLoader(f"{USER_PREFIX}/src/llm/llm_prompts"))
 class Feedback(BaseModel):
     feedback: str
 
-def evaluator_llm(evaluator_feedback_data, llm_assistant):
+def evaluator_llm(evaluator_feedback_data, ast, llm_assistant):
 
     #extract original
     original_source_code = evaluator_feedback_data["original"]["source_code"]
@@ -37,6 +37,7 @@ def evaluator_llm(evaluator_feedback_data, llm_assistant):
         "original_avg_runtime": original_avg_runtime,
         "current_source_code": current_source_code,
         "current_avg_runtime": current_avg_runtime,
+        "ast": ast,
         "flame_report": flame_report
     }
     

@@ -1,0 +1,39 @@
+{
+    "FFT": {
+        "energy_improvement": 1.016,
+        "runtime_improvement": 0.988,
+        "cpu_cycles_improvement": 1.003650513822957,
+        "peak_memory_improvement": 0.9997446399934627,
+        "throughput_improvement": 0.98909099756691,
+        "mflops_improvement": 1.6665055769267947,
+        "loc_improvement": 1.25
+    },
+    "LU": {
+        "energy_improvement": 0.926,
+        "runtime_improvement": 0.947,
+        "cpu_cycles_improvement": 0.8940949270295848,
+        "peak_memory_improvement": 1.000643744319903,
+        "throughput_improvement": 0.9457019368723101,
+        "mflops_improvement": 1.0302103798438638,
+        "loc_improvement": 1.371
+    },
+    "MonteCarlo": {
+        "energy_improvement": 0.993,
+        "runtime_improvement": 1.001,
+        "cpu_cycles_improvement": 1.0011698629629757,
+        "peak_memory_improvement": 0.9981432881652472,
+        "throughput_improvement": 1.0010363636363637,
+        "mflops_improvement": 0.6457228290369581,
+        "loc_improvement": 0.867
+    },
+    "SOR": {
+        "energy_improvement": 0.914,
+        "runtime_improvement": 0.916,
+        "cpu_cycles_improvement": 0.9109836476928616,
+        "peak_memory_improvement": 1.0080127923527036,
+        "throughput_improvement": 0.9155689223057645,
+        "mflops_improvement": 1.0335885710234323,
+        "loc_improvement": 1.0
+    },
+    "SparseCompRow": "Unable to produce functional equivalent programs."
+}

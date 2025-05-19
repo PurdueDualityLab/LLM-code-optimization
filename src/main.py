@@ -26,7 +26,7 @@ logger = Logger("logs", sys.argv[2]).logger
 def parse_arguments():
     parser = argparse.ArgumentParser(description="LLM-Code-Optimization")
     parser.add_argument("--benchmark", type=str, default="EnergyLanguage", choices=["EnergyLanguage", "PIE", "SciMark", "Dacapobench", "HumanEval"], help="dataset used for experiment")
-    parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "o3-mini", "deepseek-r1:32b","deepseek-r1:70b", "qwen2.5:72b", "llama3.3:70b", "codellama:latest"], help="llm used for inference")
+    parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "gpt-4o-mini", "o3-mini", "deepseek-r1:32b","deepseek-r1:70b", "qwen2.5:72b", "llama3.3:70b", "codellama:latest"], help="llm used for inference")
     parser.add_argument("--self_optimization_step", type=int, default=5, help="number of LLM self-optimization step")
     parser.add_argument("--num_programs", type=int, default=5, help="For PIE only, number of programs from the benchmark to test")
     parser.add_argument("--application_name", type=str, default="fop", choices=["biojava", "fop", "cassandra", "h2", "h2o", "Kafka", "Luindex", "Lusearch", "spring", "Tomact", "Tradebeans", "Tradesoap", "Xalan", "pmd"], help="For Dacapobench only, name of the application from the benchmark to test")
@@ -246,7 +246,8 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
 
                 # getting feedback from the evaluator
                 logger.info("Regression test success, getting evaluator feedback")
-                evaluator_feedback = evaluator_llm(evaluator_feedback_data=evaluator_feedback_data, llm_assistant=evaluator)
+                evaluator_ast = benchmark_obj.pre_process(last_optimized_code)
+                evaluator_feedback = evaluator_llm(evaluator_feedback_data=evaluator_feedback_data, ast=evaluator_ast, llm_assistant=evaluator)
                 logger.info("Got evaluator feedback")
         
         # clearing LLM memory
@@ -263,7 +264,6 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         with open(f"{USER_PREFIX}/results/{benchmark}/system_{folder_name}.txt", "w") as f:
             f.write(f"Total steps taken: {num_steps}\n")
             f.write(f"Total time taken: {elapsed_time:.2f} seconds\n")
-    evaluation_summary(benchmark, results, results_dir)
         
 def ablation_script_level_1_and_2(benchmark, num_programs, application_name, model, use_genai_studio, ablation):
     #create LLM agent
@@ -274,6 +274,12 @@ def ablation_script_level_1_and_2(benchmark, num_programs, application_name, mod
     for program in get_valid_programs(benchmark, num_programs, application_name, method_level=False):
         if benchmark == "PIE":
             benchmark_obj = PIEBenchmark(program)
+        elif benchmark == "HumanEval":
+            id = program[0]
+            function_code = program[1]
+            stress_test = program[2]
+            test_code = program[3]
+            benchmark_obj = HumanEvalBenchmark(id, function_code, stress_test, test_code)
         elif benchmark == "SciMark":
             target_program = program[0]
             target_method = program[1]
@@ -333,82 +339,6 @@ def ablation_script_level_1_and_2(benchmark, num_programs, application_name, mod
             evaluator_feedback_data = benchmark_obj.get_evaluator_feedback_data()
             results[folder_name] = write_result(energy_data, folder_name, evaluator_feedback_data, results_dir)
     
-    evaluation_summary(benchmark, results, results_dir)
-
-def evaluation_summary(benchmark, results, results_dir):
-    try:
-        results_dir
-    except NameError:
-        results_dir = f"{USER_PREFIX}/results"
-
-    if not os.path.exists(results_dir):
-        os.makedirs(results_dir)
-    with open(f"{results_dir}/results.txt", "w+") as file:
-        json.dump(results, file, indent=4)
-        
-    # final evaluation result
-    total_programs = len(results)
-    valid_programs = {k: v for k, v in results.items() if isinstance(v, dict)}
-    num_correct = len(valid_programs)
-    
-    # Initialize containers for aggregation
-    metrics = defaultdict(list)
-    metrics_above_1_1 = defaultdict(int)
-    
-    if benchmark == "SciMark":
-        all_metrics = [
-        "energy_improvement", "runtime_improvement", "cpu_cycles_improvement",
-        "peak_memory_improvement", "throughput_improvement", "mflops_improvement",
-        "loc_improvement"
-    ]
-    else:
-        all_metrics = [
-            "energy_improvement", "runtime_improvement", "cpu_cycles_improvement",
-            "peak_memory_improvement", "throughput_improvement",
-            "loc_improvement"
-        ]
-    
-    # Process each program (including incorrect ones)
-    for program, result in results.items():
-        if isinstance(result, dict):  # functionally correct
-            for metric in all_metrics:
-                value = result.get(metric)
-                if value is None:
-                    continue
-                if value >= 1.1:
-                    metrics_above_1_1[metric] += 1
-                metrics[metric].append(max(value, 1.0))  # cap at 1
-        else:  # non-functional, count as 1
-            for metric in all_metrics:
-                metrics[metric].append(1.0)  # not above 1.1, so don't increment count
-    
-    # Compute statistics
-    correctness_percent = 100 * num_correct / total_programs
-    
-    percent_above_1_1 = {
-        metric: 100 * metrics_above_1_1.get(metric, 0) / total_programs
-        for metric in all_metrics
-    }
-    avg_improvement = {
-        metric: sum(metrics[metric]) / len(metrics[metric])
-        for metric in all_metrics
-    }
-    
-    # Write to .txt file
-    output_path = f"{results_dir}/optimization_summary.txt"
-    with open(output_path, "w") as f:
-        f.write(f"Correctness: {correctness_percent:.2f}%\n\n")
-        f.write("% of programs with ≥1.1 improvement (out of all programs):\n")
-        for metric in all_metrics:
-            percent = percent_above_1_1.get(metric, 0.0)
-            f.write(f"  {metric}: {percent:.2f}%\n")
-        f.write("\nAverage improvement (capping values < 1 as 1):\n")
-        for metric in all_metrics:
-            avg = avg_improvement.get(metric, 0.0)
-            f.write(f"  {metric}: {avg:.3f}\n")
-    
-    logger.info(f"Evaluation summary written to {output_path}")
-
 def main():
     args=parse_arguments()
     
