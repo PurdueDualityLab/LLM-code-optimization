@@ -1,0 +1,24 @@
+### Description
+The provided code defines a function `filter_by_substring` that takes a vector of strings and a substring as input, and returns a new vector containing only those strings from the input vector that contain the specified substring. This function is implemented in two versions: an original version and an optimized version.
+
+### Detailed Comparison and Optimizations
+
+1. **Algorithmic Changes**:
+   - The fundamental logic of the function remains unchanged in both versions. It iterates over a list of strings and applies a substring search to filter the strings. There are no algorithmic changes in terms of altering the approach to solve the problem of filtering strings by a substring.
+
+2. **Performance Improvements**:
+   - **Space Reservation**: In the optimized version, the `out` vector reserves space for all elements in the input `strings` vector using `out.reserve(strings.size())`. This optimization prevents multiple memory reallocations and potential copies as elements are added to the vector, potentially improving performance when the vector grows.
+   - **Range-Based For Loop**: The optimized code uses a range-based for loop (`for (const auto& str : strings)`) instead of an index-based for loop (`for (int i=0;i<strings.size();i++)`). This modern C++ feature simplifies the code and can potentially offer slight performance benefits by avoiding index calculation and improving readability.
+
+3. **Redundant Code Removal**:
+   - The optimized version removes the unnecessary `#include<stdlib.h>` and `#include<math.h>` directives, which are not used in the program. This can marginally improve compile time and reduces clutter in the code.
+
+4. **Other Optimizations**:
+   - **Use of `string_view`**: The comment in the optimized version suggests using `string_view` for efficient substring search, but the actual implementation still uses `std::string`. Switching to `string_view` could further optimize the code by avoiding allocations and copies associated with `std::string` operations.
+   - **Header File Ordering**: The order of header files is slightly changed, but this does not impact performance; it might contribute to organizational clarity.
+
+### Summary of Optimizations
+- **Space Reservation**: Added `out.reserve(strings.size())` to reduce memory reallocations.
+- **Range-Based For Loop**: Improved loop readability and performance.
+- **Header File Clean-Up**: Removed unused `#include` directives for tidier code.
+- **Potential Use of `string_view`**: Mentioned, but not implemented, for further efficiency improvements.

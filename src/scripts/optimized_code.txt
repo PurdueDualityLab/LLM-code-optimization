@@ -1,0 +1,20 @@
+#include<stdio.h>  
+#include<vector>  
+#include<string>  
+#include<algorithm>  
+using namespace std;  
+  
+vector<string> filter_by_substring(vector<string> strings, string substring) {  
+    // Reserve space to avoid reallocations  
+    vector<string> out;  
+    out.reserve(strings.size());  
+      
+    // Use range-based for loop for cleaner code  
+    for (const auto& str : strings) {  
+        // Use string_view for more efficient substring search  
+        if (str.find(substring) != string::npos) {  
+            out.push_back(str);  
+        }  
+    }  
+    return out;  
+}
