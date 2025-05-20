@@ -6,7 +6,7 @@ from collections import defaultdict
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
 
-results_dir = f"{USER_PREFIX}/final_results/ablation/level_1/humaneval"
+results_dir = f"{USER_PREFIX}/results/ablation/level_2"
 
 valid_files = sorted(os.listdir(results_dir))
 valid_files = [file for file in valid_files if file.endswith(".txt") and file != "optimization_summary.txt"]

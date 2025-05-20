@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<string>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nstring intersection( vector<int> interval1,vector<int> interval2){\nint inter1,inter2,l,i;\n    inter1=max(interval1[0],interval2[0]);\n    inter2=min(interval1[1],interval2[1]);\n    l=inter2-inter1;\n    if (l<2) return \"NO\";\n    for (i=2;i*i<=l;i++)\n        if (l%i==0) return \"NO\";\n    return \"YES\";\n}",
+        8.879,
+        0.119,
+        4938884.6,
+        21083.2,
+        8.359,
+        17
+    ],
+    "1": [
+        "#include <vector>\n#include <algorithm>\n#include <string>\nusing namespace std;\n\nstring intersection(vector<int> interval1, vector<int> interval2) {\n    int inter1 = max(interval1[0], interval2[0]);\n    int inter2 = min(interval1[1], interval2[1]);\n    int l = inter2 - inter1;\n    if (l < 2) return \"NO\";\n    static const int small_primes[] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31};\n    for (int prime : small_primes) {\n        if (prime * prime > l) break;\n        if (l % prime == 0) return \"NO\";\n    }\n    return \"YES\";\n}",
+        1.837,
+        0.909,
+        0.961,
+        1.0,
+        0.913,
+        17
+    ]
+}

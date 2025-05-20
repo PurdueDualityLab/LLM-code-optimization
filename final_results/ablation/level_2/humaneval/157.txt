@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nbool right_angle_triangle(float a,float b,float c){\nif (abs(a*a+b*b-c*c)<1e-4 or abs(a*a+c*c-b*b)<1e-4 or abs(b*b+c*c-a*a)<1e-4) return true;\n    return false;\n}",
+        4.369,
+        0.131,
+        2809657.4,
+        21039.2,
+        7.606,
+        9
+    ],
+    "1": [
+        "#include <cstdio>\n\nbool right_angle_triangle(float a, float b, float c) {\n    float a2 = a * a;\n    float b2 = b * b;\n    float c2 = c * c;\n    const float tolerance = 1e-4;\n    return (\n        ((a2 + b2) - c2 < tolerance && (a2 + b2) - c2 > -tolerance) ||\n        ((a2 + c2) - b2 < tolerance && (a2 + c2) - b2 > -tolerance) ||\n        ((b2 + c2) - a2 < tolerance && (b2 + c2) - a2 > -tolerance)\n    );\n}",
+        1.031,
+        1.163,
+        1.077,
+        1.002,
+        1.166,
+        13
+    ]
+}

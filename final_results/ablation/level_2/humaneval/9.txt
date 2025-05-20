@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<vector>\nusing namespace std;\n#include<algorithm>\n#include<math.h>\n#include<stdlib.h>\nvector<int> rolling_max(vector<int> numbers){\nvector<int> out;\n    int max=0;\n    for (int i=0;i<numbers.size();i++)\n    {\n        if (numbers[i]>max) max=numbers[i];\n        out.push_back(max);\n    }\n    return out;\n}",
+        12.0,
+        0.129,
+        8369072.4,
+        20898.4,
+        7.738,
+        16
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <vector>\n#include <algorithm>\n#include <climits> \nusing namespace std;\n\nvector<int> rolling_max(vector<int> numbers) {\n    vector<int> out;\n    out.reserve(numbers.size()); \n    int max = INT_MIN; \n    for (int i = 0; i < numbers.size(); i++) {\n        if (numbers[i] > max) max = numbers[i];\n        out.push_back(max);\n    }\n    return out;\n}",
+        1.035,
+        1.037,
+        1.034,
+        0.991,
+        1.038,
+        16
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<vector>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<math.h>\n#include<stdlib.h>\nstring longest(vector<string> strings){\nstring out;\n    for (int i=0;i<strings.size();i++)\n    {\n        if (strings[i].length()>out.length()) out=strings[i];\n    }\n    return out;\n}",
+        23.342,
+        0.253,
+        460223996.0,
+        314298.4,
+        3.949,
+        15
+    ],
+    "1": [
+        "#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\n#include <cmath>\n#include <cstdlib>\n\nusing namespace std;\n\nstring longest(const vector<string>& strings) {\n    string out;\n    for (const auto& s : strings) {\n        if (s.length() > out.length()) {\n            out = std::move(s);\n        }\n    }\n    return out;\n}",
+        1.036,
+        1.005,
+        0.988,
+        0.998,
+        1.005,
+        18
+    ]
+}

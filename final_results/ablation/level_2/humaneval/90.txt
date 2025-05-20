@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nint next_smallest(vector<int> lst){\nsort(lst.begin(),lst.end());\n    for (int i=1;i<lst.size();i++)\n        if (lst[i]!=lst[i-1]) return lst[i];\n    return -1;\n}",
+        11.627,
+        0.119,
+        4221402.8,
+        21018.4,
+        8.42,
+        12
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <vector>\n#include <limits.h>\n#include <unordered_set>\nusing namespace std;\n\nint next_smallest(vector<int> lst) {\n    int smallest = INT_MAX, second_smallest = INT_MAX;\n    unordered_set<int> seen;\n    for (int num : lst) {\n        if (seen.find(num) == seen.end()) { \n            seen.insert(num);\n            if (num < smallest) {\n                second_smallest = smallest;\n                smallest = num;\n            } else if (num < second_smallest) {\n                second_smallest = num;\n            }\n        }\n    }\n    return second_smallest == INT_MAX ? -1 : second_smallest;\n}",
+        1.063,
+        0.928,
+        0.951,
+        0.992,
+        0.925,
+        22
+    ]
+}

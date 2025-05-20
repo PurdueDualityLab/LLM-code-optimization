@@ -8,17 +8,26 @@ from dotenv import load_dotenv
 from abstract_syntax_trees.cpp_ast import CPPAST
 from benchmark import Benchmark
 from utils import Logger
+import signal
+
+class TimeoutException(Exception):
+    pass
+
+def timeout_handler(signum, frame):
+    raise TimeoutException("post_process timed out")
+signal.signal(signal.SIGALRM, timeout_handler)
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
 logger = Logger("logs", sys.argv[2]).logger
 
 class HumanEvalBenchmark(Benchmark):
-    def __init__(self, id, function_code, stress_test, test_code):
+    def __init__(self, id, function_code, stress_test, test_code, entry_point):
         self.program = id
         self.function_code = function_code
         self.stress_test = stress_test
         self.test_code = test_code
+        self.entry_point = entry_point
         self.compilation_error = None
         self.runtime_error = None
         self.energy_data = {}
@@ -75,29 +84,39 @@ class HumanEvalBenchmark(Benchmark):
 
     def pre_process(self, code):
         ast = CPPAST("cpp")
-        source_code_path = f"{USER_PREFIX}/benchmark_human_eval/{self.program}/ast_{self.program}"
+        source_code_path = f"{USER_PREFIX}/benchmark_human_eval/{self.program}/ast_{self.program}.cpp"
         with open(source_code_path, 'w') as file:
             file.write(code)
-        return ast.create_ast(source_code_path)
+        ast = ast.create_ast(source_code_path, self.entry_point)
+        return ast
 
-    def post_process(self, code):
-        if "```cpp" in code:
-            code = code.split("```cpp")[1].split("```")[0].strip()
-     
-        def remove_main_function(cpp_code: str) -> str:
-            # Regex pattern to match the main function (basic heuristic)
-            pattern = re.compile(
-                r'\bint\s+main\s*\([^)]*\)\s*{'
-                r'(?:[^{}]*|{[^{}]*})*'
-                r'}', 
-                re.DOTALL
-            )
+    def post_process(self, code, timeout_sec=60):
+        logger.info(f"Post processing code")
+        signal.alarm(timeout_sec)  # Start timer
+        
+        try:
+            if "```cpp" in code:
+                code = code.split("```cpp")[1].split("```")[0].strip()
+        
+            def remove_main_function(cpp_code: str) -> str:
+                # Regex pattern to match the main function (basic heuristic)
+                pattern = re.compile(
+                    r'\bint\s+main\s*\([^)]*\)\s*{'
+                    r'(?:[^{}]*|{[^{}]*})*'
+                    r'}', 
+                    re.DOTALL
+                )
 
-            cleaned_code = re.sub(pattern, '', cpp_code)
-            return cleaned_code
-        code = remove_main_function(code)
-        return re.sub(r'//.*?$|/\*.*?\*/', '', code, flags=re.DOTALL | re.MULTILINE)
-
+                cleaned_code = re.sub(pattern, '', cpp_code)
+                return cleaned_code
+            code = remove_main_function(code)
+            return re.sub(r'//.*?$|/\*.*?\*/', '', code, flags=re.DOTALL | re.MULTILINE)
+        except TimeoutException:
+            logger.error("Post process timed out")
+            return code
+        finally:
+            signal.alarm(0) # Stop timer
+        
     def compile(self, optimized_code):
         destination_path = f"{USER_PREFIX}/benchmark_human_eval/{self.program}/optimized_{self.program}.cpp"
         with open(destination_path, "w") as file:
@@ -306,8 +325,10 @@ class HumanEvalBenchmark(Benchmark):
             with open(input_file_path, 'r') as input_file:
                 lines = input_file.readlines()
             start_index = 13
-
-            return lines[start_index:-3]
+            
+            if len(lines) < 80:
+                return lines[start_index:-3]
+            return lines[start_index:60]
         
         flame_report = extract_subtree(flame_report_path)
         
@@ -338,7 +359,7 @@ def get_valid_humaneval_programs(num_programs):
         
     valid_programs = []
     
-    for entry in data[:num_programs]:
+    for entry in data:
         id = entry['task_id']
         folder_path = f"{USER_PREFIX}/benchmark_human_eval/{id}"
         if not os.path.exists(folder_path):
@@ -348,6 +369,7 @@ def get_valid_humaneval_programs(num_programs):
         function_code = entry['function_code']
         stress_test = entry['cpp_stress_test']
         test_code = entry['test_code']
+        entry_point = entry['entry_point']
         
         #Create parameterized Makefile for each problem id folder
         makefile_template = open(f"{USER_PREFIX}/benchmark_human_eval/makefile_template.mak", "r")
@@ -358,7 +380,7 @@ def get_valid_humaneval_programs(num_programs):
         makefile_template.write(makefile_content)
         makefile_template.close()
         
-        valid_programs.append((id, function_code, stress_test, test_code))
+        valid_programs.append((id, function_code, stress_test, test_code, entry_point))
     
     return valid_programs
         

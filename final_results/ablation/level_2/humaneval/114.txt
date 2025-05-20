@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nlong long minSubArraySum(vector<long long> nums){\nlong long current,min;\n    current=nums[0];\n    min=nums[0];\n    for (int i=1;i<nums.size();i++)\n    {\n       if (current<0) current=current+nums[i];\n       else current=nums[i];\n       if (current<min) min=current;\n    }\n    return min;\n}",
+        8.098,
+        0.129,
+        8789996.8,
+        21059.2,
+        7.743,
+        18
+    ],
+    "1": [
+        "#include <vector>\n#include <algorithm>\n\nlong long minSubArraySum(const std::vector<long long>& nums) {\n    if (nums.empty()) return 0; \n\n    long long current = nums[0];\n    long long minSum = nums[0];\n    size_t size = nums.size(); \n\n    for (size_t i = 1; i < size; ++i) { \n        current = std::min(current + nums[i], nums[i]);\n        minSum = std::min(minSum, current);\n    }\n\n    return minSum;\n}",
+        0.952,
+        0.938,
+        1.034,
+        1.002,
+        0.938,
+        17
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nlong long double_the_difference(vector<float> lst){\nlong long sum=0;\n    for (int i=0;i<lst.size();i++)\n    if (lst[i]-round(lst[i])<1e-4)\n    if (lst[i]>0 and (int)(round(lst[i]))%2==1) sum+=(int)(round(lst[i]))*(int)(round(lst[i]));\n    return sum;\n}",
+        4.892,
+        0.13,
+        12174960.0,
+        21051.2,
+        7.657,
+        13
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <vector>\n#include <cmath>\nusing namespace std;\n\nlong long double_the_difference(const vector<float>& lst) {\n    long long sum = 0;\n    for (auto it = lst.begin(); it != lst.end(); ++it) {\n        float current = *it;\n        float rounded = round(current);\n        if (fabs(current - rounded) < 1e-4 && current > 0) {\n            int roundedInt = static_cast<int>(rounded);\n            if (roundedInt % 2 == 1) {\n                sum += static_cast<long long>(roundedInt) * roundedInt;\n            }\n        }\n    }\n    return sum;\n}",
+        1.075,
+        0.972,
+        1.022,
+        1.0,
+        0.976,
+        19
+    ]
+}

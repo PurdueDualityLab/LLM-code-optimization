@@ -123,7 +123,8 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
             function_code = program[1]
             stress_test = program[2]
             test_code = program[3]
-            benchmark_obj = HumanEvalBenchmark(id, function_code, stress_test, test_code)
+            entry_point = program[4]
+            benchmark_obj = HumanEvalBenchmark(id, function_code, stress_test, test_code, entry_point)
         elif benchmark == "SciMark":
             target_program = program[0]
             target_method = program[1]
@@ -272,6 +273,7 @@ def ablation_script_level_1_and_2(benchmark, num_programs, application_name, mod
     results = {}
     
     for program in get_valid_programs(benchmark, num_programs, application_name, method_level=False):
+        generator.clear_memory()
         if benchmark == "PIE":
             benchmark_obj = PIEBenchmark(program)
         elif benchmark == "HumanEval":
@@ -279,7 +281,8 @@ def ablation_script_level_1_and_2(benchmark, num_programs, application_name, mod
             function_code = program[1]
             stress_test = program[2]
             test_code = program[3]
-            benchmark_obj = HumanEvalBenchmark(id, function_code, stress_test, test_code)
+            entry_point = program[4]
+            benchmark_obj = HumanEvalBenchmark(id, function_code, stress_test, test_code, entry_point)
         elif benchmark == "SciMark":
             target_program = program[0]
             target_method = program[1]

@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<vector>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<math.h>\n#include<stdlib.h>\nvector<int> parse_nested_parens(string paren_string){\nvector<int> all_levels;\n    string current_paren;\n    int level=0,max_level=0;\n    char chr;\n    int i;\n    for (i=0;i<paren_string.length();i++)\n    {\n        chr=paren_string[i];\n        if (chr=='(')\n        {\n        level+=1;\n        if (level>max_level) max_level=level;\n        current_paren+=chr;\n        }\n        if (chr==')')\n        {\n            level-=1;\n            current_paren+=chr;\n            if (level==0){\n                all_levels.push_back(max_level);\n                current_paren=\"\";\n                max_level=0;\n            }\n        }\n    }\n    return all_levels;\n}",
+        12.188,
+        0.144,
+        38574899.8,
+        21217.6,
+        6.959,
+        35
+    ],
+    "1": [
+        "#include <vector>\n#include <string>\n#include <algorithm> \nusing namespace std;\n\nvector<int> parse_nested_parens(const string& paren_string) {\n    vector<int> all_levels;\n    int level = 0, max_level = 0;\n    for (size_t i = 0; i < paren_string.length(); ++i) {\n        if (paren_string[i] == '(') {\n            ++level;\n            max_level = max(max_level, level);\n        } else if (paren_string[i] == ')') {\n            --level;\n            if (level == 0) {\n                all_levels.push_back(max_level);\n                max_level = 0;\n            }\n        }\n    }\n    return all_levels;\n}",
+        1.254,
+        0.996,
+        1.039,
+        1.006,
+        0.993,
+        22
+    ]
+}

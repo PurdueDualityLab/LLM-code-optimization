@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<string>\n#include<algorithm>\nusing namespace std;\n#include<math.h>\n#include<stdlib.h>\nbool simplify(string x,string n){\nint a,b,c,d,i;\n    for (i=0;i<x.size();i++)\n        if (x[i]=='/') \n        {\n            a=atoi(x.substr(0,i).c_str());\n            b=atoi(x.substr(i+1).c_str());\n        }\n    for (i=0;i<n.size();i++)\n        if (n[i]=='/') \n        {\n            c=atoi(n.substr(0,i).c_str());\n            d=atoi(n.substr(i+1).c_str());\n        }\n    if ((a*c)%(b*d)==0) return true;\n    return false;\n}",
+        4.618,
+        0.13,
+        4454445.8,
+        21128.8,
+        7.674,
+        23
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <string>\n#include <algorithm>\n#include <cmath> \n#include <cstdlib> \nusing namespace std;\n\nbool simplify(string x, string n) {\n    \n    size_t posX = x.find('/');\n    size_t posN = n.find('/');\n\n    \n    int a = stoi(x.substr(0, posX));\n    int b = stoi(x.substr(posX + 1));\n    int c = stoi(n.substr(0, posN));\n    int d = stoi(n.substr(posN + 1));\n\n    \n    return (a * c) % (b * d) == 0;\n}",
+        1.046,
+        0.987,
+        0.984,
+        1.003,
+        0.988,
+        21
+    ]
+}

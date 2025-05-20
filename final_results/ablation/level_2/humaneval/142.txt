@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nint sum_squares(vector<int> lst){\nint sum=0;\n    for (int i=0;i<lst.size();i++)\n        if (i%3==0) sum+=lst[i]*lst[i];\n        else if (i%4==0) sum+=lst[i]*lst[i]*lst[i];\n        else sum+=lst[i];\n    return sum;\n}",
+        4.854,
+        0.127,
+        13217718.6,
+        21155.2,
+        7.836,
+        14
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <vector>\nusing namespace std;\n\nint sum_squares(const vector<int>& lst) {\n    int sum = 0;\n    for (size_t i = 0; i < lst.size(); ++i) {\n        int value = lst[i];\n        bool isMultipleOf3 = (i % 3 == 0);\n        bool isMultipleOf4 = (i % 4 == 0);\n\n        if (isMultipleOf3) {\n            sum += value * value;\n        } else if (isMultipleOf4) {\n            sum += value * value * value;\n        } else {\n            sum += value;\n        }\n    }\n    return sum;\n}\n\n",
+        1.077,
+        0.973,
+        0.998,
+        1.004,
+        0.976,
+        22
+    ]
+}

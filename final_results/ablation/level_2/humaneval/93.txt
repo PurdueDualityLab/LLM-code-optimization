@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<string>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nstring encode(string message){\nstring vowels=\"aeiouAEIOU\";\n    string out=\"\";\n    for (int i=0;i<message.length();i++)\n    {\n        char w=message[i];\n        if (w>=97 and w<=122){w=w-32;}\n        else if (w>=65 and w<=90) w=w+32;\n        if (find(vowels.begin(),vowels.end(),w)!=vowels.end()) w=w+2;\n        out=out+w;\n    }\n    return out;\n}",
+        15.628,
+        0.175,
+        5261514.4,
+        21100.0,
+        5.7,
+        19
+    ],
+    "1": [
+        "#include <iostream>\n#include <string>\n#include <unordered_set>\n#include <algorithm>\n\nusing namespace std;\n\nstring encode(const string& message) {\n    unordered_set<char> vowels = {'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U'};\n    string out;\n    out.reserve(message.size()); \n\n    for (char ch : message) {\n        if (isalpha(ch)) {\n            ch = islower(ch) ? toupper(ch) : tolower(ch);\n        }\n        if (vowels.find(ch) != vowels.end()) {\n            ch += 2;\n        }\n        out += ch;\n    }\n\n    return out;\n}\n\n\n\n",
+        1.654,
+        1.468,
+        0.912,
+        1.003,
+        1.469,
+        27
+    ]
+}

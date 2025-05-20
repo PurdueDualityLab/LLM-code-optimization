@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nint fibfib(int n){\nint ff[100];\n    ff[0]=0;\n    ff[1]=0;\n    ff[2]=1;\n    for (int i=3;i<=n;i++)\n        ff[i]=ff[i-1]+ff[i-2]+ff[i-3];\n    return ff[n];\n\n}",
+        10.397,
+        0.113,
+        2659765.8,
+        21083.2,
+        8.799,
+        15
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <stdlib.h>\n\nint fibfib(int n) {\n    if (n < 0) return -1; \n    if (n == 0) return 0;\n    if (n == 1 || n == 2) return (n == 2) ? 1 : 0;\n    \n    int *ff = (int *)malloc((n + 1) * sizeof(int));\n    if (!ff) return -1; \n\n    ff[0] = 0;\n    ff[1] = 0;\n    ff[2] = 1;\n\n    for (int i = 3; i <= n; i++) {\n        ff[i] = ff[i-1] + ff[i-2] + ff[i-3];\n    }\n    int result = ff[n];\n    free(ff);\n    return result;\n}\n\n",
+        1.003,
+        0.972,
+        0.911,
+        1.002,
+        0.976,
+        23
+    ]
+}

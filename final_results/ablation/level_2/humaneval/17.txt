@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nvector<int> parse_music(string music_string){\nstring current=\"\";\n    vector<int> out={};\n    if (music_string.length()>0)\n        music_string=music_string+' ';\n    for (int i=0;i<music_string.length();i++)\n    {\n        if (music_string[i]==' ')\n        {\n            if (current==\"o\") out.push_back(4);\n            if (current==\"o|\") out.push_back(2);\n            if (current==\".|\") out.push_back(1);\n            current=\"\";\n        }\n        else current+=music_string[i];\n    }\n    return out;\n}",
+        10.963,
+        0.128,
+        10903303.6,
+        21083.2,
+        7.829,
+        25
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <vector>\n#include <string>\n#include <unordered_map>\n\nusing namespace std;\n\nvector<int> parse_music(const string &music_string) {\n    unordered_map<string, int> symbol_map = {\n        {\"o\", 4},\n        {\"o|\", 2},\n        {\".|\", 1}\n    };\n    vector<int> out;\n    string current;\n\n    for (char c : music_string) {\n        if (c == ' ') {\n            if (!current.empty() && symbol_map.count(current)) {\n                out.push_back(symbol_map[current]);\n            }\n            current.clear();\n        } else {\n            current += c;\n        }\n    }\n\n    \n    if (!current.empty() && symbol_map.count(current)) {\n        out.push_back(symbol_map[current]);\n    }\n\n    return out;\n}\n\n",
+        0.893,
+        0.876,
+        0.519,
+        0.999,
+        0.873,
+        35
+    ]
+}

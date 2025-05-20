@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nvector<int> remove_duplicates(vector<int> numbers){\nvector<int> out={};\n    vector<int> has1={};\n    vector<int> has2={};\n    for (int i=0;i<numbers.size();i++)\n    {\n        if (find(has2.begin(),has2.end(),numbers[i])!=has2.end()) continue;\n        if (find(has1.begin(),has1.end(),numbers[i])!=has1.end())\n        {\n\n            has2.push_back(numbers[i]);\n        }\n        else has1.push_back(numbers[i]);\n    }\n    for (int i=0;i<numbers.size();i++)\n    if (find(has2.begin(),has2.end(),numbers[i])==has2.end())\n        out.push_back(numbers[i]);\n    return out;\n\n\n}",
+        115.788,
+        1.325,
+        4981514316.4,
+        20972.8,
+        0.755,
+        27
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <vector>\n#include <unordered_set>\nusing namespace std;\n\nvector<int> remove_duplicates(vector<int> numbers) {\n    unordered_set<int> seen_once;\n    unordered_set<int> duplicates;\n    vector<int> out;\n\n    for (int num : numbers) {\n        if (seen_once.find(num) != seen_once.end()) {\n            duplicates.insert(num);\n        } else {\n            seen_once.insert(num);\n        }\n    }\n\n    for (int num : numbers) {\n        if (duplicates.find(num) == duplicates.end()) {\n            out.push_back(num);\n        }\n    }\n\n    return out;\n}",
+        9.765,
+        8.622,
+        67.931,
+        0.991,
+        8.609,
+        26
+    ]
+}

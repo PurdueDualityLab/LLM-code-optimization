@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nvector<string> words_string(string s){\nstring current=\"\";\n    vector<string> out={};\n    s=s+' ';\n    for (int i=0;i<s.length();i++)\n     if (s[i]==' ' or s[i]==',')\n     {\n        if (current.length()>0)\n        {\n            out.push_back(current);\n            current=\"\";\n        }\n     }\n     else current=current+s[i];\n     return out;\n}",
+        9.393,
+        0.14,
+        53050876.0,
+        21058.4,
+        7.136,
+        23
+    ],
+    "1": [
+        "#include <iostream>\n#include <vector>\n#include <string>\n\nusing namespace std;\n\nvector<string> words_string(const string& s) {\n    string current;\n    vector<string> out;\n    out.reserve(s.size() / 5); \n    \n    for (size_t i = 0; i < s.size(); ++i) {\n        if (s[i] == ' ' || s[i] == ',') {\n            if (!current.empty()) {\n                out.push_back(move(current));\n                current.clear();\n            }\n        } else {\n            current += s[i];\n        }\n    }\n    \n    if (!current.empty()) { \n        out.push_back(move(current));\n    }\n    return out;\n}\n\n",
+        0.987,
+        1.047,
+        2.158,
+        1.001,
+        1.046,
+        28
+    ]
+}

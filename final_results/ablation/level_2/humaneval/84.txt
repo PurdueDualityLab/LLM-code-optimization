@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nstring solve(int N){\nstring str,bi=\"\";\n    str=to_string(N);\n    int i,sum=0;\n    for (int i=0;i<str.length();i++)\n        sum+=str[i]-48;\n    while (sum>0)\n    {\n        bi=to_string(sum%2)+bi;\n        sum=sum/2;\n    }\n    return bi;\n}",
+        9.959,
+        0.119,
+        4242978.6,
+        21072.0,
+        8.421,
+        19
+    ],
+    "1": [
+        "#include<string>\n#include<sstream>\n\nstd::string solve(int N) {\n    int sum = 0;\n    \n    while (N > 0) {\n        sum += N % 10;\n        N /= 10;\n    }\n    \n    std::string bi = \"\";\n    if (sum == 0) return \"0\";\n    while (sum > 0) {\n        bi = char('0' + sum % 2) + bi;\n        sum /= 2;\n    }\n    return bi;\n}",
+        0.926,
+        0.998,
+        0.988,
+        1.002,
+        0.995,
+        19
+    ]
+}

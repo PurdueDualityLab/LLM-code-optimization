@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nbool correct_bracketing(string brackets){\nint level=0;\n    for (int i=0;i<brackets.length();i++)\n    {\n        if (brackets[i]=='<') level+=1;\n        if (brackets[i]=='>') level-=1;\n        if (level<0) return false;\n    }\n    if (level!=0) return false;\n    return true;\n}",
+        8.78,
+        0.124,
+        7061521.6,
+        21105.6,
+        8.05,
+        17
+    ],
+    "1": [
+        "#include <string>\n\nbool correct_bracketing(const std::string &brackets) {\n    int level = 0;\n    size_t length = brackets.length();\n    \n    for (size_t i = 0; i < length; ++i) {\n        if (brackets[i] == '<') {\n            ++level;\n        } else if (brackets[i] == '>') {\n            if (--level < 0) {\n                return false;\n            }\n        }\n    }\n    return level == 0;\n}",
+        0.97,
+        0.971,
+        1.047,
+        1.003,
+        0.971,
+        17
+    ]
+}

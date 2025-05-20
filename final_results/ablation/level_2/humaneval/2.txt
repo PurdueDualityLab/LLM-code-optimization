@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nfloat truncate_number(float number){\nreturn number-int(number);\n}",
+        10.892,
+        0.12,
+        2677941.0,
+        21041.6,
+        8.355,
+        8
+    ],
+    "1": [
+        "#include <math.h>\n\nfloat truncate_number(float number) {\n    \n    return number - floor(number);\n}",
+        1.036,
+        1.036,
+        0.989,
+        0.995,
+        1.032,
+        6
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nstring encrypt(string s){\nstring out;\n    int i;\n    for (i=0;i<s.length();i++)\n    {\n        int w=((int)s[i]+4-(int)'a')%26+(int)'a';   \n        out=out+(char)w;\n    }\n    return out;\n}",
+        14.45,
+        0.149,
+        46551520.4,
+        21100.0,
+        6.71,
+        16
+    ],
+    "1": [
+        "#include <string>\n\nstd::string encrypt(const std::string &s) {\n    std::string out;\n    out.reserve(s.size()); \n    for (char c : s) {\n        char w = ((c + 4 - 'a') % 26) + 'a'; \n        out += w; \n    }\n    return out;\n}",
+        1.245,
+        1.257,
+        6.782,
+        1.007,
+        1.255,
+        11
+    ]
+}
