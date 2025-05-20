@@ -21,7 +21,7 @@ def run_mflops(jar_path, benchmark_class, jvm_flags=""):
     mflops = float(mflops.split("make")[0])
     print(f"MFLOPS: {mflops}")
     return mflops
-    
+
 def run_java(jar_path, main_class, jvm_flags=""):
     # Clear runtime log
     with open(RUNTIME_LOG, "w") as f:
@@ -63,7 +63,7 @@ def percent_improvement(before, after):
 
 def main():
     results = []
-    
+
     programs = [
         "FFT",
         "LU",
@@ -87,13 +87,21 @@ def main():
 
             # Run with JIT optimization flags
             jit_flags = (
+                # "-server "
+                # "-XX:+UseSuperWord "
+                # "-XX:+TieredCompilation "
+                # "-XX:TieredStopAtLevel=4 "
+                # "-XX:MaxInlineSize=100 "
+                # "-XX:FreqInlineSize=100 "
+
                 "-server "
+                "-Xms512m -Xmx512m "
+                "-XX:-TieredCompilation "
+                "-Xbatch "
                 "-XX:+UseSuperWord "
-                "-XX:+TieredCompilation "
-                "-XX:TieredStopAtLevel=4 "
-                "-XX:MaxInlineSize=100 "
-                "-XX:FreqInlineSize=100 "
             )
+
+
             opt_metrics = run_java(java_path, main_class, jvm_flags=jit_flags)
             opt_mflops = run_mflops(java_path, benchmark_class, jvm_flags=jit_flags)
             mflops_improvement = round(opt_mflops / orig_mflops, 3)
