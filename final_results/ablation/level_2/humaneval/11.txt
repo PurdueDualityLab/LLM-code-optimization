@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<math.h>\n#include<stdlib.h>\nstring string_xor(string a,string b){\nstring output=\"\";\n    for (int i=0;(i<a.length() and i<b.length());i++)\n    {\n        if (i<a.length() and i<b.length())\n        {\n            if (a[i]== b[i]) \n            {\n                output+='0';\n            }  \n            else output+='1';\n        }\n        else\n        {\n            if (i>=a.length()) \n            {\n            output+=b[i];\n            }\n            else output+=a[i];\n        }\n    }\n    return output;\n}",
+        11.105,
+        0.123,
+        4564892.0,
+        21100.0,
+        8.149,
+        29
+    ],
+    "1": [
+        "#include <iostream>\n#include <string>\n\nusing namespace std;\n\nstring string_xor(const string &a, const string &b) {\n    string output;\n    size_t len_a = a.length();\n    size_t len_b = b.length();\n    size_t min_len = min(len_a, len_b);\n    \n    output.reserve(len_a + len_b); \n    \n    for (size_t i = 0; i < min_len; ++i) {\n        output += (a[i] == b[i]) ? '0' : '1';\n    }\n\n    \n    if (len_a > min_len) {\n        output += a.substr(min_len);\n    } else if (len_b > min_len) {\n        output += b.substr(min_len);\n    }\n\n    return output;\n}\n\n",
+        1.063,
+        1.012,
+        0.95,
+        1.0,
+        1.008,
+        27
+    ]
+}

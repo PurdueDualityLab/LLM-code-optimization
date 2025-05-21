@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nvector<int> common(vector<int> l1,vector<int> l2){\nvector<int> out={};\n    for (int i=0;i<l1.size();i++)\n        if (find(out.begin(),out.end(),l1[i])==out.end())\n            if (find(l2.begin(),l2.end(),l1[i])!=l2.end())\n                out.push_back(l1[i]);\n    sort(out.begin(),out.end());\n    return out;\n}",
+        138.625,
+        1.763,
+        6987659909.6,
+        21054.4,
+        0.567,
+        15
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <vector>\n#include <algorithm>\n#include <unordered_set>\nusing namespace std;\n\nvector<int> common(vector<int> l1, vector<int> l2) {\n    unordered_set<int> l2_set(l2.begin(), l2.end());  \n    unordered_set<int> result_set;\n    for (const int &num : l1) {\n        if (l2_set.find(num) != l2_set.end()) {\n            result_set.insert(num);  \n        }\n    }\n    vector<int> out(result_set.begin(), result_set.end());\n    sort(out.begin(), out.end());  \n    return out;\n}",
+        11.753,
+        11.234,
+        72.416,
+        1.004,
+        11.227,
+        18
+    ]
+}

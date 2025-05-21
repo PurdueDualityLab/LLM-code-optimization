@@ -1,17 +1,15 @@
 from openai import OpenAI
-import time
 import subprocess
 from utils import Logger
 import sys
 from ollama import Client
 from pydantic import BaseModel
-import requests
-import json
 
-logger = Logger("logs", sys.argv[2]).logger
+logger = Logger("logs", sys.argv[2]).logger if len(sys.argv) > 2 else Logger("logs", "default").logger
 
 class LLMAgent:
-    def __init__(self, openai_api_key, genai_api_key, model, use_genai_studio, system_message="You are a helpful assistant."):
+    global_counter = 0
+    def __init__(self, openai_api_key, genai_api_key, model, use_genai_studio=False, system_message="You are a helpful assistant."):
         if not model:
             raise ValueError("A model must be specified when creating a LLM Agent.")
         self.model = model
@@ -39,16 +37,18 @@ class LLMAgent:
         self.memory.append({"role": role, "content": content})
     
     def generate_response(self, response_format=BaseModel):
+        LLMAgent.global_counter +=1
         try:
             if self.is_openai_model() or self.use_genai_studio:
                 response = self.client.beta.chat.completions.parse(
                     model = self.model,
                     messages = self.memory,
-                    response_format=response_format
+                    response_format=response_format,
+                    temperature=0.7
                 )
                 content = response.choices[0].message.content
             else:
-                response = self.client.chat(model=self.model, messages=self.memory, format=response_format.model_json_schema())
+                response = self.client.chat(model=self.model, messages=self.memory, temperature=0.7, format=response_format.model_json_schema())
                 content = response.message.content
         except Exception as e:
             logger.error(f"Error when generating response: {e}")
@@ -68,7 +68,16 @@ class LLMAgent:
         self.memory = [{"role": "system", "content": self.system_message}]
     
     def is_openai_model(self):
-        return self.model in ["gpt-4o", "o1", "o3-mini"]
+        return self.model in ["gpt-4o", "o1", "o3-mini", "gpt-4o-mini"]
     
     def is_genai_studio(self):
         return self.use_genai_studio
+
+    @classmethod
+    def get_global_counter(cls):
+        """Returns the global counter value."""
+        return cls.global_counter
+    
+    @classmethod
+    def reset_global_counter(cls):
+        cls.global_counter = 0

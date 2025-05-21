@@ -6,11 +6,14 @@ class CPPAST(AbstractSyntaxTree):
     def __init__(self, language):
         super().__init__(language)
 
-    def create_ast(self, source_code_path) -> str:
-        command = f"clang++ -Xclang -ast-dump -fsyntax-only {source_code_path} | grep -A 1000 {source_code_path}"
+    def create_ast(self, source_code_path, entry_point) -> str:
+        command = f"clang++ -Xclang -ast-dump -fsyntax-only {source_code_path} | grep -A 150 {entry_point}"
         ast = subprocess.run(command, shell=True, capture_output=True, text=True)
-        ast = ast.stdout
-        return self.clean_ast(ast)
+        ast_output = ast.stdout
+        # If the AST output is more than 150 lines, return empty string
+        if len(ast_output.splitlines()) > 150:
+            return ""  # Return empty string if AST output exceeds 150 lines
+        return self.clean_ast(ast_output)
     
     def clean_ast(self, ast_text):
         # Remove memory addresses (0x followed by hex digits)

@@ -7,7 +7,7 @@ from abstract_syntax_trees.java_ast import JavaAST
 from utils import Logger
 import csv
 import re
-from dacapo_profiling import get_hotspots, find_unit_test
+from flamegraph_profiling import get_hotspots, find_unit_test
 from java_method_profiling import replace_method_body, get_method_source_code, compile_java_project
 
 load_dotenv()
@@ -26,8 +26,11 @@ biojava_root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/biojava/build
 pmd_root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/pmd/build/pmd-core"
 pmd_src_dir = f"{pmd_root_dir}/src/main/java/net/sourceforge/pmd"
 
+graphchi_root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/graphchi/build"
+graphchi_src_dir = f"{graphchi_root_dir}/src/main/java/edu/cmu/graphchi"
+
 class DaCapoBenchmark(Benchmark):
-    def __init__(self, test_method, test_class, test_namespace, test_group, unit_tests, benchmark_name, method_level):
+    def __init__(self, test_method, test_class, test_namespace, test_group, unit_tests, benchmark_name, method_level, methods_list):
         # ex. test_class = PDFNumsArray, test_namespace = pdf, test_group = core, benchmark_name = fop
         self.method_name = test_method
         self.class_name = test_class
@@ -41,6 +44,7 @@ class DaCapoBenchmark(Benchmark):
         self.original_code = None
         self.optimization_iteration = 0
         self.method_level = method_level
+        self.methods_list = methods_list
         self.set_original_code()
         
     def set_original_code(self):
@@ -62,6 +66,11 @@ class DaCapoBenchmark(Benchmark):
                 source_path = f"{pmd_src_dir}/{self.namespace_name}/{self.class_name}.java"
             else:
                 source_path = f"{pmd_src_dir}/{self.class_name}.java"
+        elif self.program == 'graphchi':
+            if self.namespace_name and self.namespace_name != "":
+                source_path = f"{graphchi_src_dir}/{self.namespace_name}/{self.class_name}.java"
+            else:
+                source_path = f"{graphchi_src_dir}/{self.class_name}.java"
 
         if self.method_level:
             compile_java_project()
@@ -111,6 +120,8 @@ class DaCapoBenchmark(Benchmark):
             os.chdir(f"{biojava_root_dir}/biojava-{folder_name}/")
         elif self.program == 'pmd':
             os.chdir(f"{pmd_root_dir}/")
+        elif self.program == 'graphchi':
+            os.chdir(f"{graphchi_root_dir}/")
 
         try:
             result = subprocess.run(["make", "compile", f"BENCHMARK={self.program}"], check=True, capture_output=True, text=True)
@@ -139,9 +150,8 @@ class DaCapoBenchmark(Benchmark):
         code = code.replace("```", "")
         filtered_code = self.remove_java_comments(code)
         return filtered_code
-
-    def compile(self, optimized_code):
-        #write optimized code to file
+    
+    def _get_destination_path_of_source_code(self):
         if self.program == 'fop':
             if self.namespace_name and self.namespace_name != "":
                 destination_path = f"{fop_src_dir}/{self.namespace_name}/{self.class_name}.java"
@@ -160,6 +170,17 @@ class DaCapoBenchmark(Benchmark):
                 destination_path = f"{pmd_src_dir}/{self.namespace_name}/{self.class_name}.java"
             else:
                 destination_path = f"{pmd_src_dir}/{self.class_name}.java"
+        elif self.program == 'graphchi':
+
+            if self.namespace_name and self.namespace_name != "":
+                destination_path = f"{graphchi_src_dir}/{self.namespace_name}/{self.class_name}.java"
+            else:
+                destination_path = f"{graphchi_src_dir}/{self.class_name}.java"
+        return destination_path
+
+    def compile(self, optimized_code):
+        #write optimized code to file
+        destination_path = self._get_destination_path_of_source_code()
         
         # save optimized code to optimized_java.txt first with the format { method_body }
         # then replace the method body with the optimized code
@@ -180,7 +201,9 @@ class DaCapoBenchmark(Benchmark):
             with open(f"{USER_PREFIX}/src/runtime_logs/optimized_java.txt", "w") as file:
                 file.write(optimized_code)
             logger.info(f"optimized_code: {optimized_code}")
-            replace_method_body(destination_path, self.method_name)
+            replace_successfully = replace_method_body(destination_path, self.method_name)
+            if not replace_successfully:
+                return False
         else:
             with open(destination_path, "w") as file:
                 file.write(optimized_code)
@@ -195,6 +218,8 @@ class DaCapoBenchmark(Benchmark):
             os.chdir(f"{biojava_root_dir}/biojava-{folder_name}")
         elif self.program == 'pmd':
             os.chdir(f"{fop_root_dir}")
+        elif self.program == 'graphchi':
+            os.chdir(f"{graphchi_root_dir}")
 
         try:
             result = subprocess.run(
@@ -208,7 +233,6 @@ class DaCapoBenchmark(Benchmark):
             return True
         except subprocess.CalledProcessError as e:
             self.compilation_error = e.stdout + e.stderr  # Capture both stdout and stderr
-            print(e.stderr + e.stdout)
             logger.error(f"Compile optimized code failed: {e}\n")
             logger.error(f"Maven output: {self.compilation_error}")
             return False
@@ -226,6 +250,8 @@ class DaCapoBenchmark(Benchmark):
             os.chdir(f"{biojava_root_dir}/biojava-{folder_name}")
         elif self.program == 'pmd':
             os.chdir(f"{pmd_root_dir}")
+        elif self.program == 'graphchi':
+            os.chdir(f"{graphchi_root_dir}")
 
         for test in self.unit_tests:
             try:
@@ -240,16 +266,14 @@ class DaCapoBenchmark(Benchmark):
                 
                 # Check if the command failed (non-zero return code)
                 if result.returncode != 0:
-                    print(f"Test {test} failed with error:\nstdout: {result.stdout}\nstderr: {result.stderr}")
-                    return False
-                
-                print(f"Test {test} output:\n{result.stdout}")
-                
+                    logger.error(f"Test {test} failed with error:\nstdout: {result.stdout}\nstderr: {result.stderr}")
+                    return False             
             except subprocess.CalledProcessError as e:
-                print(f"Test {test} execution failed: {e}\nstdout: {e.stdout}\nstderr: {e.stderr}")
+                logger.error(f"Test {test} execution failed: {e}\nstdout: {e.stdout}\nstderr: {e.stderr}")
                 return False
         
         # If all tests pass, return True
+        logger.info("All test passed successfully.")
         return True
         
     def measure_energy(self, optimized_code):
@@ -292,6 +316,8 @@ class DaCapoBenchmark(Benchmark):
             os.chdir(f"{biojava_root_dir}/biojava-{folder_name}")
         elif self.program == 'pmd':
             os.chdir(f"{pmd_root_dir}")
+        elif self.program == 'graphchi':
+            os.chdir(f"{graphchi_root_dir}")
 
         try:
             result = subprocess.run(["make", "measure", f"BENCHMARK={self.program}", f"TEST={self.unit_tests[0]}"], check=True, capture_output=True, text=True, timeout=120)
@@ -302,8 +328,7 @@ class DaCapoBenchmark(Benchmark):
             logger.error("Make measure timeout")
             return False
         except subprocess.CalledProcessError as e:
-            print(e.stderr + e.stdout)
-            logger.error(f"Make measure failed: {e}\n")
+            logger.error(f"Make measure failed: {e.stderr + e.stdout}\n")
             #to get the error message, might have to return the error message from here
             return False
     
@@ -409,15 +434,26 @@ class DaCapoBenchmark(Benchmark):
         }
         
         return benchmark_info
+    
+    def generate_flame_report(self, code):
+        return self.methods_list
+    
+    def dynamic_analysis(self, code):
+        return super().dynamic_analysis(code)
+    
+    def restore_last_working_optimized_code(self, code):
+        destination_path = self._get_destination_path_of_source_code()
+        with open(destination_path, "w") as file:
+            file.write(code)
 
 def get_valid_dacapo_classes(application_name):
-    hotspots = get_hotspots(application_name, top_K=50)
+    hotspots = get_hotspots("Dacapo", application_name, top_K=50)
     methods_name = [method for method, count in hotspots]
 
     transformed_data = []
     
     for method in methods_name:
-        print(f"method: {method}")
+        logger.info(f"method: {method}")
         parts = method.split('/')
         test_class, test_method = parts[-1].split('.')  # Split the last part into class and method
 
@@ -442,6 +478,11 @@ def get_valid_dacapo_classes(application_name):
             test_group = "test_group"
             root_path = f"{spring_root_dir}/src/test/java/org/springframework/samples/petclinic"
             unit_test_class_name = f"{test_class}Tests"
+        elif application_name == "graphchi":
+            test_namespace = '/'.join(parts[3:-1])
+            test_group = "test_group"
+            root_path = f"{graphchi_root_dir}/src/test/java/edu/cmu/graphchi"
+            unit_test_class_name = f"Test{test_class}"
 
         unit_tests = find_unit_test(root_path, unit_test_class_name, test_class)
 
@@ -451,7 +492,7 @@ def get_valid_dacapo_classes(application_name):
 
         transformed_data.append((test_method, test_class, test_namespace, test_group, unit_tests))
 
-    print(transformed_data)
+    logger.info(transformed_data)
 
     setup_makefile(application_name)
     return transformed_data
@@ -469,9 +510,12 @@ def setup_makefile(application_name):
     elif application_name == 'pmd':
         folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{application_name}/build"
         subfolders = [f.path for f in os.scandir(folder_path) if f.is_dir() and f.name.startswith('pmd-')]
+    elif application_name == 'graphchi':
+        folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/{application_name}"
+        subfolders = [f.path for f in os.scandir(folder_path) if f.is_dir() and f.name == 'build']
 
     for subfolder in subfolders:
-        print(subfolder)
+        logger.info(subfolder)
         makefile_template = open(f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/makefile_template.mak", "r")
         makefile_content = makefile_template.read()
         makefile_template.close()

@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nint digitSum(string s){\nint sum=0;\n    for (int i=0;i<s.length();i++)\n        if (s[i]>=65 and s[i]<=90)\n            sum+=s[i];\n    return sum;\n}",
+        10.893,
+        0.122,
+        4461725.2,
+        21010.4,
+        8.209,
+        13
+    ],
+    "1": [
+        "#include <iostream> \n#include <string>\nusing namespace std;\n\nint digitSum(string s) {\n    int sum = 0;\n    size_t len = s.length(); \n    for (size_t i = 0; i < len; i++) {\n        if (s[i] >= 'A' && s[i] <= 'Z') { \n            sum += s[i];\n        }\n    }\n    return sum;\n}\n\n",
+        0.954,
+        0.955,
+        0.97,
+        0.993,
+        0.952,
+        15
+    ]
+}

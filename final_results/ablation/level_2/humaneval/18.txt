@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nint how_many_times(string str,string substring){\nint out=0;\n    if (str.length()==0) return 0;\n    for (int i=0;i<=str.length()-substring.length();i++)\n    if (str.substr(i,substring.length())==substring)\n        out+=1;\n    return out;\n}",
+        10.208,
+        0.13,
+        10724029.0,
+        21101.6,
+        7.673,
+        14
+    ],
+    "1": [
+        "#include <iostream>\n#include <string>\nusing namespace std;\n\nint how_many_times(const string &str, const string &substring) {\n    int out = 0;\n    size_t str_len = str.length();\n    size_t sub_len = substring.length();\n    \n    if (sub_len == 0 || str_len < sub_len) return 0;\n\n    for (size_t i = 0; i <= str_len - sub_len; ++i) {\n        \n        if (str.compare(i, sub_len, substring) == 0) {\n            ++out;\n        }\n    }\n    return out;\n}\n\n",
+        1.013,
+        1.062,
+        1.817,
+        1.005,
+        1.063,
+        20
+    ]
+}

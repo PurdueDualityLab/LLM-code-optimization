@@ -11,21 +11,15 @@ load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
 
 env = Environment(loader=FileSystemLoader(f"{USER_PREFIX}/src/llm/llm_prompts"))
-#todo: add back optimization patterns
-def llm_optimize(code, llm_assistant, evaluator_feedback=None, ast=None, flame_report=None, optimization_patterns=None):
-    class Strategy(BaseModel):
-        Strategy: str
-        Pros: str
-        Cons: str
 
+def llm_optimize(code, llm_assistant, evaluator_feedback=None, ast=None, flame_report=None, optimization_patterns=None):
     class OptimizationReasoning(BaseModel):
         analysis: str
         optimization_opportunities: str
-        strategies: list[Strategy]
         selected_strategy: str
         final_code: str
         
-    logger.info(f"flamegraph: {flame_report}")
+    # logger.info(f"flamegraph: {flame_report}")
 
     if not evaluator_feedback or evaluator_feedback == "":
         template = env.get_template("generator_prompt.jinja")
@@ -73,20 +67,20 @@ def llm_optimize(code, llm_assistant, evaluator_feedback=None, ast=None, flame_r
     
     return final_code
 
-def handle_compilation_error(error_message, llm_assistant):
+def handle_error(error_message, llm_assistant):
     class ErrorReasoning(BaseModel):
         analysis: str
         final_code: str
     
-    template = env.get_template("compilation_error_prompt.jinja")
+    template = env.get_template("error_prompt.jinja")
     data = {
         "error_message": error_message
     }
-    compilation_error_prompt = template.render(data)
-    logger.info(f"Prompt: {compilation_error_prompt}")
-    logger.info(f"llm_optimize: Generator LLM Handling Compilation Error ....")
+    error_prompt = template.render(data)
+    logger.info(f"Prompt: {error_prompt}")
+    logger.info(f"llm_optimize: Generator LLM Handling Error ....")
     
-    llm_assistant.add_to_memory("user", compilation_error_prompt)
+    llm_assistant.add_to_memory("user", error_prompt)
     llm_assistant.generate_response(ErrorReasoning)
     response = llm_assistant.get_last_msg()
 
@@ -104,5 +98,4 @@ def handle_compilation_error(error_message, llm_assistant):
         logger.error("Error in llm completion")
         return
 
-    return final_code 
-
+    return final_code

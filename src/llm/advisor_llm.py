@@ -12,22 +12,26 @@ load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
 
 env = Environment(loader=FileSystemLoader(f"{USER_PREFIX}/src/llm/llm_prompts"))
-energy_patterns = f"{USER_PREFIX}/pattern_catalog/energy_patterns.xlsx"
+optimization_patterns = f"{USER_PREFIX}/pattern_catalog/optimization_patterns.xlsx"
 #with open(f"{USER_PREFIX}/src/llm/llm_prompts/advisor_prompt.txt", "r") as file:
 #    advisor_prompt = file.read()
 
 def filter_patterns(llm_assistant, code):
     class Pattern(BaseModel):
+        type: str
         pattern_name: str
         pattern_description: str
         pattern_example: str
+        optimized_metrics: str
+        detection: str
         rank: str
         reasoning: str
 
     class PatternSelection(BaseModel):
         patterns: list[Pattern]
 
-    patterns = get_patterns(file_path=energy_patterns)
+    patterns = get_patterns(file_path=optimization_patterns)
+    #logger.info(f"Unformatted patterns: {patterns}")
 
     template = env.get_template("advisor_prompt.jinja")
     data = {
@@ -49,13 +53,13 @@ def filter_patterns(llm_assistant, code):
         if llm_assistant.is_openai_model() or llm_assistant.is_genai_studio():
             content_dict = json.loads(response["content"])
             patterns = "\n".join(
-                f"{entry['pattern_name']}:\nDescription:{entry['pattern_description']}\nExample:{entry['pattern_example']}\nRank:{entry['rank']}\nReasoning:{entry['reasoning']}"
+                f"Pattern Type:{entry['type']}\nPattern Name:{entry['pattern_name']}\nDescription:{entry['pattern_description']}\nExample:{entry['pattern_example']}\nOptimized Metrics:{'optimized_metrics'}\nDetection:{entry['detection']}\nRank:{entry['rank']}\nReasoning:{entry['reasoning']}"
                 for entry in content_dict["patterns"]
             )
         else:
             patterns = "\n".join(
-                 f"Pattern Name:{entry['pattern_name']}:\nDescription:{entry['pattern_description']}\nExample:{entry['pattern_example']}\nRank:{entry['rank']}\nReasoning:{entry['reasoning']}"
-                 for entry in PatternSelection.model_validate_json(response["content"]).patterns
+                f"Pattern Type:{entry['type']}\nPattern Name:{entry['pattern_name']}\nDescription:{entry['pattern_description']}\nExample:{entry['pattern_example']}\nOptimized Metrics:{'optimized_metrics'}\nDetection:{entry['detection']}\nRank:{entry['rank']}\nReasoning:{entry['reasoning']}"
+                for entry in PatternSelection.model_validate_json(response["content"]).patterns
             )
     except json.JSONDecodeError as e:
         logger.error(f"Failed to decode JSON: {e}")

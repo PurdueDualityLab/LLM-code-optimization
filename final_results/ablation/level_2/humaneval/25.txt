@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nvector<int> factorize(int n){\nvector<int> out={};\n    for (int i=2;i*i<=n;i++)\n        if (n%i==0)\n        {\n            n=n/i;\n            out.push_back(i);\n            i-=1;\n        }\n    out.push_back(n);\n    return out;\n}",
+        9.682,
+        0.118,
+        4358263.4,
+        21094.4,
+        8.453,
+        18
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nvector<int> factorize(int n) {\n    vector<int> out;\n    out.reserve(10);  \n\n    for (int i = 2; i * i <= n; ++i) {\n        while (n % i == 0) {  \n            n /= i;\n            out.push_back(i);\n        }\n    }\n\n    if (n > 1) {  \n        out.push_back(n);\n    }\n\n    return out;\n}",
+        0.826,
+        0.923,
+        0.867,
+        1.004,
+        0.924,
+        22
+    ]
+}

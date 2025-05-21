@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\ndouble poly(vector<double> xs, double x){\n    double sum=0;\n    int i;\n    for (i=0;i<xs.size();i++)\n    {\n        sum+=xs[i]*pow(x,i);\n    }\n    return sum;\n}\n\ndouble find_zero(vector<double> xs){\ndouble ans=0;\n    double value;\n    value=poly(xs,ans);\n    while (abs(value)>1e-6)\n    {\n        double driv=0;\n        for (int i=1;i<xs.size();i++)\n        {\n            driv+=xs[i]*pow(ans,i-1)*i;\n        }\n        ans=ans-value/driv;\n        value=poly(xs,ans);\n    }\n    return ans;\n\n}",
+        10.775,
+        0.121,
+        11007862.4,
+        21117.6,
+        8.268,
+        33
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <math.h>\n#include <vector>\nusing namespace std;\n#include <algorithm>\n#include <stdlib.h>\n\ndouble poly(vector<double> xs, double x) {\n    double sum = 0;\n    double x_power = 1; \n    for (size_t i = 0; i < xs.size(); ++i) {\n        sum += xs[i] * x_power;\n        x_power *= x; \n    }\n    return sum;\n}\n\ndouble find_zero(vector<double> xs) {\n    double ans = 0;\n    double value = poly(xs, ans);\n    double xs_size = xs.size();\n    \n    while (abs(value) > 1e-6) {\n        double driv = 0;\n        double ans_power = 1; \n        for (size_t i = 1; i < xs_size; ++i) {\n            driv += xs[i] * ans_power * i;\n            ans_power *= ans; \n        }\n        ans = ans - value / driv;\n        value = poly(xs, ans); \n    }\n    return ans;\n}",
+        1.0,
+        0.965,
+        1.332,
+        1.005,
+        0.964,
+        34
+    ]
+}

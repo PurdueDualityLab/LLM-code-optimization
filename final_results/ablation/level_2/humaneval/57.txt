@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nbool monotonic(vector<float> l){\nint incr,decr;\n    incr=0;decr=0;\n    for (int i=1;i<l.size();i++)\n    {\n        if (l[i]>l[i-1]) incr=1;\n        if (l[i]<l[i-1]) decr=1;\n    }\n    if (incr+decr==2) return false;\n    return true;\n}",
+        9.607,
+        0.141,
+        38018759.0,
+        21097.6,
+        7.089,
+        17
+    ],
+    "1": [
+        "#include <vector>\nusing namespace std;\n\nbool monotonic(const vector<float>& l) {\n    if (l.size() < 2) return true; \n    int trend = 0; \n    for (int i = 1; i < l.size(); ++i) {\n        if (l[i] > l[i - 1]) {\n            if (trend == -1) return false; \n            trend = 1;\n        } else if (l[i] < l[i - 1]) {\n            if (trend == 1) return false; \n            trend = -1;\n        }\n    }\n    return true;\n}",
+        0.885,
+        1.018,
+        1.06,
+        0.996,
+        1.017,
+        17
+    ]
+}

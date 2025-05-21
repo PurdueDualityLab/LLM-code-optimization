@@ -10,15 +10,15 @@ JAVA = java
 JFLAGS = -d . 
 
 SRCS = *.java
-STOPWATCH_SRC = ../Stopwatch.java
-RANDOM_SRC = ../Random.java
 SORBENCHMARK_CLASS = jnt/scimark2/SORBenchmark
 
 MAIN_CLASS = jnt/scimark2/SOR
 OPTIMIZED_CLASS = jnt.scimark2.SOROptimized
 
 compile:
-	$(JAVAC) $(JFLAGS) $(SRCS) $(RANDOM_SRC)
+	rm -rf *.class
+	rm -rf jnt/
+	$(JAVAC) $(JFLAGS) $(SRCS) ../Random.java ../Stopwatch.java
 
 run:
 	@$(JAVA) $(MAIN_CLASS)
@@ -41,6 +41,3 @@ measure_mflops:
 
 measure_mflops_optimized:
 	@$(JAVA) $(SORBENCHMARK_CLASS) true
-
-clean:
-	rm -rf *.class

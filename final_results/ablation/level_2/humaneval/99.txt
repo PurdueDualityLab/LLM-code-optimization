@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nint closest_integer(string value){\ndouble w;\n    w=atof(value.c_str());\n    return round(w);\n}",
+        9.009,
+        0.121,
+        4845164.6,
+        21080.8,
+        8.245,
+        11
+    ],
+    "1": [
+        "#include <cmath> \n#include <string> \n\nint closest_integer(const std::string& value) {\n    double w = std::stod(value); \n    return static_cast<int>(round(w)); \n}",
+        1.016,
+        1.008,
+        1.096,
+        0.998,
+        1.009,
+        7
+    ]
+}

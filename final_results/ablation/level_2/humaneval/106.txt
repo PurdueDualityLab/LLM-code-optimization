@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nvector<int> f(int n){\nint sum=0,prod=1;\n    vector<int> out={};\n    for (int i=1;i<=n;i++)\n    {\n        sum+=i;\n        prod*=i;\n        if (i%2==0) out.push_back(prod);\n        else out.push_back(sum);\n    } \n    return out;\n}",
+        9.278,
+        0.115,
+        5077043.6,
+        20972.0,
+        8.68,
+        18
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <vector>\n#include <algorithm>\n#include <stdlib.h>\n\nusing namespace std;\n\nvector<int> f(int n) {\n    int sum = 0, prod = 1;\n    vector<int> out;\n    out.reserve(n);  \n    for (int i = 1; i <= n; i++) {\n        sum += i;\n        prod *= i;\n        out.push_back((i % 2 == 0) ? prod : sum);  \n    }\n    return out;\n}",
+        0.98,
+        0.964,
+        1.063,
+        0.991,
+        0.964,
+        18
+    ]
+}

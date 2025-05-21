@@ -10,14 +10,15 @@ JAVA = java
 JFLAGS = -d . 
 
 SRCS = *.java  
-RANDOM_SRC = ../Random.java
 BENCHMARK_CLASS = jnt/scimark2/SparseCompRowBenchmark	
 
 MAIN_CLASS = jnt/scimark2/SparseCompRow
 OPTIMIZED_CLASS = jnt.scimark2.SparseCompRowOptimized
 
 compile:
-	$(JAVAC) $(JFLAGS) $(SRCS) $(RANDOM_SRC) 
+	rm -rf *.class
+	rm -rf jnt/
+	$(JAVAC) $(JFLAGS) $(SRCS) ../Random.java ../Stopwatch.java
 
 run:
 	@$(JAVA) $(MAIN_CLASS)
@@ -40,6 +41,3 @@ measure_mflops:
 
 measure_mflops_optimized:
 	@$(JAVA) $(BENCHMARK_CLASS) true
-
-clean:
-	rm -rf *.class

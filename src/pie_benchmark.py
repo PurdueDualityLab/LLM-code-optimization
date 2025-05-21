@@ -28,7 +28,7 @@ class PIEBenchmark(Benchmark):
         self.set_original_code()
     
     def set_original_code(self):
-        source_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}/{self.program}"
+        source_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('.')[0]}/{self.program}"
         with open(source_path, 'r') as file:
             self.original_code = file.read()
 
@@ -40,7 +40,7 @@ class PIEBenchmark(Benchmark):
 
         # compile
         # Needed for makefiles
-        problem_id = self.program.split('_')[0]
+        problem_id = self.program.split('.')[0]
         os.chdir(f"{USER_PREFIX}/benchmark_pie/{problem_id}")  
         try: 
             result = subprocess.run(
@@ -93,27 +93,26 @@ class PIEBenchmark(Benchmark):
 
     def pre_process(self, code):
         ast = CPPAST("cpp")
-        source_code_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}/ast_{self.program}"
+        source_code_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('.')[0]}/ast_{self.program}"
         with open(source_code_path, 'w') as file:
             file.write(code)
         return ast.create_ast(source_code_path)
 
     def post_process(self, code):
         # Remove code block delimiters
-        code = code.replace("```cpp", "")
-        code = code.replace("```", "")
+        code = code.replace("```cpp", "").replace("```", "")
         # Remove all comments
         code = re.sub(r'//.*?$|/\*.*?\*/', '', code, flags=re.DOTALL | re.MULTILINE)
         return code
 
     def compile(self, optimized_code):
-        logger.info(f"llm_optimize: : writing optimized code to benchmark_pie/{self.program.split('_')[0]}/optimized_{self.program}")
-        destination_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}/optimized_{self.program}"
+        logger.info(f"llm_optimize: : writing optimized code to benchmark_pie/{self.program.split('.')[0]}/optimized_{self.program}")
+        destination_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('.')[0]}/optimized_{self.program}"
         with open(destination_path, "w") as file:
             file.write(optimized_code)
 
         # Needed for makefiles
-        os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}")  
+        os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('.')[0]}")  
         try: 
             result = subprocess.run(
                 ["make", "compile_optimized"], 
@@ -133,10 +132,10 @@ class PIEBenchmark(Benchmark):
 
     def run_tests(self):
         # Needed for makefiles
-        os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}")
+        os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('.')[0]}")
 
         # Iterate through all test cases and perform correctness check
-        problem_id = self.program.split('_')[0]
+        problem_id = self.program.split('.')[0]
         test_case_folder = f"{USER_PREFIX}/benchmark_pie/{problem_id}/test_cases"
         input_files = sorted(glob.glob(f"{test_case_folder}/input.*.txt"))
         output_files = sorted(glob.glob(f"{test_case_folder}/output.*.txt"))
@@ -160,7 +159,7 @@ class PIEBenchmark(Benchmark):
         #load the optimized code and data
         logger.info(f"Iteration {self.optimization_iteration + 1}, run benchmark on the optimized code")
         
-        problem_id = self.program.split('_')[0]
+        problem_id = self.program.split('.')[0]
         test_case_folder = f"{USER_PREFIX}/benchmark_pie/{problem_id}/test_cases"
         input_files = sorted(glob.glob(f"{test_case_folder}/input.*.txt"))
         
@@ -195,28 +194,83 @@ class PIEBenchmark(Benchmark):
         # Find the required benchmark elements
         self.evaluator_feedback_data = self._extract_content(self.energy_data)
 
-    def generate_flame_report(self, optimized):
+    def generate_flame_report(self, code):
         # Needed for makefiles
-        os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}")
+        os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('.')[0]}")
 
         #Generate flame report using test case #0
-        problem_id = self.program.split('_')[0]
-        test_case_folder = f"{USER_PREFIX}/benchmark_pie/{problem_id}/test_cases"
-        input_files = sorted(glob.glob(f"{test_case_folder}/input.*.txt"))        
-        input_file = input_files[0]
+        problem_id = self.program.split('.')[0]
 
-        if optimized:
-            logger.info(f"Generating flame report for optimized program with input file: {input_file}")
-            result = subprocess.run(["make", "generate_flame_report_optimized"], stdin=open(input_file, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
-            flame_report_file = open(f"{USER_PREFIX}/benchmark_pie/{problem_id}/flame_report_optimized.txt", 'r')
-        else:
-            logger.info(f"Generating flame report for original program with input file: {input_file}")
-            result = subprocess.run(["make", "generate_flame_report"], stdin=open(input_file, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='latin-1')
-            flame_report_file = open(f"{USER_PREFIX}/benchmark_pie/{problem_id}/flame_report.txt", 'r')
+        source_code_path = f"{USER_PREFIX}/benchmark_pie/{self.program.split('.')[0]}/flamegraph_{self.program}"
+        with open(source_code_path, 'w') as file:
+            file.write(code)
+            
+        # compile the code
+        try: 
+            result = subprocess.run(
+                ["make", "compile_code_for_flame_report"], 
+                check=True,
+                capture_output=True,
+                text=True
+            )
+            logger.info(f"Compiled code used for flame report successfully.\n")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Compiling code used for flame report failed: {e.stdout + e.stderr}\n")
+            return
+
+        logger.info(f"Generating flame report for original program across all test cases")
         
-        flame_report = flame_report_file.read()
+        try: 
+            result_flame_report = subprocess.run(
+                ["make", "generate_flame_report"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                encoding='latin-1'
+            )
+            logger.info(f"Generate flame_report successfully.\n")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Generate flame_report failed: {e.stdout + e.stderr}\n")
+        
+        try:
+            flame_report_path = f"{USER_PREFIX}/benchmark_pie/{problem_id}/flame_report.txt"
+        except FileNotFoundError:
+            logger.error(f"Flame report file not found: {flame_report_path}\n")
+            return
+        
+        def extract_subtree(input_file_path):
+            with open(input_file_path, 'r') as input_file:
+                lines = input_file.readlines()
+                
+            start_index = 13
+
+            root_line = lines[start_index].strip()
+            root_indent = len(lines[start_index]) - len(lines[start_index].lstrip())
+
+            subtree_lines = [root_line[1:] + '\n']
+
+            for i in range(start_index + 1, len(lines) - 3):
+                line = lines[i].strip()
+
+                if not line:
+                    continue  # Skip blank lines
+                if line.startswith("|--"):
+                    break  # End of subtree
+                else:
+                    if line[1:].lstrip() != "|":
+                        subtree_lines.append(line[1:].lstrip() + '\n')
+
+            return subtree_lines
+        
+        flame_report = extract_subtree(flame_report_path)
+        
+        if flame_report is None:
+            logger.error(f"Flame report is None\n")
+            return
+        
+        logger.info(f"Flame report:\n{flame_report}\n")
+                
         self.evaluator_feedback_data["flame_report"] = flame_report
-        flame_report_file.close()
         return flame_report
         
     def get_energy_data(self):
@@ -228,8 +282,8 @@ class PIEBenchmark(Benchmark):
     def static_analysis(self, optimized_code):
         return super().static_analysis(optimized_code)
 
-    def dynamic_analysis(self, optimized):
-        return super().dynamic_analysis(optimized)
+    def dynamic_analysis(self, code):
+        return super().dynamic_analysis(code)
 
     def _run_program(self, optimized, input_file):
         # Run the make command and capture the output in a variable
@@ -289,7 +343,7 @@ class PIEBenchmark(Benchmark):
 
         #run make measure using make file
         #change current directory to benchmarks/folder to run make file
-        os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('_')[0]}")
+        os.chdir(f"{USER_PREFIX}/benchmark_pie/{self.program.split('.')[0]}")
         current_dir = os.getcwd()
         logger.info(f"Current directory: {current_dir}")
 
@@ -410,33 +464,40 @@ class PIEBenchmark(Benchmark):
 
 def get_valid_pie_programs(num_programs):
     slow_fast_pairs = []
-    selected_problem_ids = set()
     source_code = []
-    invalid_problem_id = ["p02587"] #timeout
 
-    #Extract the first 5 unique problems from the validation set
-    file = open(f"{USER_PREFIX}/benchmark_pie/val.jsonl", "r")
+    file = open(f"{USER_PREFIX}/benchmark_pie/test.jsonl", "r")
+    all_programs = []
     for line in file:
         json_line = json.loads(line)
-        if json_line["problem_id"] not in selected_problem_ids and len(selected_problem_ids) != num_programs and json_line["problem_id"] not in invalid_problem_id and float(json_line["src_agg_runtime"]) >= 0.1:
-            selected_problem_ids.add(json_line["problem_id"])
-            slow_fast_pairs.append(json_line)
-            src_code = json_line["src_code"].replace("\n\n", "\n")
-            source_code.append(src_code)
-        if len(selected_problem_ids) == num_programs:
-            break
+        all_programs.append(json_line)
     file.close()
+    
+    all_programs.sort(key=lambda x: float(x["src_agg_runtime"]), reverse=True)
 
+    # Select the top num_programs programs
+    selected_programs = all_programs[:num_programs]
+    
+    # Extract program details
+    for program in selected_programs:
+        slow_fast_pairs.append(program)
+        src_code = program["src_code"].replace("\n\n", "\n")
+        source_code.append(src_code)
+        print(f"src_agg_runtime: {program['src_agg_runtime']}")
+    
     #Return only the program names
     valid_programs = [f"{pair['problem_id']}_{pair['src_id']}_t{pair['tgt_id'][1:]}.cpp" for pair in slow_fast_pairs]
     setup_benchmarks(valid_programs, source_code)
-
+    #print valid_programs list and src_agg_runtime
+    for i, pair in enumerate(slow_fast_pairs):
+        print(f"{i}: {pair['problem_id']}_{pair['src_id']}_t{pair['tgt_id'][1:]}, {pair['src_agg_runtime']}")
+    exit(0)
     return valid_programs
 
 def setup_benchmarks(valid_programs, source_code):
     for i, program in enumerate(valid_programs):
         #Create the folder if it does not exist
-        folder_path = f"{USER_PREFIX}/benchmark_pie/{program.split('_')[0]}"
+        folder_path = f"{USER_PREFIX}/benchmark_pie/{program.split('.')[0]}"
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
@@ -447,7 +508,7 @@ def setup_benchmarks(valid_programs, source_code):
         
         #Copy the test case folder from all_test_cases/ into the program's folder
         problem_id = program.split('_')[0]
-        test_case_folder_src = f"{USER_PREFIX}/benchmark_pie/all_test_cases/{problem_id}"
+        test_case_folder_src = f"{USER_PREFIX}/benchmark_pie/merged_test_cases/{problem_id}"
         test_case_folder_dest = f"{folder_path}/test_cases"
         if not os.path.exists(test_case_folder_dest):
             shutil.copytree(test_case_folder_src, test_case_folder_dest)
@@ -456,8 +517,19 @@ def setup_benchmarks(valid_programs, source_code):
         makefile_template = open(f"{USER_PREFIX}/benchmark_pie/makefile_template.mak", "r")
         makefile_content = makefile_template.read()
         makefile_content = makefile_content.replace("${FILE_NAME}", program.split('.')[0])
-        makefile_content = makefile_content.replace("${PROBLEM_ID}", problem_id)
+        makefile_content = makefile_content.replace("${PROBLEM_ID}", program)
         makefile_template.close()
         makefile_template = open(f"{folder_path}/Makefile", "w")
         makefile_template.write(makefile_content)
         makefile_template.close()
+ 
+        #Create bash script for each problem to run through all test cases
+        bash_script_template = open(f"{USER_PREFIX}/benchmark_pie/bash_script_template.sh", "r")
+        bash_script_content = bash_script_template.read()
+        bash_script_content = bash_script_content.replace("${EXE_NAME}", f"flamegraph_{program.split('.')[0]}.gpp_run")
+        bash_script_template.close()
+        bash_script = open(f"{folder_path}/run_all_test_cases.sh", "w")
+        bash_script.write(bash_script_content)
+        bash_script.close()
+        os.chmod(f"{folder_path}/run_all_test_cases.sh", 0o755)
+
