@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nbool is_sorted(vector<int> lst){\nfor (int i=1;i<lst.size();i++)\n    {\n        if (lst[i]<lst[i-1]) return false;\n        if (i>=2 and lst[i]==lst[i-1] and lst[i]==lst[i-2]) return false;\n    }\n    return true;\n}",
+        5.027,
+        0.127,
+        5830330.4,
+        20888.8,
+        7.835,
+        14
+    ],
+    "1": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\n\nbool is_sorted(vector<int> lst){\n    for (int i=1; i<lst.size(); i++) {\n        \n        if (lst[i] < lst[i-1]) return false;\n        \n        if (lst[i] == lst[i-1] && i >= 2 && lst[i] == lst[i-2]) return false;\n    }\n    return true;\n}\n\n",
+        1.05,
+        0.989,
+        1.083,
+        0.987,
+        0.993,
+        17
+    ]
+}

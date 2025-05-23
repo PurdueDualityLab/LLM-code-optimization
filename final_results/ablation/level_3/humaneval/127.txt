@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<string>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nstring intersection( vector<int> interval1,vector<int> interval2){\nint inter1,inter2,l,i;\n    inter1=max(interval1[0],interval2[0]);\n    inter2=min(interval1[1],interval2[1]);\n    l=inter2-inter1;\n    if (l<2) return \"NO\";\n    for (i=2;i*i<=l;i++)\n        if (l%i==0) return \"NO\";\n    return \"YES\";\n}",
+        5.84,
+        0.13,
+        4565553.2,
+        21167.2,
+        7.706,
+        17
+    ],
+    "1": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<string>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\n\n\nbool isPrime(int num) {\n    if (num < 2) return false;\n    if (num == 2) return true; \n    if (num % 2 == 0) return false; \n    for (int i = 3; i*i <= num; i += 2) {\n        if (num % i == 0) return false;\n    }\n    return true;\n}\n\nstring intersection(vector<int> interval1, vector<int> interval2) {\n    int inter1, inter2, l;\n    inter1 = max(interval1[0], interval2[0]);\n    inter2 = min(interval1[1], interval2[1]);\n    l = inter2 - inter1;\n    \n    \n    return isPrime(l) ? \"YES\" : \"NO\";\n}",
+        1.211,
+        1.128,
+        0.941,
+        1.01,
+        1.124,
+        28
+    ]
+}

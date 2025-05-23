@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nint add_elements(vector<int> arr,int k){\nint sum=0;\n    for (int i=0;i<k;i++)\n        if( arr[i]>=-99 and arr[i]<=99)\n            sum+=arr[i];\n    return sum;\n}",
+        8.384,
+        0.201,
+        278442172.2,
+        20997.6,
+        4.967,
+        13
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <math.h>\n#include <vector>\nusing namespace std;\n#include <algorithm>\n#include <stdlib.h>\n\nint add_elements(vector<int> arr, int k) {\n    int sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0;\n    int i = 0;\n\n    \n    for (; i <= k - 4; i += 4) {\n        if (arr[i] >= -99 && arr[i] <= 99) sum1 += arr[i];\n        if (arr[i + 1] >= -99 && arr[i + 1] <= 99) sum2 += arr[i + 1];\n        if (arr[i + 2] >= -99 && arr[i + 2] <= 99) sum3 += arr[i + 2];\n        if (arr[i + 3] >= -99 && arr[i + 3] <= 99) sum4 += arr[i + 3];\n    }\n\n    \n    for (; i < k; ++i) {\n        if (arr[i] >= -99 && arr[i] <= 99) sum1 += arr[i];\n    }\n\n    return sum1 + sum2 + sum3 + sum4;\n}\n\n",
+        1.032,
+        0.903,
+        0.998,
+        0.994,
+        0.904,
+        27
+    ]
+}

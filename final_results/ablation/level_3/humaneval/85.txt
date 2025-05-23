@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nint add(vector<int> lst){\nint sum=0;\n    for (int i=0;i*2+1<lst.size();i++)\n        if (lst[i*2+1]%2==0) sum+=lst[i*2+1];\n    return sum;\n}",
+        4.766,
+        0.126,
+        4239795.2,
+        21130.4,
+        7.896,
+        12
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <vector>\nusing namespace std;\n\nint add(const vector<int>& lst) {\n    int sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0;\n    int i;\n    \n    \n    for (i = 0; i + 7 < lst.size(); i += 8) {\n        if (lst[i + 1] % 2 == 0) sum1 += lst[i + 1];\n        if (lst[i + 3] % 2 == 0) sum2 += lst[i + 3];\n        if (lst[i + 5] % 2 == 0) sum3 += lst[i + 5];\n        if (lst[i + 7] % 2 == 0) sum4 += lst[i + 7];\n    }\n    \n    \n    for (; i + 1 < lst.size(); i += 2) {\n        if (lst[i + 1] % 2 == 0) sum1 += lst[i + 1];\n    }\n    \n    return sum1 + sum2 + sum3 + sum4;\n}",
+        0.918,
+        1.009,
+        0.954,
+        1.002,
+        1.013,
+        23
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nstring filp_case(string str){\nstring out=\"\";\n    for (int i=0;i<str.length();i++)\n    {\n        char w=str[i];\n        if (w>=97 and w<=122) {w-=32;}\n        else\n            if (w>=65 and w<=90){ w+=32;}\n        out=out+w;\n    }\n    return out;\n}",
+        5.032,
+        0.139,
+        53805147.2,
+        20924.0,
+        7.204,
+        18
+    ],
+    "1": [
+        "#include <iostream>\n#include <string>\nusing namespace std;\n\nstring filp_case(string str) {\n    string out;\n    out.reserve(str.length());  \n    for (int i = 0; i < str.length(); i++) {\n        char w = str[i];\n        if (w >= 'a' && w <= 'z') {\n            w -= ('a' - 'A');\n        } else if (w >= 'A' && w <= 'Z') {\n            w += ('a' - 'A');\n        }\n        out += w;\n    }\n    return out;\n}\n\n",
+        1.082,
+        1.029,
+        8.949,
+        0.993,
+        1.026,
+        19
+    ]
+}

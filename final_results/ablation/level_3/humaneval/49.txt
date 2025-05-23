@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nint modp(int n,int p){\nint out=1;\n    for (int i=0;i<n;i++)\n        out=(out*2)%p;\n    return out;\n}",
+        4.94,
+        0.126,
+        4046901.6,
+        21124.0,
+        7.941,
+        11
+    ],
+    "1": [
+        "#include<stdio.h>\n#include<math.h>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\n\nint modp(int n, int p) {\n    int result = 1;\n    int base = 2;\n    while (n > 0) {\n        \n        if (n % 2 == 1) {\n            result = (result * base) % p;\n        }\n        \n        base = (base * base) % p;\n        n = n / 2;\n    }\n    return result;\n}",
+        1.043,
+        0.99,
+        1.519,
+        0.997,
+        0.988,
+        20
+    ]
+}

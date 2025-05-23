@@ -162,7 +162,9 @@ class HumanEvalBenchmark(Benchmark):
     def measure_energy(self, optimized_code):
         logger.info(f"Iteration {self.optimization_iteration + 1}, run benchmark on the optimized code")
                 
-        self._run_rapl(optimized=True)
+        measure_success = self._run_rapl(optimized=True)
+        if not measure_success:
+            return False
         energy, latency, cpu_cycles, peak_memory, throughput = self._compute_avg()
 
         original_data = self.energy_data[0]
@@ -185,10 +187,13 @@ class HumanEvalBenchmark(Benchmark):
 
         try:
             cmd = ["make", "measure_optimized" if optimized else "measure"]
-            subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=120)
+            subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=180)
             return True
         except subprocess.CalledProcessError as e:
             logger.error(f"Make measure failed: {e.stderr}")
+            return False
+        except subprocess.TimeoutExpired:
+            logger.error("Make measure timeout")
             return False
 
     def _compute_avg(self):
@@ -359,7 +364,7 @@ def get_valid_humaneval_programs(num_programs):
         
     valid_programs = []
     
-    for entry in data:
+    for entry in data[:num_programs]:
         id = entry['task_id']
         folder_path = f"{USER_PREFIX}/benchmark_human_eval/{id}"
         if not os.path.exists(folder_path):

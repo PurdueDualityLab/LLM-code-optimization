@@ -212,17 +212,25 @@ def extract_metrics():
         reader = csv.reader(file)
         for index, row in enumerate(reader):
             try:
-                val = float(row[2])
-                values.append(val)
+                energy = float(row[1])
+                latency = float(row[2])
+                cpu_cycles = float(row[3])
+                peak_memory = float(row[4])
+                values.append((energy, latency, cpu_cycles, peak_memory))
             except (IndexError, ValueError):
                 continue
 
     if not values:
         return -1
-
-    avg_latency = sum(values) / len(values)
+    avg_energy = sum(x[0] for x in values) / len(values)
+    avg_latency = sum(x[1] for x in values) / len(values)
+    avg_cpu_cycles = sum(x[2] for x in values) / len(values)
+    avg_peak_memory = sum(x[3] for x in values) / len(values)
+    logger.info(f"Average energy: {avg_energy}")
+    logger.info(f"Average CPU cycles: {avg_cpu_cycles}")
+    logger.info(f"Average peak memory: {avg_peak_memory}")
     logger.info(f"Average latency: {avg_latency}")
-    return avg_latency
+    return avg_energy, avg_latency, avg_cpu_cycles, avg_peak_memory
 
 def round_1(function_code: str):
     template = env.get_template("round_1.jinja")
@@ -359,32 +367,32 @@ def main():
             final_code = round_1_optimized_code
         
         # measure final performance
-        optimized_latency = measure_performance(id, final_code, stress_test_code, optimized=True)
-        original_latency = measure_performance(id, function_code, stress_test_code, optimized=False)
-        results.append((id, original_latency / optimized_latency))
+        optimized_energy, optimized_latency, optimized_cpu_cycles, optimized_memory = measure_performance(id, final_code, stress_test_code, optimized=True)
+        original_energy, original_latency, original_cpu_cycles, original_memory = measure_performance(id, function_code, stress_test_code, optimized=False)
+        results.append((id, original_energy / optimized_energy, original_latency / optimized_latency, original_cpu_cycles / optimized_cpu_cycles, original_memory / optimized_memory))
         
     # Save results to CSV
     with open(f"{USER_PREFIX}/profcodegen_results.csv", "w") as f:
         writer = csv.writer(f)
-        writer.writerow(["Id", "Speedup"])
+        writer.writerow(["Id", "Energy", "Latency", "CPU Cycles", "Peak Memory"])
         writer.writerows(results)
         
-    # Compute average improvements across all entries
-    if results:
-        total = len(results)
-        correct = sum(1 for _, s in results if s != -1)
-        optimized = sum(1 for _, s in results if s >= 1.1)
-        speedups = [s for _, s in results if s != -1]
-        avg_speedup = round(sum(speedups) / len(speedups), 3) if speedups else 0
+    # # Compute average improvements across all entries
+    # if results:
+    #     total = len(results)
+    #     correct = sum(1 for _, s in results if s != -1)
+    #     optimized = sum(1 for _, s in results if s >= 1.1)
+    #     speedups = [s for _, s in results if s != -1]
+    #     avg_speedup = round(sum(speedups) / len(speedups), 3) if speedups else 0
 
-        percent_correct = round(100 * correct / total, 2)
-        percent_optimized = round(100 * optimized / total, 2)
+    #     percent_correct = round(100 * correct / total, 2)
+    #     percent_optimized = round(100 * optimized / total, 2)
 
-        logger.info(f"% correct: {percent_correct}%")
-        logger.info(f"% optimized: {percent_optimized}%")
-        logger.info(f"Average speedup (correct only, min 1x): {avg_speedup}x")
-    else:
-        logger.error("No valid results to compute statistics.")
+    #     logger.info(f"% correct: {percent_correct}%")
+    #     logger.info(f"% optimized: {percent_optimized}%")
+    #     logger.info(f"Average speedup (correct only, min 1x): {avg_speedup}x")
+    # else:
+    #     logger.error("No valid results to compute statistics.")
             
     # Clean up
     for entry in dataset:

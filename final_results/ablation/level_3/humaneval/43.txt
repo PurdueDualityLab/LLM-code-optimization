@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nbool pairs_sum_to_zero(vector<int> l){\nfor (int i=0;i<l.size();i++)\n    for (int j=i+1;j<l.size();j++)\n    if (l[i]+l[j]==0) return true;\n    return false;\n}",
+        16.806,
+        0.348,
+        992198459.2,
+        21070.4,
+        2.876,
+        12
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <vector>\n#include <unordered_set>\nusing namespace std;\n\nbool pairs_sum_to_zero(vector<int> l) {\n    unordered_set<int> complements;\n    for (int num : l) {\n        if (complements.find(-num) != complements.end()) {\n            return true;\n        }\n        complements.insert(num);\n    }\n    return false;\n}\n\n\n\n",
+        3.569,
+        2.404,
+        23.982,
+        1.002,
+        2.399,
+        18
+    ]
+}

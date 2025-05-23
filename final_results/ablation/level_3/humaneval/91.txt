@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nint is_bored(string S){\nbool isstart=true;\n    bool isi=false;\n    int sum=0;\n    for (int i=0;i<S.length();i++)\n    {\n        if (S[i]==' ' and isi) {isi=false; sum+=1;}\n        if (S[i]=='I' and isstart) {isi=true;  }\n        else isi=false;   \n        if (S[i]!=' ') { isstart=false;}\n        if (S[i]=='.' or S[i]=='?' or S[i]=='!') isstart=true;\n    }\n    return sum;\n}",
+        4.815,
+        0.128,
+        8499564.2,
+        21038.4,
+        7.82,
+        20
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <string>\nusing namespace std;\n\nint is_bored(const string& S) {\n    bool isstart = true;\n    bool isi = false;\n    int sum = 0;\n    \n    for (char c : S) {\n        if (c == ' ') {\n            if (isi) {\n                sum++;\n                isi = false;\n            }\n        } else if (c == 'I' && isstart) {\n            isi = true;\n        } else {\n            isi = false;\n            isstart = false;\n        }\n        \n        if (c == '.' || c == '?' || c == '!') {\n            isstart = true;\n        }\n    }\n    \n    return sum;\n}\n\n",
+        1.05,
+        0.977,
+        1.192,
+        1.001,
+        0.974,
+        30
+    ]
+}

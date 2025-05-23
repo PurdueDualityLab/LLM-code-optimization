@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nbool is_palindrome(string text){\nstring pr(text.rbegin(),text.rend());\n    return pr==text;\n}",
+        4.597,
+        0.125,
+        8798885.4,
+        21014.4,
+        7.992,
+        10
+    ],
+    "1": [
+        "#include <string>\nusing namespace std;\n\nbool is_palindrome(const string& text) {\n    int left = 0;\n    int right = text.size() - 1;\n    while (left < right) {\n        if (text[left] != text[right]) {\n            return false;\n        }\n        left++;\n        right--;\n    }\n    return true;\n}",
+        0.926,
+        0.956,
+        1.704,
+        1.001,
+        0.955,
+        15
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<string>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nint count_upper(string s){\nstring uvowel=\"AEIOU\";\n    int count=0;\n    for (int i=0;i*2<s.length();i++)\n    if (find(uvowel.begin(),uvowel.end(),s[i*2])!=uvowel.end())\n        count+=1;\n    return count;\n}",
+        5.522,
+        0.121,
+        5285721.4,
+        21001.6,
+        8.285,
+        14
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <string>\n#include <unordered_set> \n\nusing namespace std;\n\nint count_upper(const string& s) {\n    unordered_set<char> uvowel = {'A', 'E', 'I', 'O', 'U'}; \n    int count = 0;\n    int len = s.length(); \n    for (int i = 0; i < len; i += 2) { \n        if (uvowel.find(s[i]) != uvowel.end()) {\n            count += 1;\n        }\n    }\n    return count;\n}",
+        1.239,
+        0.961,
+        1.033,
+        1.002,
+        0.957,
+        17
+    ]
+}

@@ -2,8 +2,10 @@ You are tasked with optimizing the following code to improve its performance. Th
 
 Task Instructions:
 - Analyze the code: Examine the provided code in detail.
-- Choose the most effective optimization.
-- Implement the chosen optimization: Rewrite the code with the chosen optimization strategies, ensuring:
+- Analyze the optimization patterns:
+    - The provided optimization patterns were deemed relevant to the code, consider them when generating optimization strategies.
+- Choose the most effective optimization stategy.
+- Implement the chosen optimization strategy: Rewrite the code with the chosen optimization strategies, ensuring:
     - The optimized code produces the same output as the original code for all valid inputs.
 - Output Requirements:
     - Begin with a step-by-step analysis of the original code and identify inefficiencies.
@@ -21,4 +23,9 @@ Here is the AST of the source code:
 {% if flame_report %}
 Here is a textual representation of the flame graph for the current source code:
 {{ flame_report }}
+{% endif %}
+
+{% if optimization_patterns %}
+Here are some relevant optimization patterns:
+{{ optimization_patterns }}
 {% endif %}

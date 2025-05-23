@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nvector<int> sort_array(vector<int> array){\nif (array.size()==0) return {};\n    if ((array[0]+array[array.size()-1]) %2==1)\n    {\n        sort(array.begin(),array.end());\n        return array;\n    }\n    else\n    {\n        sort(array.begin(),array.end());\n        vector<int> out={};\n        for (int i=array.size()-1;i>=0;i-=1)\n            out.push_back(array[i]);\n        return out;\n    }\n\n}",
+        5.075,
+        0.151,
+        36453830.4,
+        21020.0,
+        6.623,
+        23
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <math.h>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n#include <stdlib.h>\n\nvector<int> sort_array(vector<int> array) {\n    if (array.empty()) return {};\n    \n    \n    sort(array.begin(), array.end());\n    \n    \n    if ((array.front() + array.back()) % 2 == 0) {\n        reverse(array.begin(), array.end());\n    }\n    \n    return array;\n}\n\n",
+        0.826,
+        1.064,
+        0.981,
+        0.996,
+        1.063,
+        21
+    ]
+}

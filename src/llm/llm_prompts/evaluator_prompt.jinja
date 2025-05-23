@@ -1,26 +1,30 @@
-You are a code optimization expert. Evaluate the following current code snippet in terms of time complexity, space complexity, energy usage, and performance, considering both the original and optimized code. Please provide a comprehensive analysis of the code's efficiency and suggest further optimizations. Your feedback should include:
+You are a code optimization expert. Analyze the following code snippets from a performance engineering perspective. Your evaluation should be comprehensive and structured, covering:
 
-1. **Current Code Behavior**:
-- Explain how the current code functions, highlighting its design, algorithm choices, and any assumptions it makes.
+1. **Code Functionality**:
+- Summarize what the current code does, including key algorithmic strategies, and design choices.
     
-2. **Inefficiencies and Bottlenecks**:
-- Identify potential inefficiencies in terms of time complexity (e.g., algorithm choice) and space complexity (e.g., memory usage).
-- Highlight any specific patterns or functions that are likely to consume excessive computational resources.
-  
+2. **Performance Analysis**:
+- Evaluate the time complexity and space complexity of the current implementation.
+- Identify performance bottlenecks, such as expensive operations, nested loops, memory-intensive data structures, or inefficient control flow.
+
 3. **Comparison to Original Code**:
-- Compare the current code with the original code. Highlight key differences that contribute to code efficiency, such as:
-    - Use of more efficient data structures or algorithms.
-    - Modifications that reduce resource-intensive operations.
-    - Opportunities to utilize hardware more efficiently (e.g., parallelism, vectorization, etc.).
+- Compare the current code with the original code. Highlight changes that contribute to performance gains or regressions.
 
 4. **Improvement Suggestions**:
-- Provide step-by-step suggestions for improving the current code and improving runtime performance.
-- Suggest any algorithmic improvements or refactorings that could help improve performance. Recommend alternative approaches (e.g., swapping to a more resource-efficient algorithm).
-- Provide concrete code examples of how the current code could be refactored to reduce resource usage.
-
-5. **Best Practices**:
-- Suggest best practices and coding patterns for efficient code, particularly focusing on areas where the current code deviates from these principles.
-- Point out potential areas where resource could be saved, such as reducing CPU-bound tasks, optimizing memory usage, or minimizing I/O operations.
+- Provide specific, actionable suggestions to further optimize the code, including:
+    - Replacing inefficient algorithms or data structures.
+    - Reducing nested loops or redundant computations.
+    - Identifying opportunities for parallelism:
+        - Assume the code is run on an Intel server with:
+            - 18 physical cores, 36 logical threads.
+            - SIMD support: AVX, AVX2, and AVX-512
+            - 24.8MB shared L3 cache and 18MB L2 cache
+        - Assess
+            - Where multi-threading (e.g., loop-level, task-level) can accelerate performance
+            - Where SIMD/vectorization can replace scalar computations
+    - Apply dynamic programming or memoization to avoid redundant calculations.
+    - Optimizing I/O, memory allocation, or synchronization patterns.
+    - Include concrete code examples or pseudocode where appropriate to demonstrate improvements.
 
 Here is the original code snippet:
 
@@ -31,9 +35,6 @@ Here is the code snippiets that you are tasked to optimize:
 {{ current_source_code }}
 
 Average speedup: {{ current_avg_runtime }}
-
-Here is the AST of the source code:
-{{ ast }}
 
 {% if flame_report %}
 Here is a textual representation of the flame graph for the current source code:

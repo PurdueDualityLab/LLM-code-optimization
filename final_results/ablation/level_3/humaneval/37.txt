@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nvector<float> sort_even(vector<float> l){\nvector<float> out={};\n    vector<float> even={};\n    for (int i=0;i*2<l.size();i++)\n        even.push_back(l[i*2]);\n    sort(even.begin(),even.end());\n    for (int i=0;i<l.size();i++)\n    {\n        if (i%2==0) out.push_back(even[i/2]);\n        if (i%2==1) out.push_back(l[i]);\n    }\n    return out;\n}",
+        4.734,
+        0.137,
+        6448625.6,
+        21024.8,
+        7.285,
+        19
+    ],
+    "1": [
+        "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nvector<float> sort_even(vector<float> l) {\n    \n    for (size_t i = 0; i < l.size(); i += 2) {\n        for (size_t j = i + 2; j < l.size(); j += 2) {\n            if (l[i] > l[j]) {\n                swap(l[i], l[j]);\n            }\n        }\n    }\n    return l;\n}\n\n\n",
+        0.971,
+        1.084,
+        0.951,
+        0.999,
+        1.084,
+        18
+    ]
+}

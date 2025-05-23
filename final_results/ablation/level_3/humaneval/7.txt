@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<vector>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<math.h>\n#include<stdlib.h>\nvector<string> filter_by_substring(vector<string> strings, string substring){\nvector<string> out;\n    for (int i=0;i<strings.size();i++)\n    {\n        if (strings[i].find(substring)!=strings[i].npos)\n        out.push_back(strings[i]);\n    }\n    return out;\n}",
+        4.553,
+        0.127,
+        15297063.2,
+        21048.0,
+        7.865,
+        16
+    ],
+    "1": [
+        "#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\nvector<string> filter_by_substring(const vector<string>& strings, const string& substring) {\n    vector<string> out;\n    out.reserve(strings.size()); \n    for (const auto& str : strings) {\n        if (str.find(substring) != string::npos) {\n            out.push_back(str);\n        }\n    }\n    return out;\n}\n\n",
+        1.005,
+        0.92,
+        1.143,
+        0.996,
+        0.92,
+        17
+    ]
+}

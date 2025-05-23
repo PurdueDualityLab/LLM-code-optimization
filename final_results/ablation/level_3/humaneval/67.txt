@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nint fruit_distribution(string s,int n){\nstring num1=\"\",num2=\"\";\n    int is12;\n    is12=0;\n    for (int i=0;i<s.size();i++)\n        \n        if (s[i]>=48 and s[i]<=57)\n        {\n            if (is12==0) num1=num1+s[i];\n            if (is12==1) num2=num2+s[i];\n        }\n        else\n          if (is12==0 and num1.length()>0) is12=1;\n    return n-atoi(num1.c_str())-atoi(num2.c_str());\n\n}",
+        4.731,
+        0.123,
+        4356232.8,
+        21005.6,
+        8.093,
+        22
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <ctype.h>\n\nint fruit_distribution(const char* s, int n) {\n    int num1 = 0, num2 = 0;\n    int* current_num = &num1;\n\n    for (int i = 0; s[i] != '\\0'; i++) {\n        if (isdigit(s[i])) {\n            *current_num = (*current_num * 10) + (s[i] - '0');\n        } else if (*current_num > 0) {\n            current_num = &num2;\n        }\n    }\n\n    return n - num1 - num2;\n}\n\n",
+        1.083,
+        0.985,
+        1.477,
+        0.997,
+        0.988,
+        18
+    ]
+}
