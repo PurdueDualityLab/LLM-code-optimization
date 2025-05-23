@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nbool is_simple_power(int x,int n){\nint p=1,count=0;\n    while (p<=x and count<100)\n    {\n        if (p==x) return true;\n        p=p*n;count+=1;\n    }\n    return false;\n}",
+        5.027,
+        0.129,
+        2610976.2,
+        21128.0,
+        7.737,
+        14
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <cmath> \n\nbool is_simple_power(int x, int n) {\n    if (n <= 1) return x == 1; \n    \n    double log_result = log(x) / log(n);\n    \n    return floor(log_result) == log_result;\n}",
+        0.959,
+        1.097,
+        0.917,
+        1.0,
+        1.097,
+        10
+    ]
+}

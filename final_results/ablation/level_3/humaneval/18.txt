@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nint how_many_times(string str,string substring){\nint out=0;\n    if (str.length()==0) return 0;\n    for (int i=0;i<=str.length()-substring.length();i++)\n    if (str.substr(i,substring.length())==substring)\n        out+=1;\n    return out;\n}",
+        4.825,
+        0.137,
+        10798718.4,
+        21112.8,
+        7.286,
+        14
+    ],
+    "1": [
+        "#include <iostream>\n#include <vector>\n#include <string>\nusing namespace std;\n\n\nvoid computeLPSArray(const string &pat, int M, vector<int> &lps) {\n    int len = 0;\n    lps[0] = 0;\n    int i = 1;\n    while (i < M) {\n        if (pat[i] == pat[len]) {\n            len++;\n            lps[i] = len;\n            i++;\n        } else {\n            if (len != 0) {\n                len = lps[len - 1];\n            } else {\n                lps[i] = 0;\n                i++;\n            }\n        }\n    }\n}\n\n\nint how_many_times(const string &str, const string &substring) {\n    int N = str.length();\n    int M = substring.length();\n\n    if (M == 0 || N == 0 || M > N) return 0;\n\n    vector<int> lps(M);\n    computeLPSArray(substring, M, lps);\n\n    int i = 0;\n    int j = 0;\n    int count = 0;\n    while (i < N) {\n        if (substring[j] == str[i]) {\n            j++;\n            i++;\n        }\n\n        if (j == M) {\n            count++;\n            j = lps[j - 1];\n        } else if (i < N && substring[j] != str[i]) {\n            if (j != 0)\n                j = lps[j - 1];\n            else\n                i++;\n        }\n    }\n    return count;\n}\n\n",
+        1.057,
+        1.128,
+        1.807,
+        1.007,
+        1.128,
+        58
+    ]
+}

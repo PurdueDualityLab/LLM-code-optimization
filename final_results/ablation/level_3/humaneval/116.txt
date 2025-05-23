@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nvector<int> sort_array(vector<int> arr){\nvector<int> bin={};\n    int m;\n\n    for (int i=0;i<arr.size();i++)\n    {\n        int b=0,n=abs(arr[i]);\n        while (n>0)\n        {\n            b+=n%2;n=n/2;\n        }\n        bin.push_back(b);\n    }\n    for (int i=0;i<arr.size();i++)\n    for (int j=1;j<arr.size();j++)\n    if (bin[j]<bin[j-1] or (bin[j]==bin[j-1] and arr[j]<arr[j-1]))\n    {\n        m=arr[j];arr[j]=arr[j-1];arr[j-1]=m;\n        m=bin[j];bin[j]=bin[j-1];bin[j-1]=m;\n    }\n    return arr;\n}",
+        365.977,
+        6.046,
+        25713427716.2,
+        21118.4,
+        0.165,
+        28
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <math.h>\n#include <vector>\n#include <algorithm>\n#include <stdlib.h>\n\nusing namespace std;\n\n\nint count_ones(int n) {\n    n = abs(n);\n    int count = 0;\n    while (n) {\n        count += n & 1;  \n        n >>= 1;         \n    }\n    return count;\n}\n\n\nbool compare(int a, int b) {\n    int countA = count_ones(a);\n    int countB = count_ones(b);\n    if (countA == countB) {\n        return a < b;\n    }\n    return countA < countB;\n}\n\nvector<int> sort_array(vector<int> arr) {\n    sort(arr.begin(), arr.end(), compare);\n    return arr;\n}\n\n\n",
+        62.943,
+        42.026,
+        296.54,
+        1.005,
+        42.081,
+        35
+    ]
+}

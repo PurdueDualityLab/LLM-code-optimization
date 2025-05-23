@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<math.h>\n#include<stdlib.h>\nstring fix_spaces(string text){\nstring out=\"\";\n    int spacelen=0;\n    for (int i=0;i<text.length();i++)\n    if (text[i]==' ') spacelen+=1;\n    else\n    {\n        if (spacelen==1) out=out+'_';\n        if (spacelen==2) out=out+\"__\";\n        if (spacelen>2) out=out+'-';\n        spacelen=0;\n        out=out+text[i];\n    }\n    if (spacelen==1) out=out+'_';\n    if (spacelen==2) out=out+\"__\";\n    if (spacelen>2) out=out+'-';\n    return out;\n}",
+        8.042,
+        0.194,
+        229981863.0,
+        21091.2,
+        5.15,
+        24
+    ],
+    "1": [
+        "#include <iostream>\n#include <string>\n#include <sstream>\n\nusing namespace std;\n\nstring fix_spaces(const string& text) {\n    ostringstream out;\n    int spacelen = 0;\n    for (char c : text) {\n        if (c == ' ') {\n            spacelen++;\n        } else {\n            if (spacelen == 1) out << '_';\n            else if (spacelen == 2) out << \"__\";\n            else if (spacelen > 2) out << '-';\n            out << c;\n            spacelen = 0;\n        }\n    }\n    \n    if (spacelen == 1) out << '_';\n    else if (spacelen == 2) out << \"__\";\n    else if (spacelen > 2) out << '-';\n    return out.str();\n}\n\n",
+        1.523,
+        1.457,
+        24.777,
+        1.006,
+        1.457,
+        27
+    ]
+}

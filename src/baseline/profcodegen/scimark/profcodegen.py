@@ -168,28 +168,57 @@ def measure_performance(program: str, optimized: bool):
     try:
         cmd = ["make", "measure_optimized" if optimized else "measure"]
         subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=180)
-        return extract_metrics()
+        return extract_metrics(optimized)
     except subprocess.CalledProcessError as e:
         logger.error(f"Make measure failed: {e.stderr}")
         return 0
 
-def extract_metrics():
+def extract_metrics(optimized):
     values = []
     with open(RUNTIME_LOG, mode='r') as file:
         reader = csv.reader(file)
         for index, row in enumerate(reader):
             try:
-                val = float(row[2])
-                values.append(val)
+                energy = float(row[1])
+                latency = float(row[2])
+                cpu_cycles = float(row[3])
+                peak_memory = float(row[4])
+                values.append((energy, latency, cpu_cycles, peak_memory))
             except (IndexError, ValueError):
                 continue
 
     if not values:
         return -1
-
-    avg_latency = sum(values) / len(values)
+    avg_energy = sum(x[0] for x in values) / len(values)
+    avg_latency = sum(x[1] for x in values) / len(values)
+    avg_cpu_cycles = sum(x[2] for x in values) / len(values)
+    avg_peak_memory = sum(x[3] for x in values) / len(values)
+    logger.info(f"Average energy: {avg_energy}")
+    logger.info(f"Average CPU cycles: {avg_cpu_cycles}")
+    logger.info(f"Average peak memory: {avg_peak_memory}")
     logger.info(f"Average latency: {avg_latency}")
-    return avg_latency
+    
+     # get mflops
+    try:
+        cmd = ["make", "measure_mflops_optimized" if optimized else "measure_mflops"]
+        measure_result = subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=180)
+        logger.info(f"Mlops measure successfully.\n")
+        # Filter out the unwanted lines
+        mflops = "\n".join(
+            line for line in measure_result.stdout.splitlines()
+            if not (line.startswith("make[") or line.startswith("./"))
+        )
+        mflops = mflops.split("make")[0]
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Mflops measure failed: {e}\n")
+        mflops = 0
+    except subprocess.TimeoutExpired:
+        logger.error("Mflops measure timeout")
+        mflops = 0
+        
+    logger.info(f"Mflops: {mflops}")
+            
+    return avg_energy, avg_latency, avg_cpu_cycles, avg_peak_memory, float(mflops)
 
 def round_1(function_code: str):
     template = env.get_template("round_1.jinja")
@@ -324,32 +353,34 @@ def main():
             logger.error(f"Compilation failed for final code")
             results.append((program, -1))
             continue
-        optimized_latency = measure_performance(program, optimized=True)
-        original_latency = measure_performance(program, optimized=False)
-        results.append((program, original_latency / optimized_latency))
+        
+        # measure final performance
+        optimized_energy, optimized_latency, optimized_cpu_cycles, optimized_memory, optimized_mflops = measure_performance(program, optimized=True)
+        original_energy, original_latency, original_cpu_cycles, original_memory, original_mflops = measure_performance(program, optimized=False)
+        results.append((program, original_energy / optimized_energy, original_latency / optimized_latency, original_cpu_cycles / optimized_cpu_cycles, original_memory / optimized_memory, optimized_mflops / original_mflops))
         
     # Save results to CSV
     with open(f"{USER_PREFIX}/profcodegen_results.csv", "w") as f:
         writer = csv.writer(f)
-        writer.writerow(["program", "Speedup"])
+        writer.writerow(["Id", "Energy", "Latency", "CPU Cycles", "Peak Memory", "Mflops"])
         writer.writerows(results)
         
-    # Compute average improvements across all entries
-    if results:
-        total = len(results)
-        correct = sum(1 for _, s in results if s != -1)
-        optimized = sum(1 for _, s in results if s >= 1.1)
-        speedups = [max(1, s) for _, s in results if s != -1]
-        avg_speedup = round(sum(speedups) / len(speedups), 3) if speedups else 0
+    # # Compute average improvements across all entries
+    # if results:
+    #     total = len(results)
+    #     correct = sum(1 for _, s in results if s != -1)
+    #     optimized = sum(1 for _, s in results if s >= 1.1)
+    #     speedups = [max(1, s) for _, s in results if s != -1]
+    #     avg_speedup = round(sum(speedups) / len(speedups), 3) if speedups else 0
 
-        percent_correct = round(100 * correct / total, 2)
-        percent_optimized = round(100 * optimized / total, 2)
+    #     percent_correct = round(100 * correct / total, 2)
+    #     percent_optimized = round(100 * optimized / total, 2)
 
-        logger.info(f"% correct: {percent_correct}%")
-        logger.info(f"% optimized: {percent_optimized}%")
-        logger.info(f"Average speedup (correct only, min 1x): {avg_speedup}x")
-    else:
-        logger.error("No valid results to compute statistics.")
+    #     logger.info(f"% correct: {percent_correct}%")
+    #     logger.info(f"% optimized: {percent_optimized}%")
+    #     logger.info(f"Average speedup (correct only, min 1x): {avg_speedup}x")
+    # else:
+    #     logger.error("No valid results to compute statistics.")
         
 if __name__ == "__main__":
     main()

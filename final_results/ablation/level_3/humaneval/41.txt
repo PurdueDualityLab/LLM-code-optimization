@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nint car_race_collision(int n){\nreturn n*n;\n}",
+        5.166,
+        0.119,
+        2704547.2,
+        21042.4,
+        8.364,
+        8
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <math.h>\n#include <algorithm>\n#include <stdlib.h>\n\n\ninline int car_race_collision(int n) {\n    return n * n;  \n}\n\n",
+        0.956,
+        0.935,
+        1.002,
+        0.999,
+        0.938,
+        10
+    ]
+}

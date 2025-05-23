@@ -169,7 +169,9 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         total_failure = 0
 
         # filter optimization patterns for most applicable
-        top_k_patterns = filter_patterns(llm_assistant=advisor, code=original_code)
+        ast = benchmark_obj.pre_process(last_optimized_code)
+        flame_report = benchmark_obj.dynamic_analysis(code=last_optimized_code) if benchmark == "PIE" or benchmark == "HumanEval" or not method_level else None
+        top_k_patterns = filter_patterns(llm_assistant=advisor, code=original_code, ast=None, flame_report=None)
 
         while True:
             if total_failure == 2:
@@ -197,7 +199,7 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                         last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback)
                     else:
                         ast = benchmark_obj.pre_process(last_optimized_code)
-                        flame_report = benchmark_obj.dynamic_analysis(code=last_optimized_code) if benchmark == "PIE" or not method_level else None
+                        flame_report = benchmark_obj.dynamic_analysis(code=last_optimized_code) if benchmark == "PIE" or benchmark == "HumanEval" or not method_level else None
                         last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report, optimization_patterns=top_k_patterns)
             else:
                 logger.info("re-optimizing from latest working optimization")
@@ -205,7 +207,7 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                 evaluator.clear_memory()
                 evaluator_feedback = ""
                 ast = benchmark_obj.pre_process(last_working_optimized_code)
-                flame_report = benchmark_obj.dynamic_analysis(code=last_working_optimized_code) if benchmark == "PIE" or not method_level else None
+                flame_report = benchmark_obj.dynamic_analysis(code=last_working_optimized_code) if benchmark == "PIE" or benchmark == "HumanEval" or not method_level else None
                 last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report)
                 reoptimize_lastly_flag = 0
             
@@ -252,13 +254,13 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
 
                 # getting feedback from the evaluator
                 logger.info("Regression test success, getting evaluator feedback")
-                evaluator_ast = benchmark_obj.pre_process(last_optimized_code)
-                evaluator_feedback = evaluator_llm(evaluator_feedback_data=evaluator_feedback_data, ast=evaluator_ast, llm_assistant=evaluator)
+                evaluator_feedback = evaluator_llm(evaluator_feedback_data=evaluator_feedback_data, llm_assistant=evaluator)
                 logger.info("Got evaluator feedback")
         
         # clearing LLM memory
         generator.clear_memory()
         evaluator.clear_memory()
+        advisor.clear_memory()
         
         end_time = time.time()
         elapsed_time = end_time - start_time
@@ -267,9 +269,9 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
             LLMAgent.reset_global_counter()
         logger.info(f"Total time taken: {elapsed_time:.2f} seconds")
         logger.info(f"Total steps taken: {num_steps}")
-        with open(f"{USER_PREFIX}/results/{benchmark}/system_{folder_name}.txt", "w") as f:
-            f.write(f"Total steps taken: {num_steps}\n")
-            f.write(f"Total time taken: {elapsed_time:.2f} seconds\n")
+        # with open(f"{USER_PREFIX}/results/{benchmark}/system_{folder_name}.txt", "w") as f:
+        #     f.write(f"Total steps taken: {num_steps}\n")
+        #     f.write(f"Total time taken: {elapsed_time:.2f} seconds\n")
         
 def ablation_script_level_1_to_3(benchmark, num_programs, application_name, model, use_genai_studio, ablation):
     #create LLM agent
@@ -281,6 +283,7 @@ def ablation_script_level_1_to_3(benchmark, num_programs, application_name, mode
     
     for program in get_valid_programs(benchmark, num_programs, application_name, method_level=False):
         generator.clear_memory()
+        advisor.clear_memory()
         if benchmark == "PIE":
             benchmark_obj = PIEBenchmark(program)
         elif benchmark == "HumanEval":
@@ -331,7 +334,7 @@ def ablation_script_level_1_to_3(benchmark, num_programs, application_name, mode
             ast = benchmark_obj.pre_process(original_code)
             flame_report = benchmark_obj.dynamic_analysis(original_code)
              # filter optimization patterns for most applicable
-            top_k_patterns = filter_patterns(llm_assistant=advisor, code=original_code)
+            top_k_patterns = filter_patterns(llm_assistant=advisor, code=original_code, ast=ast, flame_report=flame_report)
             optimized_code = llm_optimize(code=original_code, llm_assistant=generator, ast=ast, flame_report=flame_report, optimization_patterns=top_k_patterns)
         
         # code post_process

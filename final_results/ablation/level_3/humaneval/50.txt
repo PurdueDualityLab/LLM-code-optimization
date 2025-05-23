@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nstring encode_shift(string s){\n    string out;\n    int i;\n    for (i=0;i<s.length();i++)\n    {\n        int w=((int)s[i]+5-(int)'a')%26+(int)'a';   \n        out=out+(char)w;\n    }\n    return out;\n}\nstring decode_shift(string s){\nstring out;\n    int i;\n    for (i=0;i<s.length();i++)\n    {\n        int w=((int)s[i]+21-(int)'a')%26+(int)'a';   \n        out=out+(char)w;\n    }\n    return out;\n}",
+        4.465,
+        0.125,
+        4726360.8,
+        21033.6,
+        8.02,
+        26
+    ],
+    "1": [
+        "#include <iostream>  \n#include <string>    \nusing namespace std;\n\nstring encode_shift(const string &s) {\n    string out(s.length(), '\\0');  \n    for (size_t i = 0; i < s.length(); ++i) {\n        out[i] = ((s[i] - 'a' + 5) % 26) + 'a';\n    }\n    return out;\n}\n\nstring decode_shift(const string &s) {\n    string out(s.length(), '\\0');  \n    for (size_t i = 0; i < s.length(); ++i) {\n        out[i] = ((s[i] - 'a' + 21) % 26) + 'a';\n    }\n    return out;\n}\n\n",
+        0.938,
+        0.934,
+        1.035,
+        0.997,
+        0.93,
+        20
+    ]
+}

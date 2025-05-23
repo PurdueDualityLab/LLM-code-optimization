@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<vector>\n#include<string>\n#include<algorithm>\nusing namespace std;\n#include<math.h>\n#include<stdlib.h>\nstring find_max(vector<string> words){\nstring max=\"\";\n    int maxu=0;\n    for (int i=0;i<words.size();i++)\n    {\n        string unique=\"\";\n        for (int j=0;j<words[i].length();j++)\n            if (find(unique.begin(),unique.end(),words[i][j])==unique.end())\n                unique=unique+words[i][j];\n        if (unique.length()>maxu or (unique.length()==maxu and words[i]<max))\n        {\n            max=words[i];\n            maxu=unique.length();\n        }\n    }\n    return max;\n}",
+        4.78,
+        0.128,
+        26148442.0,
+        21037.6,
+        7.802,
+        24
+    ],
+    "1": [
+        "#include <iostream>\n#include <vector>\n#include <string>\n#include <unordered_set>\n\nusing namespace std;\n\nstring find_max(const vector<string>& words) {\n    string maxWord = \"\";\n    int maxUniqueCount = 0;\n    \n    for (const auto& word : words) {\n        unordered_set<char> uniqueChars;\n        for (char ch : word) {\n            uniqueChars.insert(ch);\n        }\n        int uniqueCount = uniqueChars.size();\n        if (uniqueCount > maxUniqueCount || (uniqueCount == maxUniqueCount && word < maxWord)) {\n            maxWord = word;\n            maxUniqueCount = uniqueCount;\n        }\n    }\n    return maxWord;\n}\n\n",
+        0.97,
+        0.887,
+        0.829,
+        0.993,
+        0.887,
+        25
+    ]
+}

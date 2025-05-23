@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<string>\n#include<map>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nstring sort_numbers(string numbers){\nmap<string,int> tonum={{\"zero\",0},{\"one\",1},{\"two\",2},{\"three\",3},{\"four\",4},{\"five\",5},{\"six\",6},{\"seven\",7},{\"eight\",8},{\"nine\",9}};\n    map<int,string> numto={{0,\"zero\"},{1,\"one\"},{2,\"two\"},{3,\"three\"},{4,\"four\"},{5,\"five\"},{6,\"six\"},{7,\"seven\"},{8,\"eight\"},{9,\"nine\"}};\n    int count[10];\n    for (int i=0;i<10;i++)\n        count[i]=0;\n    string out=\"\",current=\"\";\n    if (numbers.length()>0) numbers=numbers+' ';\n    for (int i=0;i<numbers.length();i++)\n        if (numbers[i]==' ')\n        {\n            count[tonum[current]]+=1;\n            current=\"\";\n        }\n        else current+=numbers[i];\n    for (int i=0;i<10;i++)\n        for (int j=0;j<count[i];j++)\n            out=out+numto[i]+' ';\n    if (out.length()>0) out.pop_back();\n    return out;\n}",
+        4.862,
+        0.131,
+        5020683.0,
+        20985.6,
+        7.605,
+        28
+    ],
+    "1": [
+        "#include <iostream>\n#include <sstream>\n#include <string>\n#include <map>\n#include <vector>\nusing namespace std;\n\nstring sort_numbers(const string& numbers) {\n    static const map<string, int> tonum = {\n        {\"zero\", 0}, {\"one\", 1}, {\"two\", 2}, {\"three\", 3}, {\"four\", 4}, {\"five\", 5},\n        {\"six\", 6}, {\"seven\", 7}, {\"eight\", 8}, {\"nine\", 9}\n    };\n    static const map<int, string> numto = {\n        {0, \"zero\"}, {1, \"one\"}, {2, \"two\"}, {3, \"three\"}, {4, \"four\"},\n        {5, \"five\"}, {6, \"six\"}, {7, \"seven\"}, {8, \"eight\"}, {9, \"nine\"}\n    };\n\n    int count[10] = {0};\n    stringstream ss(numbers);\n    string current;\n\n    \n    while (ss >> current) {\n        ++count[tonum.at(current)];\n    }\n\n    \n    stringstream out;\n    for (int i = 0; i < 10; ++i) {\n        for (int j = 0; j < count[i]; ++j) {\n            if (out.tellp() > 0) {\n                out << ' ';\n            }\n            out << numto.at(i);\n        }\n    }\n\n    return out.str();\n}",
+        0.566,
+        0.559,
+        0.898,
+        0.997,
+        0.56,
+        39
+    ]
+}

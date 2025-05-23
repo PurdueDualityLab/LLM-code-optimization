@@ -16,7 +16,7 @@ optimization_patterns = f"{USER_PREFIX}/pattern_catalog/optimization_patterns.xl
 #with open(f"{USER_PREFIX}/src/llm/llm_prompts/advisor_prompt.txt", "r") as file:
 #    advisor_prompt = file.read()
 
-def filter_patterns(llm_assistant, code):
+def filter_patterns(llm_assistant, code, ast, flame_report):
     class Pattern(BaseModel):
         type: str
         pattern_name: str
@@ -36,6 +36,8 @@ def filter_patterns(llm_assistant, code):
     template = env.get_template("advisor_prompt.jinja")
     data = {
         "code": code,
+        "ast": ast,
+        "flame_report": flame_report,
         "patterns": patterns,
     }
     prompt = template.render(data)

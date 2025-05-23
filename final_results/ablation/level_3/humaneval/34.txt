@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nvector<int> unique(vector<int> l){\nvector<int> out={};\n    for (int i=0;i<l.size();i++)\n        if (find(out.begin(),out.end(),l[i])==out.end())\n            out.push_back(l[i]);\n    sort(out.begin(),out.end());\n    return out;\n}",
+        65.712,
+        1.224,
+        5114323496.4,
+        21144.8,
+        0.817,
+        14
+    ],
+    "1": [
+        "#include<iostream>\n#include<vector>\n#include<unordered_set>\n#include<algorithm>\nusing namespace std;\n\nvector<int> unique(vector<int> l) {\n    unordered_set<int> seen;\n    vector<int> out;\n    \n    out.reserve(l.size());\n    \n    for (int i = 0; i < l.size(); i++) {\n        \n        if (seen.insert(l[i]).second) {\n            out.push_back(l[i]);\n        }\n    }\n    sort(out.begin(), out.end());\n    return out;\n}\n\n",
+        9.529,
+        8.326,
+        64.787,
+        1.004,
+        8.316,
+        22
+    ]
+}

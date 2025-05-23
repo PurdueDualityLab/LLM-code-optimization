@@ -167,7 +167,7 @@ class SciMarkBenchmark(Benchmark):
 
         # get mflops
         try:
-            measure_result = subprocess.run(["make", "measure_mflops_optimized"], check=True, capture_output=True, text=True)
+            measure_result = subprocess.run(["make", "measure_mflops_optimized"], check=True, capture_output=True, text=True, timeout=180)
             logger.info(f"Optimized code mlops measure successfully.\n")
             # Filter out the unwanted lines
             mflops = "\n".join(
@@ -177,6 +177,9 @@ class SciMarkBenchmark(Benchmark):
             mflops = mflops.split("make")[0]
         except subprocess.CalledProcessError as e:
             logger.error(f"Optimized code mflops measure failed: {e}\n")
+            mflops = 0
+        except subprocess.TimeoutExpired:
+            logger.error("Make measure_mflops_optimized timeout")
             mflops = 0
         
         self._run_rapl(optimized=True)

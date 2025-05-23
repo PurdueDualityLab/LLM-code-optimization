@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<string>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nint specialFilter(vector<int> nums){\nint num=0;\n    for (int i=0;i<nums.size();i++)\n    if (nums[i]>10)\n    {\n        string w=to_string(nums[i]);\n        if (w[0]%2==1 and w[w.length()-1]%2==1) num+=1;\n    }\n    return num;\n}",
+        4.968,
+        0.13,
+        10148410.2,
+        21102.4,
+        7.678,
+        17
+    ],
+    "1": [
+        "#include <vector>\n#include <iostream>\nusing namespace std;\n\nint specialFilter(const vector<int>& nums) {\n    int num = 0;\n    for (int n : nums) {\n        if (n > 10) {\n            int lastDigit = n % 10;\n            int firstDigit = n;\n            while (firstDigit >= 10) {\n                firstDigit /= 10;\n            }\n            if (firstDigit % 2 == 1 && lastDigit % 2 == 1) {\n                num += 1;\n            }\n        }\n    }\n    return num;\n}",
+        1.051,
+        1.01,
+        1.137,
+        1.004,
+        1.01,
+        20
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nint fizz_buzz(int n){\nint count=0;\n    for (int i=0;i<n;i++)\n    if (i%11==0 or i%13==0)\n    {\n        int q=i;\n        while (q>0)\n        {\n            if (q%10==7) count+=1;\n            q=q/10;\n        }\n    } \n    return count;\n}",
+        4.95,
+        0.134,
+        3975693.4,
+        21044.8,
+        7.441,
+        19
+    ],
+    "1": [
+        "#include <stdio.h>\n\nint fizz_buzz(int n) {\n    int count = 0;\n    \n    \n    for (int i = 0; i < n; i += 11) {\n        int q = i;\n        while (q > 0) {\n            if (q % 10 == 7) count++;\n            q /= 10;\n        }\n    }\n    \n    \n    for (int i = 0; i < n; i += 13) {\n        \n        if (i % 11 != 0) {\n            int q = i;\n            while (q > 0) {\n                if (q % 10 == 7) count++;\n                q /= 10;\n            }\n        }\n    }\n\n    return count;\n}\n\n",
+        1.111,
+        0.971,
+        1.26,
+        1.0,
+        0.973,
+        29
+    ]
+}

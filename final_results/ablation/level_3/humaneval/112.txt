@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<string>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nvector<string> reverse_delete(string s,string c){\nstring n=\"\";\n    for (int i=0;i<s.length();i++)\n    if (find(c.begin(),c.end(),s[i])==c.end())\n        n=n+s[i]; \n    if (n.length()==0) return {n,\"True\"};\n    string w(n.rbegin(),n.rend());\n    if (w==n) return {n,\"True\"};\n    return {n,\"False\"};\n}",
+        15.725,
+        0.337,
+        895931136.4,
+        21044.8,
+        2.97,
+        17
+    ],
+    "1": [
+        "#include <iostream>\n#include <unordered_set>\n#include <string>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nvector<string> reverse_delete(string s, string c) {\n    unordered_set<char> chars_to_delete(c.begin(), c.end());\n    string n;\n    n.reserve(s.size()); \n    \n    for (char ch : s) {\n        if (chars_to_delete.find(ch) == chars_to_delete.end()) {\n            n += ch;\n        }\n    }\n\n    if (n.empty()) return {n, \"True\"};\n\n    string w(n.rbegin(), n.rend());\n    if (w == n) return {n, \"True\"};\n    \n    return {n, \"False\"};\n}\n\n",
+        2.496,
+        2.081,
+        15.272,
+        0.995,
+        2.077,
+        26
+    ]
+}

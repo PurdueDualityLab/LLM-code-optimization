@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nvector<int> incr_list(vector<int> l){\nfor (int i=0;i<l.size();i++)\n        l[i]+=1;\n    return l;\n}",
+        4.819,
+        0.126,
+        7273260.8,
+        21199.2,
+        7.942,
+        11
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <vector>\nusing namespace std;\n\nvector<int> incr_list(vector<int> l) {\n    int n = l.size();\n    int i;\n    for (i = 0; i < n - 3; i += 4) {  \n        l[i] += 1;\n        l[i + 1] += 1;\n        l[i + 2] += 1;\n        l[i + 3] += 1;\n    }\n    \n    for (; i < n; i++) {\n        l[i] += 1;\n    }\n    return l;\n}",
+        0.995,
+        0.96,
+        1.057,
+        1.013,
+        0.958,
+        19
+    ]
+}

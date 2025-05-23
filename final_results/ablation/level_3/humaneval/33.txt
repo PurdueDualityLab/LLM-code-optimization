@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\nvector<int> sort_third(vector<int> l){\nvector<int> third={};\n    int i;\n    for (i=0;i*3<l.size();i++)\n        third.push_back(l[i*3]);\n    \n    sort(third.begin(),third.end());\n\n    vector<int> out={};\n    for (i=0;i<l.size();i++)\n    {\n        if (i%3==0) {out.push_back(third[i/3]);}\n        else out.push_back(l[i]);\n    }\n    return out;\n\n}",
+        4.69,
+        0.134,
+        21427958.8,
+        21025.6,
+        7.442,
+        23
+    ],
+    "1": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<algorithm>\nusing namespace std;\n#include<stdlib.h>\n\nvector<int> sort_third(vector<int> l){\n    vector<int> third;\n    third.reserve(l.size() / 3);  \n    \n    int i;\n    for (i = 0; i * 3 < l.size(); i++) {\n        third.push_back(l[i * 3]);\n    }\n    \n    \n    std::nth_element(third.begin(), third.begin() + third.size()/2, third.end());\n    std::sort(third.begin(), third.end());\n\n    vector<int> out;\n    out.reserve(l.size());  \n    \n    for (i = 0; i < l.size(); i++) {\n        if (i % 3 == 0) {\n            out.push_back(third[i / 3]);\n        } else {\n            out.push_back(l[i]);\n        }\n    }\n    return out;\n}\n\n\n\n\n",
+        0.96,
+        1.038,
+        0.963,
+        1.0,
+        1.039,
+        36
+    ]
+}

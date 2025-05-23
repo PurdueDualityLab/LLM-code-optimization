@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<math.h>\n#include<vector>\n#include<string>\nusing namespace std;\n#include<algorithm>\n#include<stdlib.h>\nvector<string> numerical_letter_grade(vector<float> grades){\nvector<string> out={};\n    for (int i=0;i<grades.size();i++)\n    {\n        if (grades[i]>=3.9999) out.push_back(\"A+\");\n        if (grades[i]>3.7001 and grades[i]<3.9999) out.push_back(\"A\");\n        if (grades[i]>3.3001 and grades[i]<=3.7001) out.push_back(\"A-\");\n        if (grades[i]>3.0001 and grades[i]<=3.3001) out.push_back(\"B+\");\n        if (grades[i]>2.7001 and grades[i]<=3.0001) out.push_back(\"B\");\n        if (grades[i]>2.3001 and grades[i]<=2.7001) out.push_back(\"B-\");\n        if (grades[i]>2.0001 and grades[i]<=2.3001) out.push_back(\"C+\");\n        if (grades[i]>1.7001 and grades[i]<=2.0001) out.push_back(\"C\");\n        if (grades[i]>1.3001 and grades[i]<=1.7001) out.push_back(\"C-\");\n        if (grades[i]>1.0001 and grades[i]<=1.3001) out.push_back(\"D+\");\n        if (grades[i]>0.7001 and grades[i]<=1.0001) out.push_back(\"D\");\n        if (grades[i]>0.0001 and grades[i]<=0.7001) out.push_back(\"D-\");\n        if (grades[i]<=0.0001) out.push_back(\"E\");\n    }\n    return out;\n}",
+        5.142,
+        0.141,
+        34738697.6,
+        20980.0,
+        7.073,
+        27
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <vector>\n#include <string>\nusing namespace std;\n\nvector<string> numerical_letter_grade(vector<float> grades) {\n    vector<string> out;\n    out.reserve(grades.size()); \n\n    for (int i = 0; i < grades.size(); i++) {\n        float grade = grades[i];\n        if (grade > 3.7001) { \n            if (grade >= 3.9999)\n                out.push_back(\"A+\");\n            else\n                out.push_back(\"A\");\n        } else if (grade > 3.3001) {\n            out.push_back(\"A-\");\n        } else if (grade > 3.0001) {\n            out.push_back(\"B+\");\n        } else if (grade > 2.7001) {\n            out.push_back(\"B\");\n        } else if (grade > 2.3001) {\n            out.push_back(\"B-\");\n        } else if (grade > 2.0001) {\n            out.push_back(\"C+\");\n        } else if (grade > 1.7001) {\n            out.push_back(\"C\");\n        } else if (grade > 1.3001) {\n            out.push_back(\"C-\");\n        } else if (grade > 1.0001) {\n            out.push_back(\"D+\");\n        } else if (grade > 0.7001) {\n            out.push_back(\"D\");\n        } else if (grade > 0.0001) {\n            out.push_back(\"D-\");\n        } else {\n            out.push_back(\"E\");\n        }\n    }\n    return out;\n}",
+        1.062,
+        1.036,
+        1.763,
+        0.996,
+        1.037,
+        42
+    ]
+}

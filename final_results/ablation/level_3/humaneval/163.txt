@@ -1,0 +1,20 @@
+{
+    "0": [
+        "#include<stdio.h>\n#include<vector>\nusing namespace std;\n#include<algorithm>\n#include<math.h>\n#include<stdlib.h>\nvector<int> generate_integers(int a,int b){\nint m;\n    if (b<a)\n    {\n        m=a;a=b;b=m;\n    }\n\n    vector<int> out={};\n    for (int i=a;i<=b;i++)\n    if (i<10 and i%2==0) out.push_back(i);\n    return out;\n}",
+        4.634,
+        0.133,
+        4951630.8,
+        21087.2,
+        7.538,
+        18
+    ],
+    "1": [
+        "#include <stdio.h>\n#include <vector>\nusing namespace std;\n#include <algorithm>\n#include <math.h>\n#include <stdlib.h>\n\nvector<int> generate_integers(int a, int b) {\n    \n    if (b < a) {\n        int temp = a;\n        a = b;\n        b = temp;\n    }\n\n    vector<int> out;\n    out.reserve(5); \n\n    \n    for (int i = 0; i < 10; i += 2) {\n        if (i >= a && i <= b) {\n            out.push_back(i);\n        }\n    }\n\n    return out;\n}\n\n",
+        1.021,
+        1.043,
+        1.106,
+        0.999,
+        1.039,
+        28
+    ]
+}
