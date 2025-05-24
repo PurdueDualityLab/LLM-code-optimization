@@ -80,12 +80,14 @@ def main():
             print("Running baseline...")
             orig_metrics = run_dacapo(dacapo_jar, benchmark)
 
-            jit_flags = (
+            jit_flags = (  
                 "-server "
-                "-Xms512m -Xmx512m "
-                "-XX:-TieredCompilation "
-                "-Xbatch "
                 "-XX:+UseSuperWord "
+                "-XX:+TieredCompilation "
+                "-XX:TieredStopAtLevel=4 "
+                "-XX:MaxInlineSize=100 "
+                "-XX:FreqInlineSize=100 "
+                "-Xms2g -Xmx2g "
             )
 
             print("Running with optimizations...")
@@ -102,9 +104,9 @@ def main():
             print(f"❌ Failed processing {benchmark}: {e}")
 
     # Save to CSV
-    with open("dacapo_optimization_results.csv", "w") as f:
+    with open("dacapo_optimization_results.csv", "a") as f:
         writer = csv.writer(f)
-        writer.writerow(["Benchmark", "Energy x", "Latency x", "CPU Cycles x", "Memory x"])
+        # writer.writerow(["Benchmark", "Energy x", "Latency x", "CPU Cycles x", "Memory x"])
         writer.writerows(results)
 
     # Aggregate results
