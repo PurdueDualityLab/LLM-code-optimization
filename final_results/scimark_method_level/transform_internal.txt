@@ -1,0 +1,32 @@
+{
+    "0": [
+        "protected static void transform_internal(double[] data, int direction) {\n    if (data.length == 0)\n        return;\n    int n = data.length / 2;\n    // Identity operation!\n    if (n == 1)\n        return;\n    int logn = log2(n);\n    /* bit reverse the input data for decimation in time algorithm */\n    bitreverse(data);\n    /* apply fft recursion */\n    /* this loop executed log2(N) times */\n    for (int bit = 0, dual = 1; bit < logn; bit++, dual *= 2) {\n        double w_real = 1.0;\n        double w_imag = 0.0;\n        double theta = 2.0 * direction * Math.PI / (2.0 * (double) dual);\n        double s = Math.sin(theta);\n        double t = Math.sin(theta / 2.0);\n        double s2 = 2.0 * t * t;\n        /* a = 0 */\n        for (int b = 0; b < n; b += 2 * dual) {\n            int i = 2 * b;\n            int j = 2 * (b + dual);\n            double wd_real = data[j];\n            double wd_imag = data[j + 1];\n            data[j] = data[i] - wd_real;\n            data[j + 1] = data[i + 1] - wd_imag;\n            data[i] += wd_real;\n            data[i + 1] += wd_imag;\n        }\n        /* a = 1 .. (dual-1) */\n        for (int a = 1; a < dual; a++) {\n            /* trignometric recurrence for w-> exp(i theta) w */\n            {\n                double tmp_real = w_real - s * w_imag - s2 * w_real;\n                double tmp_imag = w_imag + s * w_real - s2 * w_imag;\n                w_real = tmp_real;\n                w_imag = tmp_imag;\n            }\n            for (int b = 0; b < n; b += 2 * dual) {\n                int i = 2 * (b + a);\n                int j = 2 * (b + a + dual);\n                double z1_real = data[j];\n                double z1_imag = data[j + 1];\n                double wd_real = w_real * z1_real - w_imag * z1_imag;\n                double wd_imag = w_real * z1_imag + w_imag * z1_real;\n                data[j] = data[i] - wd_real;\n                data[j + 1] = data[i + 1] - wd_imag;\n                data[i] += wd_real;\n                data[i + 1] += wd_imag;\n            }\n        }\n    }\n}",
+        20.261,
+        0.45,
+        1323656970.6,
+        78300.8,
+        2.22,
+        706.55,
+        54
+    ],
+    "1": [
+        "package jnt.scimark2;\nprotected static void transform_internal(double[] data, int direction) {\n    if (data.length == 0) return;\n    int n = data.length / 2;\n    if (n == 1) return;\n    int logn = log2(n);\n    bitreverse(data);\n\n    for (int bit = 0, dual = 1; bit < logn; bit++, dual *= 2) {\n        double theta = 2.0 * direction * Math.PI / (2.0 * dual);\n        double s = Math.sin(theta);\n        double t = Math.sin(theta / 2.0);\n        double s2 = 2.0 * t * t;\n        double w_real = 1.0;\n        double w_imag = 0.0;\n\n        for (int b = 0; b < n; b += 2 * dual) {\n            int i = 2 * b;\n            int j = 2 * (b + dual);\n            double wd_real = data[j];\n            double wd_imag = data[j + 1];\n            data[j] = data[i] - wd_real;\n            data[j + 1] = data[i + 1] - wd_imag;\n            data[i] += wd_real;\n            data[i + 1] += wd_imag;\n        }\n\n        for (int a = 1; a < dual; a++) {\n            double tmp_real = w_real - s * w_imag - s2 * w_real;\n            double tmp_imag = w_imag + s * w_real - s2 * w_imag;\n            w_real = tmp_real;\n            w_imag = tmp_imag;\n\n            for (int b = 0; b < n; b += 2 * dual) {\n                int i = 2 * (b + a);\n                int j = 2 * (b + a + dual);\n                double z1_real = data[j];\n                double z1_imag = data[j + 1];\n                double wd_real = w_real * z1_real - w_imag * z1_imag;\n                double wd_imag = w_real * z1_imag + w_imag * z1_real;\n                data[j] = data[i] - wd_real;\n                data[j + 1] = data[i + 1] - wd_imag;\n                data[i] += wd_real;\n                data[i + 1] += wd_imag;\n            }\n        }\n    }\n}",
+        0.971,
+        0.94,
+        0.9823891793602835,
+        0.9999284860496717,
+        0.9408914414414414,
+        0.9649423253839078,
+        48
+    ],
+    "2": [
+        "package jnt.scimark2;\n\nprotected static void transform_internal(double[] data, int direction) {\n    if (data.length == 0) return;\n    int n = data.length / 2;\n    if (n == 1) return;\n    int logn = log2(n);\n    bitreverse(data);\n\n    double[] cosTable = new double[n];\n    double[] sinTable = new double[n];\n    for (int i = 0; i < n; i++) {\n        double angle = -2 * Math.PI * i / n;\n        cosTable[i] = Math.cos(angle);\n        sinTable[i] = Math.sin(angle);\n    }\n\n    for (int bit = 0, dual = 1; bit < logn; bit++, dual *= 2) {\n        double theta = 2.0 * direction * Math.PI / (2.0 * dual);\n        double s = Math.sin(theta);\n        double t = Math.sin(theta / 2.0);\n        double s2 = 2.0 * t * t;\n        double w_real = 1.0;\n        double w_imag = 0.0;\n\n        for (int b = 0; b < n; b += 2 * dual) {\n            int i = 2 * b;\n            int j = 2 * (b + dual);\n            double wd_real = data[j];\n            double wd_imag = data[j + 1];\n            data[j] = data[i] - wd_real;\n            data[j + 1] = data[i + 1] - wd_imag;\n            data[i] += wd_real;\n            data[i + 1] += wd_imag;\n        }\n\n        for (int a = 1; a < dual; a++) {\n            double tmp_real = w_real - s * w_imag - s2 * w_real;\n            double tmp_imag = w_imag + s * w_real - s2 * w_imag;\n            w_real = tmp_real;\n            w_imag = tmp_imag;\n\n            for (int b = 0; b < n; b += 2 * dual) {\n                int i = 2 * (b + a);\n                int j = 2 * (b + a + dual);\n                double z1_real = data[j];\n                double z1_imag = data[j + 1];\n                double wd_real = w_real * z1_real - w_imag * z1_imag;\n                double wd_imag = w_real * z1_imag + w_imag * z1_real;\n                data[j] = data[i] - wd_real;\n                data[j + 1] = data[i + 1] - wd_imag;\n                data[i] += wd_real;\n                data[i + 1] += wd_imag;\n            }\n        }\n    }\n}\n\n",
+        0.994,
+        1.065,
+        0.9843777728287167,
+        0.9993669464355002,
+        1.0654193693693692,
+        0.6803481706885571,
+        58
+    ]
+}

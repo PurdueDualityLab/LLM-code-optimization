@@ -39,6 +39,7 @@ class DaCapoBenchmark(Benchmark):
         self.unit_tests = unit_tests
         self.program = benchmark_name
         self.compilation_error = None
+        self.runtime_error = None
         self.energy_data = {}
         self.evaluator_feedback_data = {}
         self.original_code = None
@@ -85,7 +86,6 @@ class DaCapoBenchmark(Benchmark):
         
         filtered_code = self.remove_java_comments(code)
         self.original_code = filtered_code
-        logger.info(f"Original code: {self.original_code}")
         
     def remove_java_comments(self, code):
         pattern = r'''
@@ -126,9 +126,8 @@ class DaCapoBenchmark(Benchmark):
         try:
             result = subprocess.run(["make", "compile", f"BENCHMARK={self.program}"], check=True, capture_output=True, text=True)
             logger.info("Original code compile successfully.\n")
-            self.compilation_error = result.stdout + result.stderr
         except subprocess.CalledProcessError as e:
-            logger.error(f"Original code compile failed: {e}\n")
+            logger.error(f"Original code compile failed: {e.stdout + e.stderr}\n")
             return False
         
         #run make measure using make file for same test class
@@ -230,6 +229,7 @@ class DaCapoBenchmark(Benchmark):
                 check=True
             )
             logger.info(f"Optimized code compile successfully.\n")
+            self.compilation_error = None
             return True
         except subprocess.CalledProcessError as e:
             self.compilation_error = e.stdout + e.stderr  # Capture both stdout and stderr
@@ -267,13 +267,16 @@ class DaCapoBenchmark(Benchmark):
                 # Check if the command failed (non-zero return code)
                 if result.returncode != 0:
                     logger.error(f"Test {test} failed with error:\nstdout: {result.stdout}\nstderr: {result.stderr}")
+                    self.runtime_error = result.stderr + result.stdout
                     return False             
             except subprocess.CalledProcessError as e:
+                self.runtime_error = result.stderr + result.stdout
                 logger.error(f"Test {test} execution failed: {e}\nstdout: {e.stdout}\nstderr: {e.stderr}")
                 return False
         
         # If all tests pass, return True
         logger.info("All test passed successfully.")
+        self.runtime_error = None
         return True
         
     def measure_energy(self, optimized_code):

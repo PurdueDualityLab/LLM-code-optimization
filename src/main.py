@@ -27,7 +27,7 @@ logger = Logger("logs", sys.argv[2]).logger
 def parse_arguments():
     parser = argparse.ArgumentParser(description="LLM-Code-Optimization")
     parser.add_argument("--benchmark", type=str, default="EnergyLanguage", choices=["EnergyLanguage", "PIE", "SciMark", "Dacapobench", "HumanEval"], help="dataset used for experiment")
-    parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "gpt-4o-mini", "o3-mini", "deepseek-r1:32b","deepseek-r1:70b", "qwen2.5:72b", "llama3.3:70b", "codellama:latest"], help="llm used for inference")
+    parser.add_argument("--llm", type=str, default="gpt-4.1", choices=["gpt-4.1", "gpt-4o", "gpt-4o-mini", "o3-mini", "deepseek-r1:32b","deepseek-r1:70b", "qwen2.5:72b", "llama3.3:70b", "codellama:latest"], help="llm used for inference")
     parser.add_argument("--self_optimization_step", type=int, default=5, help="number of LLM self-optimization step")
     parser.add_argument("--num_programs", type=int, default=5, help="For PIE only, number of programs from the benchmark to test")
     parser.add_argument("--application_name", type=str, default="fop", choices=["biojava", "fop", "cassandra", "h2", "h2o", "Kafka", "Luindex", "Lusearch", "spring", "Tomact", "Tradebeans", "Tradesoap", "Xalan", "pmd"], help="For Dacapobench only, name of the application from the benchmark to test")
@@ -69,9 +69,10 @@ def get_valid_programs(benchmark, num_programs, application_name, method_level):
             for prog in programs:
                 if prog[1] not in unique_classes:  # prog[1] is test_class
                     unique_classes.add(prog[1])
-                    prog.append(class_methods_map.get(prog[1]))  # prog[0] is test_method
-                    filtered_programs.append(prog)
-                    logger.info(f"filtered program: {prog}")
+                    prog_list = list(prog)
+                    prog_list.append(class_methods_map.get(prog[1]))  # prog[0] is test_method
+                    filtered_programs.append(tuple(prog_list))
+                    logger.info(f"filtered program: {prog_list}")
             programs = filtered_programs
         return programs
     else:
@@ -152,7 +153,6 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
             results[folder_name] = "Unable to find original code"
             continue
         
-        # TODO: Change the error message shown by logger - currently it is misleading since code may compile but actually RAPL causes the error
         original_code_compiles = benchmark_obj.set_original_energy()
         if not original_code_compiles:
             logger.error(f"Unable to compile or measure energy of the original code for {program}")
@@ -269,9 +269,9 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
             LLMAgent.reset_global_counter()
         logger.info(f"Total time taken: {elapsed_time:.2f} seconds")
         logger.info(f"Total steps taken: {num_steps}")
-        # with open(f"{USER_PREFIX}/results/{benchmark}/system_{folder_name}.txt", "w") as f:
-        #     f.write(f"Total steps taken: {num_steps}\n")
-        #     f.write(f"Total time taken: {elapsed_time:.2f} seconds\n")
+        with open(f"{USER_PREFIX}/results/{benchmark}/system_{folder_name}.txt", "w") as f:
+            f.write(f"Total steps taken: {num_steps}\n")
+            f.write(f"Total time taken: {elapsed_time:.2f} seconds\n")
         
 def ablation_script_level_1_to_3(benchmark, num_programs, application_name, model, use_genai_studio, ablation):
     #create LLM agent

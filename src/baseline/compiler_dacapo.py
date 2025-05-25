@@ -65,7 +65,7 @@ def main():
     results = []
     # benchmarks = ["fop", "biojava", "pmd", "spring", "graphchi"]
 
-    benchmarks = ["graphchi"]
+    benchmarks = ["fop"]
 
     dacapo_jar = os.path.join(USER_PREFIX, "benchmark_dacapo/benchmarks/dacapo-evaluation-git-unknown\$\{git.dirty\}.jar")
 

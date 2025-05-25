@@ -1,0 +1,22 @@
+{
+    "0": [
+        "public static double integrate(long Num_samples) {\n    Random R = new Random(SEED);\n    long under_curve = 0;\n    for (long count = 0; count < Num_samples; count++) {\n        double x = R.nextDouble();\n        double y = R.nextDouble();\n        if (x * x + y * y <= 1.0)\n            under_curve++;\n    }\n    return ((double) under_curve / Num_samples) * 4.0;\n}",
+        799.889,
+        16.486,
+        76528341270.0,
+        44536.8,
+        0.061,
+        1149.92,
+        11
+    ],
+    "1": [
+        "package jnt.scimark2;\npublic static double integrate(long Num_samples) {\n    Random R = new Random(SEED);\n    long under_curve1 = 0, under_curve2 = 0, under_curve3 = 0, under_curve4 = 0;\n    long count;\n    for (count = 0; count <= Num_samples - 4; count += 4) {\n        double x1 = R.nextDouble();\n        double y1 = R.nextDouble();\n        double x2 = R.nextDouble();\n        double y2 = R.nextDouble();\n        double x3 = R.nextDouble();\n        double y3 = R.nextDouble();\n        double x4 = R.nextDouble();\n        double y4 = R.nextDouble();\n\n        if (x1 * x1 + y1 * y1 <= 1.0) under_curve1++;\n        if (x2 * x2 + y2 * y2 <= 1.0) under_curve2++;\n        if (x3 * x3 + y3 * y3 <= 1.0) under_curve3++;\n        if (x4 * x4 + y4 * y4 <= 1.0) under_curve4++;\n    }\n\n    \n    for (; count < Num_samples; count++) {\n        double x = R.nextDouble();\n        double y = R.nextDouble();\n        if (x * x + y * y <= 1.0) under_curve1++;\n    }\n\n    long total_under_curve = under_curve1 + under_curve2 + under_curve3 + under_curve4;\n    return ((double) total_under_curve / Num_samples) * 4.0;\n}",
+        0.987,
+        0.992,
+        0.9913771607116529,
+        0.9943380724440952,
+        0.9867868852459016,
+        1.0380809099763462,
+        31
+    ]
+}

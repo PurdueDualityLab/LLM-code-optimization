@@ -1,0 +1,32 @@
+{
+    "0": [
+        "/**\n * LU factorization (in place).\n *\n * @param A     (in/out) On input, the matrix to be factored.\n *              On output, the compact LU factorization.\n * @param pivot (out) The pivot vector records the\n *              reordering of the rows of A during factorization.\n * @return 0, if OK, nozero value, othewise.\n */\npublic static int factor(double[][] A, int[] pivot) {\n    int N = A.length;\n    int M = A[0].length;\n    int minMN = Math.min(M, N);\n    for (int j = 0; j < minMN; j++) {\n        // find pivot in column j and  test for singularity.\n        int jp = j;\n        double t = Math.abs(A[j][j]);\n        for (int i = j + 1; i < M; i++) {\n            double ab = Math.abs(A[i][j]);\n            if (ab > t) {\n                jp = i;\n                t = ab;\n            }\n        }\n        pivot[j] = jp;\n        // jp now has the index of maximum element\n        // of column j, below the diagonal\n        if (A[jp][j] == 0)\n            // factorization failed because of zero pivot\n            return 1;\n        if (jp != j) {\n            // swap rows j and jp\n            double[] tA = A[j];\n            A[j] = A[jp];\n            A[jp] = tA;\n        }\n        if (// compute elements j+1:M of jth column\n        j < M - 1) {\n            // note A(j,j), was A(jp,p) previously which was\n            // guarranteed not to be zero (Label #1)\n            //\n            double recp = 1.0 / A[j][j];\n            for (int k = j + 1; k < M; k++) A[k][j] *= recp;\n        }\n        if (j < minMN - 1) {\n            // rank-1 update to trailing submatrix:   E = E - x*y;\n            //\n            // E is the region A(j+1:M, j+1:N)\n            // x is the column vector A(j+1:M,j)\n            // y is row vector A(j,j+1:N)\n            for (int ii = j + 1; ii < M; ii++) {\n                double[] Aii = A[ii];\n                double[] Aj = A[j];\n                double AiiJ = Aii[j];\n                for (int jj = j + 1; jj < N; jj++) Aii[jj] -= AiiJ * Aj[jj];\n            }\n        }\n    }\n    return 0;\n}",
+        16.715,
+        0.372,
+        982609747.4,
+        63143.2,
+        2.687,
+        6201.55,
+        60
+    ],
+    "1": [
+        "package jnt.scimark2;\npublic static int factor(double[][] A, int[] pivot) {\n    int N = A.length;\n    int M = A[0].length;\n    int minMN = Math.min(M, N);\n    \n    for (int j = 0; j < minMN; j++) {\n        \n        int jp = j;\n        double t = Math.abs(A[j][j]);\n        for (int i = j + 1; i < M; i++) {\n            double ab = Math.abs(A[i][j]);\n            if (ab > t) {\n                jp = i;\n                t = ab;\n            }\n        }\n        pivot[j] = jp;\n        \n        if (A[jp][j] == 0) return 1;\n        \n        \n        if (jp != j) {\n            double[] temp = A[j];\n            A[j] = A[jp];\n            A[jp] = temp;\n        }\n        \n        \n        if (j < M - 1) {\n            double recp = 1.0 / A[j][j];\n            for (int k = j + 1; k < M; k++) {\n                A[k][j] *= recp;\n                double A_kj = A[k][j];\n                for (int jj = j + 1; jj < N; jj++) {\n                    A[k][jj] -= A_kj * A[j][jj];\n                }\n            }\n        }\n    }\n    return 0;\n}",
+        0.563,
+        0.606,
+        0.48025379088948544,
+        1.011702727645611,
+        0.6063483438779308,
+        0.3546387596649225,
+        42
+    ],
+    "2": [
+        "package jnt.scimark2;\nimport java.util.stream.IntStream;\n\npublic class LUOptimized {\n    public static int factor(double[][] A, int[] pivot) {\n        int N = A.length;\n        int M = A[0].length;\n        int minMN = Math.min(M, N);\n\n        for (int j = 0; j < minMN; j++) {\n            int jp = j;\n            double t = Math.abs(A[j][j]);\n            for (int i = j + 1; i < M; i++) {\n                double ab = Math.abs(A[i][j]);\n                if (ab > t) {\n                    jp = i;\n                    t = ab;\n                }\n            }\n            pivot[j] = jp;\n\n            if (A[jp][j] == 0) return 1;\n\n            if (jp != j) {\n                double[] temp = A[j];\n                A[j] = A[jp];\n                A[jp] = temp;\n            }\n\n            if (j < M - 1) {\n                double recp = 1.0 / A[j][j];\n                for (int k = j + 1; k < M; k++) {\n                    A[k][j] *= recp;\n                }\n\n                \n                final double[] Aj = A[j];\n                final int currentJ = j;\n\n                \n                IntStream.range(j + 1, M).parallel().forEach(ii -> {\n                    double[] Aii = A[ii];\n                    double AiiJ = Aii[currentJ];\n                    for (int jj = currentJ + 1; jj < N; jj++) {\n                        Aii[jj] -= AiiJ * Aj[jj];\n                    }\n                });\n            }\n        }\n        return 0;\n    }\n}",
+        0.541,
+        0.843,
+        0.054179673779382105,
+        0.6451346601822714,
+        0.8426542612579085,
+        1.423840813990051,
+        52
+    ]
+}
