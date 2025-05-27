@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Apache License v2.0.
  * You may obtain the license at
- * 
+ *
  *    http://www.opensource.org/licenses/apache2.0.php
  -->
 <project name="DacapoBenchmarks" default="dist" basedir=".">
@@ -205,7 +205,7 @@
         <mkdir dir="${log.build.dir}" />
         <mkdir dir="${dacapo.build.dir}" />
         <mkdir dir="${dacapo.build.doc.dir}"/>
-    	
+
         <echo>build.nickname=${build.nickname}</echo>
         <echo>build.version=${build.version}</echo>
     </target>
@@ -304,14 +304,14 @@
         </zip>
     </target>
 
-    <!-- ================================= 
-         target: dist              
+    <!-- =================================
+         target: dist
          ================================= -->
     <target name="dist" depends="harness,bytecode-transformer,compile,create-zip"/>
 
     <target name="doc" depends="init,bootstrap,harness" description="make the top level documentation"/>
 
-	
+
     <!-- =================================
          target: bootstrap for running harness
          ================================= -->
@@ -358,14 +358,14 @@
         <delete dir="${dacapao.out.jar.dir}"/>
     </target>
 
-    <!-- ================================= 
+    <!-- =================================
          target: compile  all sources
          ================================= -->
-    <target name="compile" depends="avrora,batik,biojava,cassandra,eclipse,fop,graphchi,h2,h2o,jme,jython,kafka,luindex,lusearch,pmd,spring,sunflow,tomcat,tradebeans,tradesoap,xalan,zxing">
+    <target name="compile" depends="avrora,batik,biojava,cassandra,eclipse,fop,graphchi,h2,jme,jython,kafka,luindex,lusearch,pmd,spring,sunflow,tomcat,tradebeans,tradesoap,xalan,zxing">
         <antcall target="build.status.fail" />
         <antcall target="build.status.pass" />
     </target>
-	
+
 
     <property name="mvn-home" location="${toolsdir}/apache-maven-${mvn.version}/bin"/>
     <property name="mvn-exe" value="${mvn-home}/mvn"/>
@@ -373,8 +373,8 @@
         <os family="windows"/>
     </condition>
 
-    <!-- ================================= 
-         target: harness           
+    <!-- =================================
+         target: harness
          ================================= -->
     <target name="harness" depends="bytecode-transformer" description="build harness and bytecode transformer"/>
 
@@ -460,7 +460,7 @@
         <clean.bm benchmark="fop"/>
         <clean.bm benchmark="graphchi"/>
         <clean.bm benchmark="h2"/>
-        <clean.bm benchmark="h2o"/>
+        <!-- <clean.bm benchmark="h2o"/> -->
         <clean.bm benchmark="jme"/>
         <clean.bm benchmark="jython"/>
         <clean.bm benchmark="kafka"/>
@@ -477,7 +477,7 @@
     </target>
 
     <target name="clean" depends="clean-benchmarks,clean-libs,clean-harness,clean-bootstrap"/>
-  
+
     <!-- *************************************************************************** -->
     <!--                            Build                                            -->
     <!-- *************************************************************************** -->
@@ -572,10 +572,10 @@ See ${log.build.report} for a summary of benchmark build status.
         <build.bm benchmark="h2"/>
         <generate-launcher-jars benchmark="h2"/>
     </target>
-    <target name="h2o" depends="init,harness">
+    <!-- <target name="h2o" depends="init,harness">
         <build.bm benchmark="h2o"/>
         <generate-launcher-jars benchmark="h2o"/>
-    </target>
+    </target> -->
     <target name="jme" depends="init,harness">
         <build.bm benchmark="jme"/>
         <generate-launcher-jars benchmark="jme"/>
