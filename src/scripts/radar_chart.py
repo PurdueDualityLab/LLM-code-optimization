@@ -39,9 +39,9 @@ for i, benchmark in enumerate(benchmarks):
 # Set aesthetics
 ax.set_yticklabels([])
 ax.set_xticks(angles[:-1])
-ax.set_xticklabels(filtered_metrics)
-ax.set_title("Trade-off Analysis of Multi-Metric Optimization Gains", size=14)
-ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+ax.set_xticklabels(filtered_metrics, fontsize=20)
+# ax.set_title("Trade-off Analysis of Multi-Metric Optimization Gains", size=14)
+ax.legend(loc='center left', fontsize=16)
 
 plt.tight_layout()
 plt.savefig("radar_chart.png", bbox_inches="tight")
