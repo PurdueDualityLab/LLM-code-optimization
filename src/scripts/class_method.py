@@ -18,15 +18,15 @@ ax.bar(x - 0.2, [method_correct]*len(x), width=0.4, label='Correctness (Function
 ax.bar(x + 0.2, [class_correct]*len(x), width=0.4, label='Correctness (Class)', color='darkgray')
 
 # Plot performance metrics stacked on top of correctness
-ax.bar(x - 0.2, method_values, width=0.4, bottom=[method_correct]*len(x), label='Function-Level', alpha=0.7)
-ax.bar(x + 0.2, class_values, width=0.4, bottom=[class_correct]*len(x), label='Class-Level', alpha=0.7)
+ax.bar(x - 0.2, method_values, width=0.4, bottom=[method_correct]*len(x), label='Function-Level', alpha=0.7, color='lightblue')
+ax.bar(x + 0.2, class_values, width=0.4, bottom=[class_correct]*len(x), label='Class-Level', alpha=1, color='skyblue')
 
 # Formatting
-ax.set_ylabel('Value (Correctness + Metric)')
-ax.set_title('Comparision between Function-level and Class-level Optimization on SciMark')
+ax.set_ylabel('Value (Correctness + Metric)', fontsize=16)
+# ax.set_title('Comparision between Function-level and Class-level Optimization on SciMark')
 ax.set_xticks(x)
-ax.set_xticklabels(categories)
-ax.legend(loc='upper left')
+ax.set_xticklabels(categories, fontsize=16)
+ax.legend(loc='upper left', fontsize=14)
 
 plt.tight_layout()
 plt.savefig("class_method.png", bbox_inches="tight")
