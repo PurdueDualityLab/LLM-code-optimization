@@ -22,7 +22,7 @@
 
     <property name="bm-build-top" value="${bm-build-dir}/${bm-name}-${bm-version}/fop" />
 
-    <target name="unpack" depends="untar, patch">
+    <target name="unpack" depends="untar">
         <!-- explicitly include xalan jar to ensure a suitable TransformerFactory is present, even in old JVMs -->
         <antcall target="check-source">
             <param name="target-dir" value="${bm-downloads}"/>

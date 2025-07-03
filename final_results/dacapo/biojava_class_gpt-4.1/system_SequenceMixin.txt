@@ -1,2 +1,0 @@
-Total steps taken: 6
-Total time taken: 283.12 seconds
