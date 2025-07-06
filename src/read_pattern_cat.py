@@ -6,7 +6,7 @@ import os
 load_dotenv()
 USER_PREFIX = os.getenv("USER_PREFIX")
 
-def get_patterns(file_path: str):
+def get_patterns(file_path: str) -> str:
     df = pd.read_excel(file_path)
     df.columns = df.columns.str.strip()
     data = df.to_dict(orient="records")

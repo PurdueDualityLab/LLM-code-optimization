@@ -15,7 +15,7 @@ env = Environment(loader=FileSystemLoader(f"{USER_PREFIX}/src/llm/llm_prompts"))
 class Feedback(BaseModel):
     feedback: str
 
-def evaluator_llm(evaluator_feedback_data, llm_assistant):
+def evaluator_llm(evaluator_feedback_data, llm_assistant, metric):
 
     #extract original
     original_source_code = evaluator_feedback_data["original"]["source_code"]
@@ -33,7 +33,8 @@ def evaluator_llm(evaluator_feedback_data, llm_assistant):
         "original_source_code": original_source_code,
         "current_source_code": current_source_code,
         "avg_speedup": avg_speedup,
-        "flame_report": flame_report
+        "flame_report": flame_report,
+        "metric": metric,
     }
     
     prompt = template.render(data)

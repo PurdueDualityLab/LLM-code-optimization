@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from utils import Logger
-from scripts.read_pattern_cat import get_patterns
+from read_pattern_cat import get_patterns
 import json
 import sys
 import os
@@ -14,7 +14,7 @@ USER_PREFIX = os.getenv('USER_PREFIX')
 env = Environment(loader=FileSystemLoader(f"{USER_PREFIX}/src/llm/llm_prompts"))
 optimization_patterns = f"{USER_PREFIX}/pattern_catalog/optimization_patterns.xlsx"
 
-def filter_patterns(llm_assistant, code, ast, flame_report):
+def filter_patterns(llm_assistant, code, ast, flame_report, metric):
     class Pattern(BaseModel):
         type: str
         pattern_name: str
@@ -29,7 +29,6 @@ def filter_patterns(llm_assistant, code, ast, flame_report):
         patterns: list[Pattern]
 
     patterns = get_patterns(file_path=optimization_patterns)
-    #logger.info(f"Unformatted patterns: {patterns}")
 
     template = env.get_template("advisor_prompt.jinja")
     data = {
@@ -37,6 +36,7 @@ def filter_patterns(llm_assistant, code, ast, flame_report):
         "ast": ast,
         "flame_report": flame_report,
         "patterns": patterns,
+        "metric": metric,
     }
     prompt = template.render(data)
 

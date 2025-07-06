@@ -1,4 +1,4 @@
-from benchmark import Benchmark
+from benchmarks.benchmark import Benchmark
 from dotenv import load_dotenv
 import os
 import subprocess

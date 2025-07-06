@@ -4,7 +4,7 @@ import sys
 import os  
 import json  
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from agent import LLMAgent
+from llm.agent import LLMAgent
 
 # Setup environment  
 load_dotenv()  

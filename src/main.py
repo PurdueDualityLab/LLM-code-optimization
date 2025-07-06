@@ -4,14 +4,14 @@ import os
 import sys
 from utils import Logger
 import argparse
-from agent import LLMAgent
+from llm.agent import LLMAgent
 from status import Status
 from llm.generator_llm import llm_optimize, handle_error
 from llm.evaluator_llm import evaluator_llm
 from llm.advisor_llm import filter_patterns
-from scimark_benchmark import get_valid_scimark_programs, SciMarkBenchmark
-from dacapo_benchmark import get_valid_dacapo_classes, DaCapoBenchmark
-from humaneval_benchmark import get_valid_humaneval_programs, HumanEvalBenchmark
+from benchmarks.scimark_benchmark import get_valid_scimark_programs, SciMarkBenchmark
+from dacapo.dacapo_benchmark import get_valid_dacapo_classes, DaCapoBenchmark
+from benchmarks.humaneval_benchmark import get_valid_humaneval_programs, HumanEvalBenchmark
 from collections import defaultdict
 import glob
 import time
@@ -31,6 +31,7 @@ def parse_arguments():
     parser.add_argument("--application_name", type=str, default="fop", choices=["biojava", "fop", "graphchi", "pmd"], help="For Dacapobench only, name of the application from the benchmark to test")
     parser.add_argument("--method_level", type=bool, default=False, help="Flag to indicate if method level optimization is used")
     parser.add_argument("--ablation", type=int, default=0, choices=[0, 1, 2, 3], help="Flag to indicate if ablation study is used. 0 for no ablation.")
+    parser.add_argument("--metric", type=str, default="Latency, throughput, energy, cpu cycles, peak_memory", choices=["energy", "latency", "cpu_cycles", "peak_memory", "throughput"], help="metric to optimize for")
 
     args = parser.parse_args()
     return args
@@ -98,7 +99,7 @@ def write_result(energy_data, program, evaluator_feedback_data, results_dir):
         "loc_improvement": round(original_loc / lowest_loc, 3),
     }
 
-def master_script(benchmark, num_programs, application_name, model, self_optimization_step, method_level, ablation):
+def master_script(benchmark, num_programs, application_name, model, self_optimization_step, method_level, metric, ablation):
     #create LLM agent
     generator = LLMAgent(openai_api_key=openai_key, model=model, system_message="You are a code expert. Think through the code optimizations strategies step by step.")
     evaluator = LLMAgent(openai_api_key=openai_key, model=model, system_message="You are a code expert. Think through the code optimizations strategies step by step.")
@@ -159,7 +160,7 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         if ablation == 0:
             ast = benchmark_obj.pre_process(last_optimized_code)
             flame_report = benchmark_obj.dynamic_analysis(code=last_optimized_code) if benchmark == "HumanEval" or not method_level else None
-            top_k_patterns = filter_patterns(llm_assistant=advisor, code=original_code, ast=None, flame_report=None)
+            top_k_patterns = filter_patterns(llm_assistant=advisor, code=original_code, ast=None, flame_report=None, metric=metric)
         
         if ablation == 3:
             ast = benchmark_obj.pre_process(last_optimized_code)
@@ -188,15 +189,15 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                     last_optimized_code = handle_error(error_message=error_message, llm_assistant=generator)
                 else:
                     if evaluator_feedback is not None and evaluator_feedback != "":
-                        last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback)
+                        last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, metric=metric, evaluator_feedback=evaluator_feedback)
                     else:
                         if ablation != 2:
                             ast = benchmark_obj.pre_process(last_optimized_code)
                             flame_report = benchmark_obj.dynamic_analysis(code=last_optimized_code) if benchmark == "HumanEval" or not method_level else None
                             if ablation == 0:
-                                last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report, top_k_patterns=top_k_patterns)
+                                last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, metric=metric, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report, optimization_patterns=top_k_patterns)
                             elif ablation == 3:
-                                last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report, top_k_patterns=None)
+                                last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, metric=metric, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report)
             else:
                 logger.info("re-optimizing from latest working optimization")
                 generator.clear_memory()
@@ -205,7 +206,7 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
                 if ablation != 2:
                     ast = benchmark_obj.pre_process(last_working_optimized_code)
                     flame_report = benchmark_obj.dynamic_analysis(code=last_working_optimized_code) if benchmark == "HumanEval" or not method_level else None
-                    last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report)
+                    last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, metric=metric, evaluator_feedback=evaluator_feedback, ast=ast, flame_report=flame_report)
                 reoptimize_lastly_flag = 0
             
             # Error in LLM completion
@@ -251,7 +252,7 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
 
                 # getting feedback from the evaluator
                 logger.info("Regression test success, getting evaluator feedback")
-                evaluator_feedback = evaluator_llm(evaluator_feedback_data=evaluator_feedback_data, llm_assistant=evaluator)
+                evaluator_feedback = evaluator_llm(evaluator_feedback_data=evaluator_feedback_data, llm_assistant=evaluator, metric=metric)
                 logger.info("Got evaluator feedback")
         
         # clearing LLM memory
@@ -331,6 +332,7 @@ def main():
     application_name = args.application_name
     method_level = args.method_level
     ablation = args.ablation
+    metric = args.metric
     
     if benchmark == "Dacapobench":
         start_time = time.time()
@@ -339,7 +341,7 @@ def main():
         logger.info("Running ablation study level 1")
         ablation_script_level_1(benchmark, num_programs, application_name, model)
     else:
-        master_script(benchmark, num_programs, application_name, model, self_optimization_step, method_level, ablation)       
+        master_script(benchmark, num_programs, application_name, model, self_optimization_step, method_level, metric, ablation)       
 
     if benchmark == "Dacapobench":
         end_time = time.time()

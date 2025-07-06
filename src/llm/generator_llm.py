@@ -12,7 +12,7 @@ USER_PREFIX = os.getenv('USER_PREFIX')
 
 env = Environment(loader=FileSystemLoader(f"{USER_PREFIX}/src/llm/llm_prompts"))
 
-def llm_optimize(code, llm_assistant, evaluator_feedback=None, ast=None, flame_report=None, optimization_patterns=None):
+def llm_optimize(code, llm_assistant, metric=None, evaluator_feedback=None, ast=None, flame_report=None, optimization_patterns=None):
     class OptimizationReasoning(BaseModel):
         analysis: str
         optimization_opportunities: str
@@ -25,6 +25,7 @@ def llm_optimize(code, llm_assistant, evaluator_feedback=None, ast=None, flame_r
         template = env.get_template("generator_prompt.jinja")
         data = {
             "code": code,
+            "metric": metric,
             "ast": ast,
             "flame_report": flame_report,
             "optimization_patterns": optimization_patterns,
@@ -34,9 +35,6 @@ def llm_optimize(code, llm_assistant, evaluator_feedback=None, ast=None, flame_r
         template = env.get_template("generator_feedback_prompt.jinja")
         data = {
             "code": code,
-            "ast": ast,
-            "flame_report": flame_report,
-            "optimization_patterns": optimization_patterns,
             "evaluator_feedback": evaluator_feedback,
         }
         prompt = template.render(data)    

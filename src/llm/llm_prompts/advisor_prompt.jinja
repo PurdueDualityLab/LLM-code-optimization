@@ -4,13 +4,7 @@ Do not suggest patterns that provide only marginal benefits or are irrelevant to
 Task Instructions:
 1. Analyze the provided code
     - Review the code to find any inefficiencies or areas that can be improved.
-    - Look for:
-        - Algorithms that are slow (high time complexity)
-        - Use of complex or expensive operations
-        - Data dependencies that prevent instruction-level parallelism (ILP)
-        - Algorithms that use large amounts of memory (high space complexity)
-        - Unnecessary if-else or branching logic
-        - Memory that is used or allocated inefficiently
+    - Targeted metrics to optimize: {{ metric }}
 2. Filter for High-Impact Patterns Only
     - Using the optimization pattern catalog (including pattern descriptions, examples, and detection methods), identify only the patterns that are directly applicable to the code and are likely to lead to substantial performance gains if applied.
     Ignore patterns with limited or negligible impact on the performance characteristics of this code.

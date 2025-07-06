@@ -1,5 +1,5 @@
 from abstract_syntax_trees.cpp_ast import CPPAST
-from benchmark import Benchmark
+from benchmarks.benchmark import Benchmark
 from dotenv import load_dotenv
 import glob
 import json

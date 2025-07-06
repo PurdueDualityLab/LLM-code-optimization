@@ -26,14 +26,14 @@ run_optimized:
 	@$(JAVA) $(OPTIMIZED_CLASS)
 
 measure:
-	sudo modprobe msr
-	sudo ${USER_PREFIX}/MEASURE/main "$(JAVA) $(MAIN_CLASS)" java FFT
-	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
+	modprobe msr
+	${USER_PREFIX}/MEASURE/main "$(JAVA) $(MAIN_CLASS)" java FFT
+	chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
 
 measure_optimized:
-	sudo modprobe msr
-	sudo ${USER_PREFIX}/MEASURE/main "$(JAVA) $(OPTIMIZED_CLASS)" java FFT_Otimized
-	sudo chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
+	modprobe msr
+	${USER_PREFIX}/MEASURE/main "$(JAVA) $(OPTIMIZED_CLASS)" java FFT_Otimized
+	chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
 
 measure_mflops:
 	@$(JAVA) $(BENCHMARK_CLASS) false

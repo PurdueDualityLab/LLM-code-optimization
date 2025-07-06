@@ -46,12 +46,14 @@
 	</target>
 
 	<!-- get the source if necessary -->
-	<target name="get-source" unless="target-valid-md5">
+	<!-- <target name="get-source" unless="target-valid-md5"> -->
+	<target name="get-source" unless="skip-checksum">
 		<get src="${target-url}" dest="${target-filename}" />
 	</target>
 
 	<!-- if there is no checksum then generate one -->
-	<target name="get-source-fix-checksum" unless="target-available-checksum">
+	<!-- <target name="get-source-fix-checksum" unless="target-available-checksum"> -->
+	<target name="get-source-fix-checksum" unless="skip-checksum">
 		<checksum file="${target-filename}" fileext=".${checksum-alg}" algorithm="${checksum-alg}" />
 	</target>
 
@@ -170,7 +172,8 @@
 	</target>
 
 	<!-- get the source from svn and tar up if necessary -->
-	<target name="get-svn-source" unless="target-valid-md5">
+	<!-- <target name="get-svn-source" unless="target-valid-md5"> -->
+	<target name="get-svn-source" unless="skip-checksum">
 		<property name="svn-tmp" value="svn-${build.time}"/>
 		<!-- set the input string to "p" to get around a bug where svn asks about unknown certificates -->
 		<exec executable="svn" failonerror="${fail-on-error}" inputstring="p${line.separator}" >
@@ -264,12 +267,12 @@
 
 	<!-- get source from mercurial repository -->
 	<target name="check-hg-source" if="target-filename" depends="scm-init">
-		<antcall target="check-hg-source.checkandupdate">
+		<!-- <antcall target="check-hg-source.checkandupdate">
 			<param name="hg-url" value="${hg-url}"/>
 			<param name="hg-revision" value="${hg-revision}"/>
 			<param name="target-filename" value="${target-filename}"/>
 			<param name="fail-on-error" value="${fail-on-error}"/>
-		</antcall>
+		</antcall> -->
 
 		<antcall target="check-hg-source.update">
 			<param name="hg-url" value="${hg-url}"/>
@@ -288,7 +291,8 @@
 	</target>
 
 	<!-- get the source from hg and tar up if necessary -->
-	<target name="get-hg-source" unless="target-valid-md5">
+	<!-- <target name="get-hg-source" unless="target-valid-md5"> -->
+	<target name="get-hg-source">
 		<property name="hg-tmp" value="hg-${build.time}"/>
 		<!-- set the input string to "p" to get around a bug where hg asks about unknown certificates -->
 		<exec executable="hg" failonerror="${fail-on-error}">
@@ -309,7 +313,7 @@
 		</antcall>
 	</target>
 
-	<target name="check-hg-source.update" unless="target-available">
+	<target name="check-hg-source.update" if="skip-checksum">
 		<antcall target="get-hg-source">
 			<param name="hg-url" value="${hg-url}"/>
 			<param name="hg-revision" value="${hg-revision}"/>
@@ -378,11 +382,12 @@
 	</target>
 
 	<!-- utility targets -->
-	<target name="check-source.checksum.update" unless="target-available-checksum">
+	<!-- <target name="get-source-fix-checksum" unless="target-available-checksum"> -->
+	<target name="check-source.checksum.update" unless="skip-checksum">
 		<checksum-write file="${target-filename}"/>
 	</target>
 
-	<target name="check-source.checksum.verify" if="target-available-checksum">
+	<target name="check-source.checksum.verify" if="target-available-checksum" unless="skip-checksum">
 		<checksum-verify file="${target-filename}" property="target-verify-md5"/>
 		<fail unless="target-verify-md5">Checksum verify for ${target-filename} failed.</fail>
 	</target>
