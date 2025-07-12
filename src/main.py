@@ -10,7 +10,7 @@ from llm.generator_llm import llm_optimize, handle_error
 from llm.evaluator_llm import evaluator_llm
 from llm.advisor_llm import filter_patterns
 from benchmarks.scimark_benchmark import get_valid_scimark_programs, SciMarkBenchmark
-from dacapo.dacapo_benchmark import get_valid_dacapo_classes, DaCapoBenchmark
+from benchmarks.dacapo.dacapo_benchmark import get_valid_dacapo_classes, DaCapoBenchmark
 from benchmarks.humaneval_benchmark import get_valid_humaneval_programs, HumanEvalBenchmark
 from collections import defaultdict
 import glob

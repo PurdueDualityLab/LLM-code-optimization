@@ -10,7 +10,7 @@ import csv
 import re
 from flamegraph_profiling import get_hotspots, find_unit_test
 from java_method_profiling import replace_method_body, get_method_source_code, compile_java_project
-from .dacapo_apps import get_app
+from .dacapo_apps import get_app, run_app_and_measure
 
 load_dotenv()
 USER_PREFIX = os.path.expanduser(os.getenv('USER_PREFIX'))
@@ -245,7 +245,17 @@ class DaCapoBenchmark(Benchmark):
             file.write(code)
 
 def get_valid_dacapo_classes(application_name):
-    app = get_app(application_name, USER_PREFIX)
+    # step 1: get app instance if app exists and built successfully
+    app = get_app(application_name)
+        
+    # # step 2: run and profile, record original data
+    # # run and get data
+    # data = run_app_and_measure(application_name)
+    # if data == (0, 0, 0, 0):
+    #     logger.error(f"Failed to run {application_name}.")
+    #     raise RuntimeError(f"Failed to run and profile {application_name}.")
+    
+    # profile
     hotspots = get_hotspots("Dacapo", application_name, top_K=50)
     methods_name = [method for method, count in hotspots]
 

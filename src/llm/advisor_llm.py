@@ -41,28 +41,28 @@ def filter_patterns(llm_assistant, code, ast, flame_report, metric):
     prompt = template.render(data)
 
     logger.info(f"filter patterns: Advisor LLM filtering patterns ....")
-    llm_assistant.add_to_memory("user", prompt)
-    if llm_assistant.generate_response(response_format=PatternSelection) != 1:
-        return -1
-    response = llm_assistant.get_last_msg()
-    if response == None:
-        return -1
-    logger.info(response)
+    # llm_assistant.add_to_memory("user", prompt)
+    # if llm_assistant.generate_response(response_format=PatternSelection) != 1:
+    #     return -1
+    # response = llm_assistant.get_last_msg()
+    # if response == None:
+    #     return -1
+    # logger.info(response)
 
-    try:
-        if llm_assistant.is_openai_model():
-            content_dict = json.loads(response["content"])
-            patterns = "\n".join(
-                f"Pattern Type:{entry['type']}\nPattern Name:{entry['pattern_name']}\nDescription:{entry['pattern_description']}\nExample:{entry['pattern_example']}\nOptimized Metrics:{'optimized_metrics'}\nDetection:{entry['detection']}\nRank:{entry['rank']}\nReasoning:{entry['reasoning']}"
-                for entry in content_dict["patterns"]
-            )
-        else:
-            patterns = "\n".join(
-                f"Pattern Type:{entry['type']}\nPattern Name:{entry['pattern_name']}\nDescription:{entry['pattern_description']}\nExample:{entry['pattern_example']}\nOptimized Metrics:{'optimized_metrics'}\nDetection:{entry['detection']}\nRank:{entry['rank']}\nReasoning:{entry['reasoning']}"
-                for entry in PatternSelection.model_validate_json(response["content"]).patterns
-            )
-    except json.JSONDecodeError as e:
-        logger.error(f"Failed to decode JSON: {e}")
-        return
+    # try:
+    #     if llm_assistant.is_openai_model():
+    #         content_dict = json.loads(response["content"])
+    #         patterns = "\n".join(
+    #             f"Pattern Type:{entry['type']}\nPattern Name:{entry['pattern_name']}\nDescription:{entry['pattern_description']}\nExample:{entry['pattern_example']}\nOptimized Metrics:{'optimized_metrics'}\nDetection:{entry['detection']}\nRank:{entry['rank']}\nReasoning:{entry['reasoning']}"
+    #             for entry in content_dict["patterns"]
+    #         )
+    #     else:
+    #         patterns = "\n".join(
+    #             f"Pattern Type:{entry['type']}\nPattern Name:{entry['pattern_name']}\nDescription:{entry['pattern_description']}\nExample:{entry['pattern_example']}\nOptimized Metrics:{'optimized_metrics'}\nDetection:{entry['detection']}\nRank:{entry['rank']}\nReasoning:{entry['reasoning']}"
+    #             for entry in PatternSelection.model_validate_json(response["content"]).patterns
+    #         )
+    # except json.JSONDecodeError as e:
+    #     logger.error(f"Failed to decode JSON: {e}")
+    #     return
 
-    return patterns
+    return "patterns"

@@ -178,30 +178,52 @@ class HumanEvalBenchmark(Benchmark):
 
     def _extract_content(self, contents):
         keys = list(contents.keys())
-        original = contents[keys[0]]
-        current = contents[keys[-1]]
+        first_value = contents[keys[0]]
+        last_value = contents[keys[-1]]
+        
+        # print all values
+        logger.info(f"key 0, avg_energy: {first_value[1]}, avg_runtime: {first_value[2]}, avg_cpu_cycles: {first_value[3]}, avg_memory: {first_value[4]}, throughput: {first_value[5]}, num_of_lines: {first_value[6]}")
+        for key, (source_code, avg_energy, avg_runtime, avg_cpu_cycles, avg_memory, throughput, num_of_lines) in list(contents.items())[1:]:
+            logger.info(f"key: {key}, avg_energy_improvement: {avg_energy}, avg_speedup: {avg_runtime}, avg_cpu_improvement: {avg_cpu_cycles}, avg_memory_improvement: {avg_memory}, avg_throughput_improvement: {throughput}, num_of_lines: {num_of_lines}")
 
-        best_key = max(list(contents.items())[1:], key=lambda kv: kv[1][2])[0]
-        best = contents[best_key]
+        # Loop through the contents to find the key with the highest speedup
+        max_avg_speedup = float('-inf')
+        max_avg_speedup_key = None
+        for key, (source_code, avg_energy, avg_speedup, avg_cpu_cycles, avg_memory, throughput, num_of_lines) in list(contents.items())[1:]:
+            if avg_speedup > max_avg_speedup:
+                max_avg_speedup = avg_speedup
+                max_avg_speedup_key = key
 
-        logger.info(f"Original energy: {original[1]}, runtime: {original[2]}")
-        logger.info(f"Best speedup: {best[2]}, current: {current[2]}")
-
+        max_value = contents[max_avg_speedup_key]
+        
         return {
-            "original": self._format_entry(original),
-            "max_avg_speedup": self._format_entry(best),
-            "current": self._format_entry(current)
-        }
-
-    def _format_entry(self, entry):
-        return {
-            "source_code": entry[0],
-            "avg_energy": entry[1],
-            "avg_runtime": entry[2],
-            "avg_cpu_cycles": entry[3],
-            "avg_memory": entry[4],
-            "throughput": entry[5],
-            "num_of_lines": entry[6]
+            "original": {
+                "source_code": first_value[0],
+                "avg_energy": first_value[1],
+                "avg_runtime": first_value[2],
+                "avg_cpu_cycles": first_value[3],
+                "avg_memory": first_value[4],
+                "throughput": first_value[5],
+                "num_of_lines": first_value[6]
+            },
+            "max_avg_speedup": {
+                "source_code": max_value[0],
+                "avg_energy_improvement": max_value[1],
+                "avg_speedup": max_value[2],
+                "avg_cpu_improvement": max_value[3],
+                "avg_memory_improvement": max_value[4],
+                "avg_throughput_improvement": max_value[5],
+                "num_of_lines": max_value[6]
+            },
+            "current": {
+                "source_code": last_value[0],
+                "avg_energy_improvement": last_value[1],
+                "avg_speedup": last_value[2],
+                "avg_cpu_improvement": last_value[3],
+                "avg_memory_improvement": last_value[4],
+                "avg_throughput_improvement": last_value[5],
+                "num_of_lines": last_value[6]
+            }
         }
 
     def generate_flame_report(self, code):

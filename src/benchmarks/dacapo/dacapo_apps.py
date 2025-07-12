@@ -1,11 +1,17 @@
 # dacapo_apps.py
 import os
 from abc import ABC, abstractmethod
+from pathlib import Path
+import subprocess
+from utils import Logger
+from dotenv import load_dotenv
+import sys
+import csv
+
+load_dotenv()
+USER_PREFIX = os.getenv("USER_PREFIX")
 
 class DaCapoApp(ABC):
-    def __init__(self, user_prefix):
-        self.user_prefix = user_prefix
-
     @abstractmethod
     def get_source_path(self, class_name, namespace_name, group_name):
         pass
@@ -23,9 +29,8 @@ class DaCapoApp(ABC):
         pass
 
 class FopApp(DaCapoApp):
-    def __init__(self, user_prefix):
-        super().__init__(user_prefix)
-        self.root_dir = f"{self.user_prefix}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8/fop-core"
+    def __init__(self):
+        self.root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8/fop-core"
         self.src_dir = f"{self.root_dir}/src/main/java/org/apache/fop"
 
     def get_source_path(self, class_name, namespace_name, group_name):
@@ -44,13 +49,12 @@ class FopApp(DaCapoApp):
         return self.root_dir
 
     def get_makefile_subfolders(self):
-        folder_path = f"{self.user_prefix}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8"
+        folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8"
         return [f.path for f in os.scandir(folder_path) if f.is_dir()]
 
 class SpringApp(DaCapoApp):
-    def __init__(self, user_prefix):
-        super().__init__(user_prefix)
-        self.root_dir = f"{self.user_prefix}/benchmark_dacapo/benchmarks/bms/spring/build"
+    def __init__(self):
+        self.root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/spring/build"
         self.src_dir = f"{self.root_dir}/src/main/java/org/springframework/samples/petclinic"
 
     def get_source_path(self, class_name, namespace_name, group_name):
@@ -67,13 +71,12 @@ class SpringApp(DaCapoApp):
         return self.root_dir
 
     def get_makefile_subfolders(self):
-        folder_path = f"{self.user_prefix}/benchmark_dacapo/benchmarks/bms/spring"
+        folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/spring"
         return [f.path for f in os.scandir(folder_path) if f.is_dir() and f.name == 'build']
 
 class BioJavaApp(DaCapoApp):
-    def __init__(self, user_prefix):
-        super().__init__(user_prefix)
-        self.root_dir = f"{self.user_prefix}/benchmark_dacapo/benchmarks/bms/biojava/build"
+    def __init__(self):
+        self.root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/biojava/build"
 
     def get_source_path(self, class_name, namespace_name, group_name):
         folder_name = "aa-prop" if group_name == "aaproperties" else group_name
@@ -96,9 +99,8 @@ class BioJavaApp(DaCapoApp):
         return [f.path for f in os.scandir(self.root_dir) if f.is_dir() and f.name.startswith('biojava-')]
 
 class PmdApp(DaCapoApp):
-    def __init__(self, user_prefix):
-        super().__init__(user_prefix)
-        self.root_dir = f"{self.user_prefix}/benchmark_dacapo/benchmarks/bms/pmd/build/pmd-core"
+    def __init__(self):
+        self.root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/pmd/build/pmd-core"
         self.src_dir = f"{self.root_dir}/src/main/java/net/sourceforge/pmd"
 
     def get_source_path(self, class_name, namespace_name, group_name):
@@ -118,9 +120,8 @@ class PmdApp(DaCapoApp):
         return [f.path for f in os.scandir(os.path.dirname(self.root_dir)) if f.is_dir() and f.name.startswith('pmd-')]
 
 class GraphchiApp(DaCapoApp):
-    def __init__(self, user_prefix):
-        super().__init__(user_prefix)
-        self.root_dir = f"{self.user_prefix}/benchmark_dacapo/benchmarks/bms/graphchi/build"
+    def __init__(self):
+        self.root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/graphchi/build"
         self.src_dir = f"{self.root_dir}/src/main/java/edu/cmu/graphchi"
 
     def get_source_path(self, class_name, namespace_name, group_name):
@@ -137,11 +138,10 @@ class GraphchiApp(DaCapoApp):
         return self.root_dir
 
     def get_makefile_subfolders(self):
-        folder_path = f"{self.user_prefix}/benchmark_dacapo/benchmarks/bms/graphchi"
+        folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/graphchi"
         return [f.path for f in os.scandir(folder_path) if f.is_dir() and f.name == 'build']
 
-
-def get_app(app_name, user_prefix):
+def get_app(app_name):
     mapping = {
         'fop': FopApp,
         'spring': SpringApp,
@@ -151,4 +151,83 @@ def get_app(app_name, user_prefix):
     }
     if app_name not in mapping:
         raise ValueError(f"Unknown DaCapo app: {app_name}")
-    return mapping[app_name](user_prefix)
+    
+    if not _build_app(app_name):
+        raise RuntimeError(f"Failed to build {app_name} app.")
+    
+    return mapping[app_name]
+
+# === Utilities ===
+DACAPO_ROOT = Path(f"{USER_PREFIX}/benchmark_dacapo/benchmarks")
+DACAPO_JAR = DACAPO_ROOT / "dacapo-evaluation-git-4e3de06d-dirty.jar"
+JAVA8_HOME = "/usr/lib/jvm/java-8-openjdk-amd64"
+JAVA11_HOME = "/usr/lib/jvm/java-11-openjdk-amd64"
+RUNTIME_LOG = os.path.join(USER_PREFIX, "src/runtime_logs/java.csv")
+RAPL_TOOL = os.path.join(USER_PREFIX, "MEASURE/main")
+
+logger = Logger("logs", sys.argv[2]).logger
+
+def _build_app(app_name):
+    # Set Java 8 for build
+    _set_java_home(JAVA8_HOME)
+
+    result = subprocess.run(["ant", app_name], cwd=str(DACAPO_ROOT), check=True)
+    
+    if result.returncode != 0:
+        logger.error(f"Failed to build {app_name} with ant.")
+        return False
+    else:
+        return True
+
+def _set_java_home(java_home: str):
+    os.environ["JAVA_HOME"] = java_home
+    os.environ["PATH"] = f"{java_home}/bin:" + os.environ["PATH"]
+    
+def run_app_and_measure(benchmark_name):
+    """
+    Builds and runs a DaCapo benchmark with profiling.
+    """
+    logger.info(f"Running benchmark with profiling: {benchmark_name}")
+    try:
+        metrics = _run_dacapo(benchmark_name)
+        print(f"✅ Success: {benchmark_name} → Energy={metrics[0]} J, Latency={metrics[1]} s, CPU={metrics[2]}, Mem={metrics[3]} MB")
+        return metrics
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Error running {benchmark_name}: {e}")
+        return (0, 0, 0, 0)
+    
+def _run_dacapo(benchmark_name):
+
+    with open(RUNTIME_LOG, "w") as f:
+        f.write("")
+
+    subprocess.run("sudo modprobe msr", shell=True, check=True)
+
+    # Construct Java command
+    java_cmd = f"java -jar {DACAPO_JAR} --no-validation {benchmark_name}"
+
+    # Run with RAPL tool
+    subprocess.run(f"sudo {RAPL_TOOL} \"{java_cmd}\" java {DACAPO_JAR}", shell=True, check=True)
+    subprocess.run(f"sudo chmod -R 777 {RUNTIME_LOG}", shell=True, check=True)
+
+    return extract_metrics()
+
+def extract_metrics():
+    benchmark_data = []
+    with open(RUNTIME_LOG, mode='r') as file:
+        reader = csv.reader(file)
+        for index, row in enumerate(reader):
+            if index < 5:
+                benchmark_data.append((row[0], float(row[1]), float(row[2]), float(row[3]), float(row[4])))
+
+    benchmark_data = [d for d in benchmark_data if d[1] >= 0]
+    if not benchmark_data:
+        return 0, 0, 0, 0
+
+    avg_energy = sum(d[1] for d in benchmark_data) / len(benchmark_data)
+    avg_latency = sum(d[2] for d in benchmark_data) / len(benchmark_data)
+    avg_cpu = sum(d[3] for d in benchmark_data) / len(benchmark_data)
+    avg_memory = sum(d[4] for d in benchmark_data) / len(benchmark_data)
+
+    return avg_energy, avg_latency, avg_cpu, avg_memory
+

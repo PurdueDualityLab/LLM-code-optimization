@@ -41,29 +41,30 @@ def llm_optimize(code, llm_assistant, metric=None, evaluator_feedback=None, ast=
 
     logger.info(f"llm_optimize: Generator LLM Optimizing ....")
 
-    logger.info(f"Generator prompt: {prompt}")
+    # logger.info(f"Generator prompt: {prompt}")
 
-    llm_assistant.add_to_memory("user", prompt)
-    llm_assistant.generate_response(OptimizationReasoning)
+    # llm_assistant.add_to_memory("user", prompt)
+    # llm_assistant.generate_response(OptimizationReasoning)
 
-    response = llm_assistant.get_last_msg()
-    logger.info(response)
+    # response = llm_assistant.get_last_msg()
+    # logger.info(response)
     
-    try:
-        if llm_assistant.is_openai_model():
-            content_dict = json.loads(response["content"])
-            final_code = content_dict["final_code"]
-        else:
-            final_code = OptimizationReasoning.model_validate_json(response["content"]).final_code
-    except json.JSONDecodeError as e:
-        logger.error(f"Failed to decode JSON: {e}")
-        return
+    # try:
+    #     if llm_assistant.is_openai_model():
+    #         content_dict = json.loads(response["content"])
+    #         final_code = content_dict["final_code"]
+    #     else:
+    #         final_code = OptimizationReasoning.model_validate_json(response["content"]).final_code
+    # except json.JSONDecodeError as e:
+    #     logger.error(f"Failed to decode JSON: {e}")
+    #     return
 
-    if final_code == "":
-        logger.error("Error in llm completion")
-        return
+    # if final_code == "":
+    #     logger.error("Error in llm completion")
+    #     return
     
-    return final_code
+    # return final_code
+    return code
 
 def handle_error(error_message, llm_assistant):
     class ErrorReasoning(BaseModel):
