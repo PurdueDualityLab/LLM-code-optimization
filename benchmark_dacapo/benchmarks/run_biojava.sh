@@ -25,8 +25,8 @@ export PATH=$JAVA_HOME/bin:$PATH
 
 # === Step 5: Build biojava benchmark ===
 cd /home/hpeng/E2COOL/benchmark_dacapo/benchmarks/
-echo "Building DaCapo benchmark with skip-checksum..."
-ant -Dskip-checksum=true biojava
+echo "Building DaCapo benchmark"
+ant biojava
 
 # === Step 6: Switch to Java 11 for running ===
 echo "Switching to Java 11 for benchmark run..."

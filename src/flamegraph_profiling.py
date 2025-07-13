@@ -9,10 +9,17 @@ load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
 logger = Logger("logs", sys.argv[2]).logger
 
+def _set_java_home():
+    java_home = "/usr/lib/jvm/java-11-openjdk-amd64"
+    os.environ["JAVA_HOME"] = java_home
+    os.environ["PATH"] = f"{java_home}/bin:" + os.environ["PATH"]
+
 def get_hotspots(benchmark_name, application_name, top_K):
     """Run the Java application with async-profiler. Need to manually run ant build command first."""
     try:        
         logger.info(f"Running application {application_name} with async-profiler...")
+        
+        _set_java_home()
         
         prof_lib = os.path.join(
             USER_PREFIX, "async-profiler", "build", "lib", "libasyncProfiler.so"
@@ -22,7 +29,7 @@ def get_hotspots(benchmark_name, application_name, top_K):
             profiler_cmd = [
                 "java",
                 f"-agentpath:{prof_lib}=start,event=cpu,file=profile.txt,collapsed",
-                "-jar", f"{USER_PREFIX}/benchmark_dacapo/benchmarks/dacapo-evaluation-git-4e3de06d-dirty.jar", application_name
+                "-jar", f"{USER_PREFIX}/benchmark_dacapo/benchmarks/dacapo-evaluation-git-4e3de06d.jar", application_name
             ]
         elif benchmark_name == "SciMark":
             os.chdir(f"{USER_PREFIX}/benchmark_scimark/{application_name}")     

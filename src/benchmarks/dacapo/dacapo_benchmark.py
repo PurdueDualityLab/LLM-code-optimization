@@ -24,7 +24,7 @@ class DaCapoBenchmark(Benchmark):
         self.group_name = test_group
         self.unit_tests = unit_tests
         self.program = benchmark_name
-        self.app = get_app(benchmark_name, USER_PREFIX)
+        self.app = get_app(benchmark_name, check=False)
 
         self.compilation_error = None
         self.runtime_error = None
@@ -180,7 +180,7 @@ class DaCapoBenchmark(Benchmark):
         os.chdir(self.app.get_build_dir(self.group_name))
 
         try:
-            subprocess.run(["sudo", "make", "measure", f"BENCHMARK={self.program}", f"TEST={self.unit_tests[0]}"], check=True, capture_output=True, text=True, timeout=120)
+            subprocess.run(["make", "measure", f"TEST={self.unit_tests[0]}"], check=True, capture_output=True, text=True, timeout=120)
             logger.info("Make measure successfully.\n")
             return True
         except subprocess.TimeoutExpired:
@@ -246,7 +246,7 @@ class DaCapoBenchmark(Benchmark):
 
 def get_valid_dacapo_classes(application_name):
     # step 1: get app instance if app exists and built successfully
-    app = get_app(application_name)
+    app = get_app(application_name, check=True)
         
     # # step 2: run and profile, record original data
     # # run and get data
@@ -279,7 +279,7 @@ def get_valid_dacapo_classes(application_name):
     return transformed_data
 
 def setup_makefile(application_name):
-    app = get_app(application_name, USER_PREFIX)
+    app = get_app(application_name, check=False)
     subfolders = app.get_makefile_subfolders()
 
     for subfolder in subfolders:

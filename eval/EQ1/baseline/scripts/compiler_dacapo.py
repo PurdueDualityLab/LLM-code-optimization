@@ -65,7 +65,7 @@ def main():
 
     benchmarks = ["biojava"]
 
-    dacapo_jar = os.path.join(USER_PREFIX, "benchmark_dacapo/benchmarks/dacapo-evaluation-git-4e3de06d-dirty.jar")
+    dacapo_jar = os.path.join(USER_PREFIX, "benchmark_dacapo/benchmarks/dacapo-evaluation-git-4e3de06d.jar")
 
     for benchmark in benchmarks:
         print(f"\nProcessing: {benchmark}")

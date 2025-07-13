@@ -141,7 +141,7 @@ class GraphchiApp(DaCapoApp):
         folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/graphchi"
         return [f.path for f in os.scandir(folder_path) if f.is_dir() and f.name == 'build']
 
-def get_app(app_name):
+def get_app(app_name, check:True) -> DaCapoApp:
     mapping = {
         'fop': FopApp,
         'spring': SpringApp,
@@ -149,17 +149,19 @@ def get_app(app_name):
         'pmd': PmdApp,
         'graphchi': GraphchiApp
     }
-    if app_name not in mapping:
-        raise ValueError(f"Unknown DaCapo app: {app_name}")
     
-    if not _build_app(app_name):
-        raise RuntimeError(f"Failed to build {app_name} app.")
+    if check:
+        if app_name not in mapping:
+            raise ValueError(f"Unknown DaCapo app: {app_name}")
+        
+        if not _build_app(app_name):
+            raise RuntimeError(f"Failed to build {app_name} app.")
     
-    return mapping[app_name]
+    return mapping[app_name]()
 
 # === Utilities ===
 DACAPO_ROOT = Path(f"{USER_PREFIX}/benchmark_dacapo/benchmarks")
-DACAPO_JAR = DACAPO_ROOT / "dacapo-evaluation-git-4e3de06d-dirty.jar"
+DACAPO_JAR = DACAPO_ROOT / "dacapo-evaluation-git-4e3de06d.jar"
 JAVA8_HOME = "/usr/lib/jvm/java-8-openjdk-amd64"
 JAVA11_HOME = "/usr/lib/jvm/java-11-openjdk-amd64"
 RUNTIME_LOG = os.path.join(USER_PREFIX, "src/runtime_logs/java.csv")
@@ -190,10 +192,10 @@ def run_app_and_measure(benchmark_name):
     logger.info(f"Running benchmark with profiling: {benchmark_name}")
     try:
         metrics = _run_dacapo(benchmark_name)
-        print(f"✅ Success: {benchmark_name} → Energy={metrics[0]} J, Latency={metrics[1]} s, CPU={metrics[2]}, Mem={metrics[3]} MB")
+        logger.info(f"✅ Success: {benchmark_name} → Energy={metrics[0]} J, Latency={metrics[1]} s, CPU={metrics[2]}, Mem={metrics[3]} MB")
         return metrics
     except subprocess.CalledProcessError as e:
-        print(f"❌ Error running {benchmark_name}: {e}")
+        logger.error(f"❌ Error running {benchmark_name}: {e}")
         return (0, 0, 0, 0)
     
 def _run_dacapo(benchmark_name):
@@ -204,7 +206,7 @@ def _run_dacapo(benchmark_name):
     subprocess.run("sudo modprobe msr", shell=True, check=True)
 
     # Construct Java command
-    java_cmd = f"java -jar {DACAPO_JAR} --no-validation {benchmark_name}"
+    java_cmd = f"java -jar {DACAPO_JAR} {benchmark_name}"
 
     # Run with RAPL tool
     subprocess.run(f"sudo {RAPL_TOOL} \"{java_cmd}\" java {DACAPO_JAR}", shell=True, check=True)

@@ -23,15 +23,14 @@ int main(int argc, char **argv) {
     FILE *fp;
 
     // Run command
-    strcat(command, argv[1]);
+    snprintf(command, sizeof(command), "%s", argv[1]);
+
     // Language name
-    strcpy(language, argv[2]);
+    snprintf(language, sizeof(language), "%s", argv[2]);
     // Path to language .csv file
-    strcpy(path, "../../src/runtime_logs/");
-    strcat(language, ".csv");
-    strcat(path, language);
+    snprintf(path, sizeof(path), "/home/hpeng/E2COOL/src/runtime_logs/%s.csv", language);
     // Test name
-    strcpy(test, argv[3]);
+    snprintf(test, sizeof(test), "%s", argv[3]);
 
     fp = fopen(path, "a");
 

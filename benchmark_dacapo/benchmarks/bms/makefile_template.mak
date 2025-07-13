@@ -4,10 +4,10 @@ compile:
 	mvn compile -q	
 
 measure:
-	mvn test -Dtest=$(TEST)
-	modprobe msr
-	${USER_PREFIX}/MEASURE/main "sudo mvn surefire:test -Dtest=$(TEST)" java $(TEST)
-	chmod -R 777 ${USER_PREFIX}/src/runtime_logs/java.csv
+	sudo mvn test -Dtest=$(TEST)
+	sudo modprobe msr
+	sudo /home/hpeng/E2COOL/MEASURE/main "sudo mvn surefire:test -Dtest=$(TEST)" java $(TEST)
+	sudo chmod -R 777 /home/hpeng/E2COOL/src/runtime_logs/java.csv
 
 test:
 	mvn test -Dtest=$(TEST)
