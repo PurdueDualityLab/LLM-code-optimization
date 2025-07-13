@@ -86,13 +86,17 @@ class DaCapoBenchmark(Benchmark):
         except subprocess.CalledProcessError as e:
             logger.error(f"Original code compile failed: {e.stdout + e.stderr}\n")
             return False
-
-        if not self._run_rapl():
-            return False
-
-        avg_energy, avg_latency, avg_cpu_cycles, avg_memory, throughput = self._compute_avg()
-
-        self.energy_data[0] = (self.original_code, round(avg_energy, 3), round(avg_latency, 3),  avg_cpu_cycles, avg_memory, round(throughput, 3), len(self.original_code.splitlines()))        
+  
+        # run and profile, record original data
+        # run and get data (energy, latency, cpu cycles, memory, throughput)
+        data = run_app_and_measure(self.app)
+        if data == (0, 0, 0, 0, 0):
+            logger.error(f"Failed to run {self.program}.")
+            raise RuntimeError(f"Failed to run and profile {self.program}.")
+        
+        logger.info(f"Run {self.program} successfully, original data: {data}")
+        self.energy_data[0] = (self.original_code, round(data[0], 3), round(data[1], 3), data[2], data[3], round(data[4], 3), len(self.original_code.splitlines()))
+        
         return True
 
     def pre_process(self, code):
@@ -156,62 +160,23 @@ class DaCapoBenchmark(Benchmark):
 
     def measure_energy(self, optimized_code):
         logger.info(f"Iteration {self.optimization_iteration + 1}, run benchmark on the optimized code")
-        self._run_rapl()
 
-        avg_energy, avg_latency, avg_cpu_cycles, avg_memory, throughput = self._compute_avg()
-        if avg_energy == 0 or avg_latency == 0 or avg_cpu_cycles == 0 or avg_memory == 0 or throughput == 0:
-            logger.error(f"RAPL returns 0")
+        data = run_app_and_measure(self.app)
+        if data == (0, 0, 0, 0, 0):
+            logger.error(f"Failed to run and profile {self.program}.")
             return False
-
+        
+        avg_energy, avg_latency, avg_cpu_cycles, avg_memory, throughput = data
         original_data = self.energy_data[0]
         energy_change = original_data[1] / avg_energy
         speedup = original_data[2] / avg_latency
         cpu_change = original_data[3] / avg_cpu_cycles
         memory_change = original_data[4] / avg_memory
         throughput_change = throughput / original_data[5]
-
         self.energy_data[self.optimization_iteration + 1] = (optimized_code, round(energy_change, 3), round(speedup, 3), cpu_change, memory_change, throughput_change, len(optimized_code.splitlines()))
-        self.evaluator_feedback_data = self._extract_content(self.energy_data)   
+        logger.info(f"Run {self.program} successfully, optimized data: {self.energy_data[self.optimization_iteration + 1]}")
+        self.evaluator_feedback_data = self._extract_content(self.energy_data)
         return True
-
-    def _run_rapl(self):
-        log_file_path = f"{USER_PREFIX}/src/runtime_logs/java.csv"
-        open(log_file_path, "w").close()
-        os.chdir(self.app.get_build_dir(self.group_name))
-
-        try:
-            subprocess.run(["make", "measure", f"TEST={self.unit_tests[0]}"], check=True, capture_output=True, text=True, timeout=120)
-            logger.info("Make measure successfully.\n")
-            return True
-        except subprocess.TimeoutExpired:
-            logger.error("Make measure timeout")
-            return False
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Make measure failed: {e.stderr + e.stdout}\n")
-            return False
-
-    def _compute_avg(self):
-        benchmark_data = []
-        throughput = 0
-        with open(f'{USER_PREFIX}/src/runtime_logs/java.csv', mode='r', newline='') as file:
-            csv_reader = csv.reader(file)
-            for index, row in enumerate(csv_reader):
-                if index == 5:
-                    throughput = row[1]
-                else:
-                    benchmark_data.append(tuple(row[:5]))
-
-        avg_energy = avg_latency = avg_cpu_cycles = avg_memory = 0
-        for data in benchmark_data:
-            energy = float(data[1])
-            if energy >= 0:
-                avg_energy += energy
-                avg_latency += float(data[2])
-                avg_cpu_cycles += float(data[3])
-                avg_memory += float(data[4])
-
-        count = len(benchmark_data)
-        return avg_energy/count, avg_latency/count, avg_cpu_cycles/count, avg_memory/count, float(throughput)
 
     def get_evaluator_feedback_data(self):
         return super().get_evaluator_feedback_data()
@@ -247,13 +212,6 @@ class DaCapoBenchmark(Benchmark):
 def get_valid_dacapo_classes(application_name):
     # step 1: get app instance if app exists and built successfully
     app = get_app(application_name, check=True)
-        
-    # # step 2: run and profile, record original data
-    # # run and get data
-    # data = run_app_and_measure(application_name)
-    # if data == (0, 0, 0, 0):
-    #     logger.error(f"Failed to run {application_name}.")
-    #     raise RuntimeError(f"Failed to run and profile {application_name}.")
     
     # profile
     hotspots = get_hotspots("Dacapo", application_name, top_K=50)

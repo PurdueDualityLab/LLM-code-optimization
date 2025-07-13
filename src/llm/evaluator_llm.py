@@ -37,20 +37,19 @@ def evaluator_llm(evaluator_feedback_data, llm_assistant, metric):
         "metric": metric,
     }
     
-    # prompt = template.render(data)
+    prompt = template.render(data)
 
-    # llm_assistant.add_to_memory("user", prompt)
-    # llm_assistant.generate_response(response_format=Feedback)
-    # response = llm_assistant.get_last_msg()
+    llm_assistant.add_to_memory("user", prompt)
+    llm_assistant.generate_response(response_format=Feedback)
+    response = llm_assistant.get_last_msg()
 
-    # try:
-    #     if llm_assistant.is_openai_model():
-    #         content_dict = json.loads(response["content"])
-    #         feedback = content_dict["feedback"]
-    #     else:
-    #         feedback = Feedback.model_validate_json(response["content"]).feedback
-    #     return feedback
-    # except json.JSONDecodeError as e:
-    #     logger.error(f"Failed to decode JSON: {e}")
-    #     return
-    return "feedback"  # Placeholder for actual feedback logic
+    try:
+        if llm_assistant.is_openai_model():
+            content_dict = json.loads(response["content"])
+            feedback = content_dict["feedback"]
+        else:
+            feedback = Feedback.model_validate_json(response["content"]).feedback
+        return feedback
+    except json.JSONDecodeError as e:
+        logger.error(f"Failed to decode JSON: {e}")
+        return

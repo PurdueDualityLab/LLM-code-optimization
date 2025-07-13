@@ -27,6 +27,14 @@ class DaCapoApp(ABC):
     @abstractmethod
     def get_makefile_subfolders(self):
         pass
+    
+    @abstractmethod
+    def get_workload_num(self):
+        pass
+    
+    @abstractmethod
+    def get_app_name(self):
+        pass
 
 class FopApp(DaCapoApp):
     def __init__(self):
@@ -51,6 +59,9 @@ class FopApp(DaCapoApp):
     def get_makefile_subfolders(self):
         folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/fop/build/fop-2.8"
         return [f.path for f in os.scandir(folder_path) if f.is_dir()]
+    
+    def get_app_name(self):
+        return "fop"
 
 class SpringApp(DaCapoApp):
     def __init__(self):
@@ -73,6 +84,9 @@ class SpringApp(DaCapoApp):
     def get_makefile_subfolders(self):
         folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/spring"
         return [f.path for f in os.scandir(folder_path) if f.is_dir() and f.name == 'build']
+    
+    def get_app_name(self):
+        return "spring"
 
 class BioJavaApp(DaCapoApp):
     def __init__(self):
@@ -97,6 +111,12 @@ class BioJavaApp(DaCapoApp):
 
     def get_makefile_subfolders(self):
         return [f.path for f in os.scandir(self.root_dir) if f.is_dir() and f.name.startswith('biojava-')]
+    
+    def get_workload_num(self):
+        return 2839
+    
+    def get_app_name(self):
+        return "biojava"
 
 class PmdApp(DaCapoApp):
     def __init__(self):
@@ -118,6 +138,9 @@ class PmdApp(DaCapoApp):
 
     def get_makefile_subfolders(self):
         return [f.path for f in os.scandir(os.path.dirname(self.root_dir)) if f.is_dir() and f.name.startswith('pmd-')]
+    
+    def get_app_name(self):
+        return "pmd"
 
 class GraphchiApp(DaCapoApp):
     def __init__(self):
@@ -140,6 +163,9 @@ class GraphchiApp(DaCapoApp):
     def get_makefile_subfolders(self):
         folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/graphchi"
         return [f.path for f in os.scandir(folder_path) if f.is_dir() and f.name == 'build']
+    
+    def get_app_name(self):
+        return "graphchi"
 
 def get_app(app_name, check:True) -> DaCapoApp:
     mapping = {
@@ -185,20 +211,29 @@ def _set_java_home(java_home: str):
     os.environ["JAVA_HOME"] = java_home
     os.environ["PATH"] = f"{java_home}/bin:" + os.environ["PATH"]
     
-def run_app_and_measure(benchmark_name):
+def run_app_and_measure(app):
     """
     Builds and runs a DaCapo benchmark with profiling.
+    If memory is 0, tries again once.
     """
-    logger.info(f"Running benchmark with profiling: {benchmark_name}")
+    app_name = app.get_app_name()
+    logger.info(f"Running benchmark with profiling: {app_name}")
     try:
-        metrics = _run_dacapo(benchmark_name)
-        logger.info(f"✅ Success: {benchmark_name} → Energy={metrics[0]} J, Latency={metrics[1]} s, CPU={metrics[2]}, Mem={metrics[3]} MB")
-        return metrics
+        metrics = _run_dacapo(app_name)
+        # If memory is 0, try again once
+        if metrics[3] == 0:
+            logger.warning(f"Memory usage is 0 for {app_name}, retrying...")
+            metrics = _run_dacapo(app_name)
+        throughput = app.get_workload_num() / metrics[1] if metrics[1] != 0 else 0
+        logger.info(f"✅ Success: {app_name} → Energy={metrics[0]} J, Latency={metrics[1]} s, CPU={metrics[2]}, Mem={metrics[3]} MB, Throughput={throughput} ops/s")
+        if any(m == 0 for m in metrics):
+            return (0, 0, 0, 0, 0)
+        return metrics + (throughput,)
     except subprocess.CalledProcessError as e:
-        logger.error(f"❌ Error running {benchmark_name}: {e}")
-        return (0, 0, 0, 0)
+        logger.error(f"❌ Error running {app_name}: {e}")
+        return (0, 0, 0, 0, 0)
     
-def _run_dacapo(benchmark_name):
+def _run_dacapo(app_name):
 
     with open(RUNTIME_LOG, "w") as f:
         f.write("")
@@ -206,10 +241,10 @@ def _run_dacapo(benchmark_name):
     subprocess.run("sudo modprobe msr", shell=True, check=True)
 
     # Construct Java command
-    java_cmd = f"java -jar {DACAPO_JAR} {benchmark_name}"
+    java_cmd = f"java -jar {DACAPO_JAR} {app_name}"
 
     # Run with RAPL tool
-    subprocess.run(f"sudo {RAPL_TOOL} \"{java_cmd}\" java {DACAPO_JAR}", shell=True, check=True)
+    subprocess.run(f"sudo {RAPL_TOOL} \"{java_cmd}\" java {app_name}", shell=True, check=True)
     subprocess.run(f"sudo chmod -R 777 {RUNTIME_LOG}", shell=True, check=True)
 
     return extract_metrics()
