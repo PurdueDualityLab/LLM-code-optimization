@@ -35,6 +35,10 @@ class DaCapoApp(ABC):
     @abstractmethod
     def get_app_name(self):
         pass
+    
+    @abstractmethod
+    def rebuild_and_run(self):
+        pass
 
 class FopApp(DaCapoApp):
     def __init__(self):
@@ -117,6 +121,14 @@ class BioJavaApp(DaCapoApp):
     
     def get_app_name(self):
         return "biojava"
+    
+    def rebuild_and_run(self):
+        try:
+            subprocess.run(["bash", f"{USER_PREFIX}/benchmark_dacapo/benchmarks/run_biojava.sh"], cwd=f"{USER_PREFIX}/benchmark_dacapo/benchmarks/", check=True)
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to run BioJava benchmark: {e}")
+            return False
+        return True
 
 class PmdApp(DaCapoApp):
     def __init__(self):
@@ -187,7 +199,7 @@ def get_app(app_name, check:True) -> DaCapoApp:
 
 # === Utilities ===
 DACAPO_ROOT = Path(f"{USER_PREFIX}/benchmark_dacapo/benchmarks")
-DACAPO_JAR = DACAPO_ROOT / "dacapo-evaluation-git-4e3de06d.jar"
+DACAPO_JAR = DACAPO_ROOT / "dacapo-evaluation-git-4e3de06d-dirty.jar"
 JAVA8_HOME = "/usr/lib/jvm/java-8-openjdk-amd64"
 JAVA11_HOME = "/usr/lib/jvm/java-11-openjdk-amd64"
 RUNTIME_LOG = os.path.join(USER_PREFIX, "src/runtime_logs/java.csv")
@@ -238,14 +250,14 @@ def _run_dacapo(app_name):
     with open(RUNTIME_LOG, "w") as f:
         f.write("")
 
-    subprocess.run("sudo modprobe msr", shell=True, check=True)
+    subprocess.run("sudo modprobe msr", shell=True, check=True, cwd=str(DACAPO_ROOT))
 
     # Construct Java command
-    java_cmd = f"java -jar {DACAPO_JAR} {app_name}"
+    java_cmd = f"java -jar {DACAPO_JAR} --no-validation {app_name}"
 
     # Run with RAPL tool
-    subprocess.run(f"sudo {RAPL_TOOL} \"{java_cmd}\" java {app_name}", shell=True, check=True)
-    subprocess.run(f"sudo chmod -R 777 {RUNTIME_LOG}", shell=True, check=True)
+    subprocess.run(f"sudo {RAPL_TOOL} \"{java_cmd}\" java {app_name}", cwd=str(DACAPO_ROOT), shell=True, check=True)
+    subprocess.run(f"sudo chmod -R 777 {RUNTIME_LOG}", shell=True, check=True, cwd=str(DACAPO_ROOT))
 
     return extract_metrics()
 

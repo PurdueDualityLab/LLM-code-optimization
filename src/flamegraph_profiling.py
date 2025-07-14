@@ -29,7 +29,9 @@ def get_hotspots(benchmark_name, application_name, top_K):
             profiler_cmd = [
                 "java",
                 f"-agentpath:{prof_lib}=start,event=cpu,file=profile.txt,collapsed",
-                "-jar", f"{USER_PREFIX}/benchmark_dacapo/benchmarks/dacapo-evaluation-git-4e3de06d.jar", application_name
+                "-jar", f"{USER_PREFIX}/benchmark_dacapo/benchmarks/dacapo-evaluation-git-4e3de06d-dirty.jar", 
+                "--no-validation",
+                application_name
             ]
         elif benchmark_name == "SciMark":
             os.chdir(f"{USER_PREFIX}/benchmark_scimark/{application_name}")     

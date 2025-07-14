@@ -160,6 +160,11 @@ class DaCapoBenchmark(Benchmark):
 
     def measure_energy(self, optimized_code):
         logger.info(f"Iteration {self.optimization_iteration + 1}, run benchmark on the optimized code")
+        
+        rebuild_and_run = self.app.rebuild_and_run()
+        if not rebuild_and_run:
+            logger.error(f"Failed to rebuild and run {self.program}.")
+            return False
 
         data = run_app_and_measure(self.app)
         if data == (0, 0, 0, 0, 0):
