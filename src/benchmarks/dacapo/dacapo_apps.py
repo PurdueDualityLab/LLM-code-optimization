@@ -140,6 +140,30 @@ class GraphchiApp(DaCapoApp):
     def get_makefile_subfolders(self):
         folder_path = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/graphchi"
         return [f.path for f in os.scandir(folder_path) if f.is_dir() and f.name == 'build']
+    
+class ZxingApp(DaCapoApp):
+    def __init__(self):
+        self.root_dir = f"{USER_PREFIX}/benchmark_dacapo/benchmarks/bms/zxing/build/core"
+        self.src_dir = f"{self.root_dir}/src/main/java/com/google/zxing"
+        
+    def get_source_path(self, class_name, namespace_name, group_name):
+        return f"{self.src_dir}/{namespace_name}/{class_name}.java" if namespace_name else f"{self.src_dir}/{class_name}.java"
+
+    def get_test_info_from_parts(self, parts, test_class):
+        test_namespace = '/'.join(parts[3:-1])
+        test_group = "test_group"
+        unit_test_class_name = f"{test_class}TestCase"
+        root_path = f"{self.root_dir}/src/test/java/com/google/zxing"
+        return test_namespace, test_group, unit_test_class_name, root_path
+    
+    def get_build_dir(self, group_name):
+        return self.root_dir
+
+    def get_makefile_subfolders(self):
+        return [f.path for f in os.scandir(os.path.dirname(self.root_dir)) if f.is_dir() and f.name == 'core']
+    
+    def get_app_name(self):
+        return "zxing"
 
 def get_app(app_name, check:True) -> DaCapoApp:
     mapping = {
@@ -147,7 +171,8 @@ def get_app(app_name, check:True) -> DaCapoApp:
         'spring': SpringApp,
         'biojava': BioJavaApp,
         'pmd': PmdApp,
-        'graphchi': GraphchiApp
+        'graphchi': GraphchiApp,
+        'zxing': ZxingApp,
     }
     
     if check:

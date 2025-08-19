@@ -28,7 +28,7 @@ def parse_arguments():
     parser.add_argument("--llm", type=str, default="gpt-4.1", choices=["gpt-4.1", "gpt-4o", "gpt-4o-mini", "o3-mini", "deepseek-r1:32b","deepseek-r1:70b", "qwen2.5:72b", "llama3.3:70b", "codellama:latest"], help="llm used for inference")
     parser.add_argument("--self_optimization_step", type=int, default=2, help="number of LLM optimization step")
     parser.add_argument("--num_programs", type=int, default=5, help="For HumanEval only, number of programs from the benchmark to test")
-    parser.add_argument("--application_name", type=str, default="fop", choices=["biojava", "fop", "graphchi", "pmd"], help="For Dacapobench only, name of the application from the benchmark to test")
+    parser.add_argument("--application_name", type=str, default="fop", choices=["biojava", "fop", "graphchi", "pmd", "zxing"], help="For Dacapobench only, name of the application from the benchmark to test")
     parser.add_argument("--method_level", type=bool, default=False, help="Flag to indicate if method level optimization is used")
     parser.add_argument("--ablation", type=int, default=0, choices=[0, 1, 2, 3], help="Flag to indicate if ablation study is used. 0 for no ablation.")
     parser.add_argument("--metric", type=str, default="Latency, throughput, energy, cpu cycles, peak_memory", choices=["energy", "latency", "cpu_cycles", "peak_memory", "throughput"], help="metric to optimize for")

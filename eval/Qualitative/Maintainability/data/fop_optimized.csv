@@ -1,0 +1,19 @@
+File,Total nloc,Avg.NLOC,AvgCCN,Avg.token,Fun Cnt,Warning cnt,Fun Rt,nloc Rt
+PDFICCStream.java,58,7.3,1.8,39.2,6,0,0.00,0.00
+FopFactoryBuilder.java,392,3.1,1.1,14.7,102,0,0.00,0.00
+CommonFont.java,171,9.8,2.7,61.5,15,0,0.00,0.00
+FontSelector.java,95,13.8,3.2,109.8,6,0,0.00,0.00
+DelegatingContentHandler.java,163,4.3,1.5,23.9,33,0,0.00,0.00
+PDFDictionary.java,110,7.4,2.2,46.6,13,0,0.00,0.00
+PropertyList.java,353,8.0,2.5,48.0,40,0,0.00,0.00
+InputHandler.java,213,12.1,2.8,75.2,13,0,0.00,0.00
+AbstractPDFStream.java,171,7.1,1.6,39.2,21,0,0.00,0.00
+TableLayoutManager.java,428,10.1,2.6,65.6,36,1,0.03,0.27
+PositionIterator.java,78,6.2,2.0,26.7,11,0,0.00,0.00
+FileIDGenerator.java,66,4.3,1.1,26.0,9,0,0.00,0.00
+FObj.java,615,8.5,3.3,50.4,67,1,0.01,0.04
+Main.java,152,19.3,4.3,129.1,7,0,0.00,0.00
+CharUtilities.java,258,10.2,4.1,58.0,21,0,0.00,0.00
+ElementMappingRegistry.java,99,8.9,2.7,57.2,9,0,0.00,0.00
+PDFRoot.java,185,5.4,1.6,31.8,29,0,0.00,0.00
+PDFNumber.java,53,5.1,1.7,27.2,9,0,0.00,0.00

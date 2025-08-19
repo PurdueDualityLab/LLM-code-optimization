@@ -1,0 +1,21 @@
+App,Metric,Original,Optimized,Delta,Delta %
+biojava,Avg Total NLOC,192.2,212.3,20.1,10.46
+biojava,Avg.NLOC,15.34,14.66,-0.68,-4.43
+biojava,AvgCCN,4.38,4.47,0.09,2.05
+biojava,Avg Functions Cnt,16.9,18.4,1.5,8.88
+biojava,Avg Tokens,140.16,132.02,-8.14,-5.81
+graphchi,Avg Total NLOC,72.0,83.0,11.0,15.28
+graphchi,Avg.NLOC,5.35,6.0,0.65,12.15
+graphchi,AvgCCN,1.425,1.725,0.3,21.05
+graphchi,Avg Functions Cnt,9.25,10.25,1.0,10.81
+graphchi,Avg Tokens,41.35,43.2,1.85,4.47
+pmd,Avg Total NLOC,287.0,276.556,-10.444,-3.64
+pmd,Avg.NLOC,8.222,7.911,-0.311,-3.78
+pmd,AvgCCN,2.344,2.322,-0.022,-0.95
+pmd,Avg Functions Cnt,30.222,30.667,0.444,1.47
+pmd,Avg Tokens,55.833,54.211,-1.622,-2.91
+fop,Avg Total NLOC,194.944,203.333,8.389,4.3
+fop,Avg.NLOC,7.928,8.383,0.456,5.75
+fop,AvgCCN,2.194,2.378,0.183,8.35
+fop,Avg Functions Cnt,24.111,24.833,0.722,3.0
+fop,Avg Tokens,47.461,51.672,4.211,8.87

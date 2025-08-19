@@ -12,3 +12,4 @@ benchmark_scimark/*/jnt/
 benchmark_human_eval/[0-9]
 **tmp**
 gccflags_final_config.*
+benchmark_scimark/*/*.txt
