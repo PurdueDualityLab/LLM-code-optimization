@@ -16,6 +16,19 @@ class Feedback(BaseModel):
     feedback: str
 
 def evaluator_llm(evaluator_feedback_data, llm_assistant, metric):
+    
+    #extract original
+    required_keys = ["original", "current"]
+    for key in required_keys:
+        if key not in evaluator_feedback_data:
+            logger.error(f"Missing required key: {key}")
+            return
+
+    if "source_code" not in evaluator_feedback_data["original"] or \
+       "source_code" not in evaluator_feedback_data["current"] or \
+       "avg_speedup" not in evaluator_feedback_data["current"]:
+        logger.error("Missing required subkeys in 'original' or 'current'")
+        return
 
     #extract original
     original_source_code = evaluator_feedback_data["original"]["source_code"]

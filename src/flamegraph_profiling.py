@@ -26,10 +26,17 @@ def get_hotspots(benchmark_name, application_name, top_K):
         )
         
         if benchmark_name == "Dacapo":
+            dacapo_root = os.path.join(USER_PREFIX, "benchmark_dacapo", "benchmarks")
+            dirty_jar = os.path.join(dacapo_root, "dacapo-evaluation-git-4e3de06d-dirty.jar")
+            clean_jar = os.path.join(dacapo_root, "dacapo-evaluation-git-4e3de06d.jar")
+            dacapo_jar = dirty_jar if os.path.exists(dirty_jar) else clean_jar
+
             profiler_cmd = [
                 "java",
                 f"-agentpath:{prof_lib}=start,event=cpu,file=profile.txt,collapsed",
-                "-jar", f"{USER_PREFIX}/benchmark_dacapo/benchmarks/dacapo-evaluation-git-4e3de06d.jar", application_name
+                "-jar", dacapo_jar,
+                "--no-validation",
+                application_name
             ]
         elif benchmark_name == "SciMark":
             os.chdir(f"{USER_PREFIX}/benchmark_scimark/{application_name}")     

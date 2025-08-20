@@ -16,7 +16,9 @@ mv biojava-7.1.1.tar.gz ../downloads/
 
 # === Step 3: Clean old biojava build directory ===
 echo "Cleaning old build directory..."
-sudo rm -rf /home/hpeng/E2COOL/benchmark_dacapo/benchmarks/bms/biojava/build/
+if [ -d /home/hpeng/E2COOL/benchmark_dacapo/benchmarks/bms/biojava/build/ ]; then
+    sudo rm -rf /home/hpeng/E2COOL/benchmark_dacapo/benchmarks/bms/biojava/build/
+fi
 
 # === Step 4: Switch to Java 8 for building ===
 echo "Switching to Java 8 for build..."
@@ -35,4 +37,8 @@ export PATH=$JAVA_HOME/bin:$PATH
 
 # === Step 7: Run the biojava benchmark ===
 echo "Running DaCapo biojava benchmark..."
-java -jar dacapo-evaluation-git-4e3de06d-dirty.jar --no-validation biojava
+if [ -f dacapo-evaluation-git-4e3de06d-dirty.jar ]; then
+    java -jar dacapo-evaluation-git-4e3de06d-dirty.jar --no-validation biojava
+else
+    java -jar dacapo-evaluation-git-4e3de06d.jar --no-validation biojava
+fi

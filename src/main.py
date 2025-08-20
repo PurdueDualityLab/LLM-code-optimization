@@ -15,6 +15,8 @@ from benchmarks.humaneval_benchmark import get_valid_humaneval_programs, HumanEv
 from collections import defaultdict
 import glob
 import time
+from benchmarks.dacapo.dacapo_apps import get_app, run_app_and_measure
+import csv
 
 load_dotenv()
 USER_PREFIX = os.getenv('USER_PREFIX')
@@ -108,6 +110,22 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
     results = {}
     
     results_dir = f"{USER_PREFIX}/results/{benchmark}"
+    
+    # dacapo specific data collection
+    if benchmark == "Dacapobench":
+        # get app instance if app exists and built successfully
+        # run and profile, record original data
+        # run and get data (energy, latency, cpu cycles, memory, throughput)
+        app = get_app(application_name, check=True)
+        data = run_app_and_measure(app)
+        if data == (0, 0, 0, 0, 0):
+            logger.error(f"Failed to run {application_name}.")
+            raise RuntimeError(f"Failed to run and profile {application_name}.")
+
+        logger.info(f"Run {application_name} successfully, original data: {data}")
+        dacapo_data_original = (round(data[0], 3), round(data[1], 3), data[2], data[3], round(data[4], 3))
+        dacapo_results = []
+        dacapo_results.append((application_name, *dacapo_data_original))
         
     for program in get_valid_programs(benchmark, num_programs, application_name, method_level):
         if benchmark == "HumanEval":
@@ -259,6 +277,38 @@ def master_script(benchmark, num_programs, application_name, model, self_optimiz
         generator.clear_memory()
         evaluator.clear_memory()
         advisor.clear_memory()
+    
+    # dacapo specific data collection
+    if benchmark == "Dacapobench":
+        # run and profile, record original data
+        # run and get data (energy, latency, cpu cycles, memory, throughput)
+        rebuild_and_run = app.rebuild_and_run()
+        if not rebuild_and_run:
+            logger.error(f"Failed to rebuild and run optimized code for {application_name}.")
+            return
+        
+        data = run_app_and_measure(app)
+        if data == (0, 0, 0, 0, 0):
+            logger.error(f"Failed to run optiimzed code for {application_name}.")
+            return
+
+        logger.info(f"Run optimized code for {application_name} successfully, optimized data: {data}")
+        dacapo_data_optimized = (round(data[0], 3), round(data[1], 3), data[2], data[3], round(data[4], 3))
+        
+        # calculate percent improvement     
+        def percent_improvement(before, after):
+            return tuple(round(b / a, 3) if b != 0 else 0 for b, a in zip(before, after))
+        
+        improvement = percent_improvement(dacapo_data_original, dacapo_data_optimized)
+        logger.info(f"Original data: {dacapo_data_original}, Optimized data: {dacapo_data_optimized}, Improvement: {improvement}")
+        dacapo_results.append((application_name, *dacapo_data_optimized))
+        dacapo_results.append((application_name, *improvement))
+        
+         # Save to CSV
+        with open(f"{results_dir}/dacapo_optimization_results_{application_name}.csv", "w") as f:
+            writer = csv.writer(f)
+            writer.writerow(["Benchmark", "Energy x", "Latency x", "CPU Cycles x", "Memory x", "Throughput x"])
+            writer.writerows(dacapo_results)
         
 def ablation_script_level_1(benchmark, num_programs, application_name, model):
     #create LLM agent
@@ -346,11 +396,8 @@ def main():
     if benchmark == "Dacapobench":
         end_time = time.time()
         elapsed_time = end_time - start_time
-        num_steps = LLMAgent.get_global_counter()
         logger.info(f"Total time taken: {elapsed_time:.2f} seconds")
-        logger.info(f"Total steps taken: {num_steps}")
         with open(f"{USER_PREFIX}/results/{benchmark}/system_{application_name}.txt", "w") as f:
-            f.write(f"Total steps taken: {num_steps}\n")
             f.write(f"Total time taken: {elapsed_time:.2f} seconds\n")
 if __name__ == "__main__":
     main()
